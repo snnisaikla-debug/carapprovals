@@ -1,0 +1,265 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Approval;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+
+class ApprovalController extends Controller
+{
+    // แสดงรายการใบล่าสุดของแต่ละ group
+    public function index(Request $request)
+{
+    $sort = $request->input('sort', 'newest'); // default = ล่าสุดก่อน
+    if ($sort === 'date') {
+        $sort = 'newest'; // รองรับของเดิมที่ใช้ ?sort=date
+    }
+
+    $salesFilter = $request->input('sales');
+
+    $query = Approval::select('approvals.*')
+        ->join(DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
+            function ($join) {
+                $join->on('approvals.group_id', '=', 'latest.group_id');
+                $join->on('approvals.version', '=', 'latest.max_version');
+            });
+
+    if (!empty($salesFilter)) {
+        $query->where('sales_name', $salesFilter);
+    }
+
+    if ($sort === 'oldest') {
+        $query->orderBy('approvals.updated_at', 'ASC');
+    } else {
+        $query->orderBy('approvals.updated_at', 'DESC');
+    }
+
+    $salesList = Approval::select('sales_name')
+        ->distinct()
+        ->orderBy('sales_name')
+        ->pluck('sales_name');
+
+    return view('approvals.index', [
+        'approvals' => $query->get(),
+        'sort'      => $sort,
+        'salesList' => $salesList,
+    ]);
+}
+
+    // ฟอร์มสร้างใบอนุมัติ (Sales)
+    public function create()
+    {
+        return view('approvals.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            // 1. ข้อมูลลูกค้า
+            'customer_name'     => 'required|string',
+            'customer_district' => 'nullable|string',
+            'customer_province' => 'nullable|string',
+            'customer_phone'    => 'nullable|string',
+
+            // 2. ข้อมูลรถ
+            'car_model'         => 'required|string',
+            'car_color'         => 'nullable|string',
+            'car_options'       => 'nullable|string',
+            'car_price'         => 'required|numeric',
+
+            // 3–12 การเงิน
+            'plus_head'             => 'nullable|numeric',
+            'fn'                    => 'nullable|string',
+            'down_percent'          => 'nullable|numeric',
+            'down_amount'           => 'nullable|numeric',
+            'finance_amount'        => 'nullable|numeric',
+            'installment_per_month' => 'nullable|numeric',
+            'installment_months'    => 'nullable|integer',
+            'interest_rate'         => 'nullable|numeric',
+            'campaign_code'         => 'nullable|string',
+            'sale_type'             => 'nullable|string',
+            'sale_type_amount'      => 'nullable|numeric',
+            'fleet_amount'          => 'nullable|numeric',
+
+            // 13–17
+            'insurance_deduct'      => 'nullable|numeric',
+            'insurance_used'        => 'nullable|numeric',
+            'kickback_amount'       => 'nullable|numeric',
+            'com_fn_option'         => 'nullable|string',
+            'com_fn_amount'         => 'nullable|numeric',
+            'free_items'            => 'nullable|string',
+            'free_items_over'       => 'nullable|string',
+            'extra_purchase_items'  => 'nullable|string',
+
+            // 19–20
+            'campaigns_available'   => 'nullable|string',
+            'campaigns_used'        => 'nullable|string',
+
+            // 21–24
+            'decoration_amount'     => 'nullable|numeric',
+            'over_campaign_amount'  => 'nullable|numeric',
+            'over_campaign_status'  => 'nullable|string',
+            'over_decoration_amount'=> 'nullable|numeric',
+            'over_decoration_status'=> 'nullable|string',
+
+            // 25–27
+            'over_reason'           => 'nullable|string',
+            'sc_signature'          => 'nullable|string',
+            'sale_com_signature'    => 'nullable|string',
+
+            // หมายเหตุท้ายฟอร์ม
+            'remark'                => 'nullable|string',
+            'sc_signature_data'        => 'nullable|string',
+            'sale_com_signature_data'  => 'nullable|string',
+        ]);
+        $scPath = null;
+        $saleComPath = null;
+
+        // ฟังก์ชันช่วยเซฟ base64 เป็นไฟล์
+        $saveSignature = function($base64, $prefix) {
+            if (!$base64) return null;
+
+            @list($type, $fileData) = explode(';', $base64);
+            @list(, $fileData) = explode(',', $fileData);
+
+            if (!$fileData) return null;
+
+            $fileData = base64_decode($fileData);
+            $fileName = $prefix.'_'.time().'_'.uniqid().'.png';
+            $path = 'signatures/'.$fileName;
+
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $fileData);
+
+
+            return 'storage/'.$path; // path สำหรับแสดงรูป
+        };
+
+        $scPath = $saveSignature($request->input('sc_signature_data'), 'sc');
+        $saleComPath = $saveSignature($request->input('sale_com_signature_data'), 'salecom');
+
+        $data['sc_signature']      = $scPath;
+        $data['sale_com_signature'] = $saleComPath;
+
+        // checkbox จะส่งมาเฉพาะตอนติ๊ก
+        $data['is_commercial_30000'] = $request->has('is_commercial_30000');
+
+        $user = Auth::user();
+
+        // version แรก
+        $approval = Approval::create(array_merge($data, [
+            'group_id'   => 0,
+            'version'    => 1,
+            'status'     => 'WAIT_ADMIN',
+            'created_by' => $user->role,    // SALE
+            'sales_name' => $user->name,    // ชื่อ Sales (ไว้ sort / ดูรายการ)
+        ]));
+
+        // ให้ group_id == id แรกของตัวเอง
+        $approval->group_id = $approval->id;
+        $approval->save();
+
+        return redirect()->route('approvals.index');
+    }
+
+    // ดูประวัติทั้ง group + ปุ่มอนุมัติ
+    public function showGroup($groupId)
+    {
+        $versions = Approval::where('group_id', $groupId)
+            ->orderBy('version')
+            ->get();
+
+        $current = $versions->last();
+
+        return view('approvals.show', compact('versions', 'current'));
+    }
+
+    // Admin อนุมัติ / ไม่อนุมัติ
+    public function adminAction(Request $request, $groupId)
+    {
+        $action = $request->input('action'); // approve / reject
+
+        $current = Approval::where('group_id', $groupId)
+            ->orderByDesc('version')
+            ->first();
+
+        $newVersion = $current->version + 1;
+        $newStatus = $action === 'approve' ? 'WAIT_HEAD' : 'REJECTED_ADMIN';
+
+        Approval::create([
+            'group_id'      => $groupId,
+            'version'       => $newVersion,
+            'status'        => $newStatus,
+            'car_model'     => $current->car_model,
+            'car_price'     => $current->car_price,
+            'customer_name' => $current->customer_name,
+            'remark'        => $current->remark,
+            'created_by'    => 'ADMIN',
+        ]);
+
+        return redirect()->route('approvals.show', $groupId);
+    }
+
+    // หัวหน้า อนุมัติ / ไม่อนุมัติ
+    public function headAction(Request $request, $groupId)
+    {
+        $action = $request->input('action'); // approve / reject
+
+        $current = Approval::where('group_id', $groupId)
+            ->orderByDesc('version')
+            ->first();
+
+        $newVersion = $current->version + 1;
+        $newStatus = $action === 'approve' ? 'APPROVED' : 'REJECTED_HEAD';
+
+        Approval::create([
+            'group_id'      => $groupId,
+            'version'       => $newVersion,
+            'status'        => $newStatus,
+            'car_model'     => $current->car_model,
+            'car_price'     => $current->car_price,
+            'customer_name' => $current->customer_name,
+            'remark'        => $current->remark,
+            'created_by'    => 'HEAD',
+        ]);
+
+        return redirect()->route('approvals.show', $groupId);
+        }
+    public function downloadPdf($groupId)
+        {
+            $current = Approval::where('group_id', $groupId)
+                ->orderByDesc('version')
+                ->firstOrFail();
+
+            // โหลด view แล้วแปลงเป็น PDF
+            $pdf = Pdf::loadView('approvals.pdf', [
+                'current' => $current,
+            ])->setPaper('a4', 'portrait');
+
+            // ถ้าอยากให้โหลดเลย
+            return $pdf->download("approval_group_{$groupId}.pdf");
+
+            // หรือถ้าอยากให้เปิดในเบราว์เซอร์ก่อนค่อยกด Save
+            // return $pdf->stream("approval_group_{$groupId}.pdf");
+        }
+    public function edit($groupId)
+        {
+            $approval = Approval::where('group_id', $groupId)
+                ->orderByDesc('version')
+                ->firstOrFail();
+
+            return view('approvals.edit', compact('approval'));
+        }
+
+    public function destroy($groupId)
+        {
+            Approval::where('group_id', $groupId)->delete();
+
+            return redirect()->route('approvals.index')
+                ->with('status', 'ลบใบอนุมัติ Group '.$groupId.' เรียบร้อยแล้ว');
+        }
+    }
