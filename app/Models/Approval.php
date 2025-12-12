@@ -53,5 +53,8 @@ class Approval extends Model
     'sc_signature',
     'sale_com_signature',
     'sales_name',
-];
+    ];
+public function salesUser() {
+    return $this->belongsTo(User::class, 'sales_user_id');
+    }
 }

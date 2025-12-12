@@ -47,6 +47,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/approvals/{groupId}/pdf', [ApprovalController::class, 'downloadPdf'])
         ->name('approvals.pdf');
 
+    //เปลี่ยนรูป + เปลี่ยนรหัส/อีเมล “ยืนยันผ่านเมล
+    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+    Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
+
+    Route::post('/account/change-email', [AccountController::class, 'requestChangeEmail'])->name('account.changeEmail');
+    Route::post('/account/change-password', [AccountController::class, 'requestChangePassword'])->name('account.changePassword');
+
+    Route::get('/account/confirm/{token}', [AccountController::class, 'confirm'])->name('account.confirm');
+
     /*
     |--------------------------------------------------------------------------
     | Admin Routes
@@ -87,7 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/profile', [AuthController::class, 'updateProfile'])->name('account.updateProfile');
     Route::post('/account/password', [AuthController::class, 'updatePassword'])->name('account.updatePassword');
     Route::delete('/account', [AuthController::class, 'destroyAccount'])->name('account.destroy');
-});
+    });
 /*
     |--------------------------------------------------------------------------
     | เพิ่ม/ลบ/แก้ไข sale
