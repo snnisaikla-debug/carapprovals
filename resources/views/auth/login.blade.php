@@ -19,9 +19,24 @@
             <div class="form-text">ไม่ต้องเติม @ ก็ได้</div>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-3 position-relative">
             <label class="form-label">รหัสผ่าน</label>
-            <input type="password" name="password" class="form-control" required>
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control pe-5"
+            >
+
+            <button
+                type="button"
+                class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-2"
+                onclick="togglePassword('password', this)"
+                tabindex="-1"
+            >
+                <i class="bi bi-eye"></i>
+            </button>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -50,7 +65,6 @@
             </div>
         @endif
     </form>
-
     <script>
         function normalizeEmail(inputId){
             const inp = document.getElementById(inputId);

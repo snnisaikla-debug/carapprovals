@@ -246,20 +246,95 @@ class ApprovalController extends Controller
             // หรือถ้าอยากให้เปิดในเบราว์เซอร์ก่อนค่อยกด Save
             // return $pdf->stream("approval_group_{$groupId}.pdf");
         }
-    public function edit($groupId)
+        public function edit($groupId)
         {
-            $approval = Approval::where('group_id', $groupId)
-                ->orderByDesc('version')
-                ->firstOrFail();
+            // ดึงเวอร์ชันล่าสุดของ group นี้
+            $current = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
-            return view('approvals.edit', compact('approval'));
+            // อนุญาตให้ SALE แก้เฉพาะของตัวเอง (กันแก้ของคนอื่น)
+            if (Auth::user()->role === 'sale' && $current->sales_name !== Auth::user()->name) {
+                abort(403);
+            }
+
+            // เปิดฟอร์มแก้ไข (ใช้ create เดิมก็ได้ หรือทำ edit แยก)
+            return view('approvals.edit', compact('current'));
         }
 
-    public function destroy($groupId)
+        public function update(Request $request, $groupId)
         {
+            $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+            // ✅ SALE แก้เฉพาะของตัวเอง
+            if (Auth::user()->role === 'sale' && $latest->sales_name !== Auth::user()->name) {
+                abort(403);
+            }
+
+            // ✅ validate (ค่อยๆ เพิ่มทีหลังได้)
+            $data = $request->validate([
+                'customer_name' => 'required|string|max:255',
+                'customer_district' => 'nullable|string|max:255',
+                'customer_province' => 'nullable|string|max:255',
+                'customer_phone' => 'nullable|string|max:50',
+
+                'car_model' => 'required|string|max:255',
+                'car_color' => 'nullable|string|max:255',
+                'car_options' => 'nullable|string|max:255',
+                'car_price' => 'required|numeric',
+
+                // ใส่ฟิลด์อื่นๆ ที่มีในฟอร์มตามจริงได้เรื่อย ๆ
+            ]);
+
+            // ✅ สร้างเวอร์ชันใหม่ (ไม่ทับของเดิม)
+            $new = new Approval();
+            $new->group_id = $latest->group_id;
+            $new->version  = $latest->version + 1;
+
+            // สถานะเมื่อ “แก้ไขแล้วส่งใหม่”
+            // โดย workflow ของเปา: ส่งเข้า admin ใหม่เสมอ
+            $new->status = 'WAIT_ADMIN';
+
+            // ใครเป็นคนสร้างเวอร์ชันนี้
+            $new->created_by = strtoupper(Auth::user()->role); // SALE/ADMIN/HEAD
+
+            // ✅ ต้องเก็บชื่อ sales ในทุกเวอร์ชัน (ถ้ามี field นี้)
+            $new->sales_name = $latest->sales_name ?? Auth::user()->name;
+
+            // map ข้อมูลจากฟอร์มลง model
+            $new->customer_name = $data['customer_name'];
+            $new->customer_district = $data['customer_district'] ?? null;
+            $new->customer_province = $data['customer_province'] ?? null;
+            $new->customer_phone = $data['customer_phone'] ?? null;
+
+            $new->car_model = $data['car_model'];
+            $new->car_color = $data['car_color'] ?? null;
+            $new->car_options = $data['car_options'] ?? null;
+            $new->car_price = $data['car_price'];
+
+            // ✅ ถ้ามีฟิลด์อื่น ๆ ก็ใส่ต่อ (plus_head, fn, down_percent, …)
+            // $new->plus_head = $request->input('plus_head');
+            // ...
+
+            $new->save();
+
+            return redirect()->route('approvals.show', $groupId)->with('success', 'สร้างเวอร์ชันใหม่เรียบร้อย');
+        }
+
+        public function destroy($groupId)
+        {
+            // ลบทั้ง group (ทุกเวอร์ชัน)
+            $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+            if (Auth::user()->role === 'sale' && $latest->sales_name !== Auth::user()->name) {
+                abort(403);
+            }
+
+            // แนะนำ: ให้ลบได้เฉพาะยังไม่ APPROVED
+            if ($latest->status === 'APPROVED') {
+                return back()->with('error', 'เอกสารอนุมัติแล้ว ไม่อนุญาตให้ลบ');
+            }
+
             Approval::where('group_id', $groupId)->delete();
 
-            return redirect()->route('approvals.index')
-                ->with('status', 'ลบใบอนุมัติ Group '.$groupId.' เรียบร้อยแล้ว');
+            return redirect()->route('approvals.index')->with('success', 'ลบเอกสารชุดนี้เรียบร้อย');
         }
     }

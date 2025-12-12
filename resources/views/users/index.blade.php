@@ -24,9 +24,9 @@
                         <form method="POST" action="{{ route('users.updateRole', $u->id) }}">
                             @csrf
                             <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;">
-                                <option value="SALE"  @selected($u->role === 'SALE')>SALE</option>
-                                <option value="ADMIN" @selected($u->role === 'ADMIN')>ADMIN</option>
-                                <option value="HEAD"  @selected($u->role === 'HEAD')>HEAD</option>
+                                <option value="sale"  @selected($u->role === 'sale')>sale</option>
+                                <option value="admin" @selected($u->role === 'admin')>admin</option>
+                                <option value="head"  @selected($u->role === 'head')>head</option>
                             </select>
                             <button class="btn btn-sm btn-primary">บันทึก</button>
                         </form>

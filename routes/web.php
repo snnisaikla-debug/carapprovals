@@ -88,3 +88,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/password', [AuthController::class, 'updatePassword'])->name('account.updatePassword');
     Route::delete('/account', [AuthController::class, 'destroyAccount'])->name('account.destroy');
 });
+/*
+    |--------------------------------------------------------------------------
+    | เพิ่ม/ลบ/แก้ไข sale
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])->name('approvals.edit');
+    Route::put('/approvals/{groupId}', [ApprovalController::class, 'update'])->name('approvals.update');
+    Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');

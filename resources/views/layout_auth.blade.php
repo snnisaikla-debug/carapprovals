@@ -8,6 +8,9 @@
 
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    
+    {{-- Icon see password --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
         body {
@@ -99,7 +102,7 @@
             font-size: 12px;
         }
     </style>
-</head>
+    </head>
 <body>
 
 <div class="auth-wrapper">
@@ -109,6 +112,21 @@
 
     @yield('content')
 </div>
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
 
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = "password";
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+</script>
 </body>
 </html>

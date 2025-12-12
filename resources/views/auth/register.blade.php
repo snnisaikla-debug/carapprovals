@@ -18,14 +18,34 @@
             <div class="form-text">กรุณาใช้อีเมล @ypb.co.th"</div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3 position-relative">
             <label class="form-label">รหัสผ่าน</label>
-            <input type="password" name="password" class="form-control" required>
+
+            <input type="password" 
+                    id="password" 
+                    name="password"
+                    class="form-control pe-5" required>
+
+            <button type="button"
+                    class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-0"
+                    onclick="togglePassword('password', this)"
+                    style="border:none; background:transparent;">
+                <i class="bi bi-eye fs-5"></i>
+            </button>
         </div>
 
         <div class="mb-3">
             <label class="form-label">ยืนยันรหัสผ่าน</label>
-            <input type="password" name="password_confirmation" class="form-control" required>
+            <input type="password" 
+                    name="password_confirmation" 
+                    class="form-control pe-5" required>
+            
+            <button type="button"
+                    class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-0"
+                    onclick="togglePassword('password', this)"
+                    style="border:none; background:transparent;">
+                <i class="bi bi-eye fs-5"></i>
+            </button>
         </div>
 
         <button class="btn btn-success w-100">สมัครสมาชิก</button>

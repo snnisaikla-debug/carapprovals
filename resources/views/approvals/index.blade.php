@@ -66,30 +66,23 @@
         <td>
             <a href="{{ route('approvals.show', $row->group_id) }}"
                class="btn btn-primary btn-sm mb-1">
-                เปิดดู/ประวัติ
+                รายละเอียด
             </a>
-
-            {{-- ปุ่มแก้ไข (ให้ Admin/Head ใช้ หรือจะเปิดให้ Sales ก็ได้) --}}
-            @if(auth()->user()->role === 'ADMIN' || auth()->user()->role === 'HEAD')
-                <a href="{{ route('approvals.edit', $row->group_id) }}"
-                   class="btn btn-warning btn-sm mb-1">
-                    แก้ไข
-                </a>
-
-                <form action="{{ route('approvals.destroy', $row->group_id) }}"
-                      method="POST"
-                      class="d-inline"
-                      onsubmit="return confirm('ยืนยันลบใบอนุมัติ Group {{ $row->group_id }} ?');">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-danger btn-sm mb-1">
-                        ลบ
-                    </button>
-                </form>
+        </td>
+        </form>
+             {{-- เชื่อมไฟล์ partials --}}
+        
+        <td class="text-nowrap">
+            @if(auth()->user()->role === 'sale')
+                @include('approvals.partials.actions_sale', ['row' => $row])
+            @elseif(auth()->user()->role === 'admin')
+                @include('approvals.partials.actions_admin', ['row' => $row])
+            @elseif(auth()->user()->role === 'head')
+                @include('approvals.partials.actions_head', ['row' => $row])
             @endif
         </td>
-    </tr>
-@endforeach
+            </tr>
+    @endforeach
 </tbody>
     </table>
 @endsection
