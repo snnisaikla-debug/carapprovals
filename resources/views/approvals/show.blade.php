@@ -39,39 +39,6 @@
         </div>
     </div>
 
-    @if ($current->status === 'WAIT_ADMIN' && auth()->user()->role === 'ADMIN')
-        <div class="mt-3">
-            <h5>โหมด Admin (ลองกดเล่น)</h5>
-            <form method="POST" action="{{ route('approvals.adminAction', $current->group_id) }}" class="d-inline">
-                @csrf
-                <input type="hidden" name="action" value="approve">
-                <button class="btn btn-success">Admin อนุมัติ ➜ ส่งให้หัวหน้า</button>
-            </form>
-
-            <form method="POST" action="{{ route('approvals.adminAction', $current->group_id) }}" class="d-inline">
-                @csrf
-                <input type="hidden" name="action" value="reject">
-                <button class="btn btn-danger">Admin ไม่อนุมัติ</button>
-            </form>
-        </div>
-    @endif
-
-    @if ($current->status === 'WAIT_HEAD' && auth()->user()->role === 'HEAD')
-        <div class="mt-3">
-            <h5>โหมดหัวหน้า (ลองกดเล่น)</h5>
-            <form method="POST" action="{{ route('approvals.headAction', $current->group_id) }}" class="d-inline">
-                @csrf
-                <input type="hidden" name="action" value="approve">
-                <button class="btn btn-success">หัวหน้าอนุมัติ ➜ APPROVED</button>
-            </form>
-
-            <form method="POST" action="{{ route('approvals.headAction', $current->group_id) }}" class="d-inline">
-                @csrf
-                <input type="hidden" name="action" value="reject">
-                <button class="btn btn-danger">หัวหน้าไม่อนุมัติ</button>
-            </form>
-        </div>
-    @endif
     <div class="card mt-3">
     <div class="card-body">
         <h5>ลายเซ็น</h5>

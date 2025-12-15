@@ -1,113 +1,83 @@
 @extends('layout')
 
-@section('title', 'บัญชีของฉัน')
+@section('title','My Profile')
 
 @section('content')
-    <h4 class="mb-3">บัญชีของฉัน</h4>
+<style>
+  .profile-wrap{max-width:920px;margin:0 auto;}
+  .card-soft{border-radius:16px;border:1px solid #e9ecef;}
+  .section-title{font-size:28px;font-weight:700;margin-bottom:16px;}
+  .edit-pill{border-radius:999px;padding:.45rem 1rem;}
+  .rowline{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #f1f3f5;}
+  .rowline:last-child{border-bottom:0;}
+  .label{color:#6c757d;width:40%;}
+  .value{font-weight:600;width:60%;text-align:right;}
+  @media (max-width:576px){
+    .label{width:45%}
+    .value{width:55%}
+    .section-title{font-size:24px}
+  }
+</style>
 
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">โปรไฟล์</div>
-                <div class="card-body">
-                    @if (session('status_profile'))
-                        <div class="alert alert-success">{{ session('status_profile') }}</div>
-                    @endif
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="section-title">My Profile</div>
 
-                    <form method="POST" action="{{ route('account.updateProfile') }}" enctype="multipart/form-data">
-                        @csrf
+  <div class="dropdown">
+    <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" style="border-radius:999px;">
+      Options
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" style="border-radius:14px;">
+      <li>
+        <a class="dropdown-item" href="{{ route('account.edit') }}">
+          แก้ไขข้อมูล (About)
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{{ route('account.avatar.edit') }}">
+          เปลี่ยนรูปโปรไฟล์
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{{ route('account.password.edit') }}">
+          เปลี่ยนรหัสผ่าน
+        </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+          ลบบัญชี
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="border-radius:16px;">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">ยืนยันลบบัญชี</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
-                        <div class="mb-3 text-center">
-                            @if($user->avatar)
-                                <img src="{{ asset('storage/'.$user->avatar) }}" alt="Avatar"
-                                     class="rounded-circle mb-2" style="width:80px;height:80px;object-fit:cover;">
-                            @else
-                                <div class="rounded-circle bg-secondary text-white d-inline-flex
-                                            justify-content-center align-items-center mb-2"
-                                     style="width:80px;height:80px;">
-                                    {{ mb_substr($user->name,0,1) }}
-                                </div>
-                            @endif
-                            <div>
-                                <input type="file" name="avatar" class="form-control mt-2">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">ชื่อ-นามสกุล</label>
-                            <input type="text" name="name" class="form-control"
-                                   value="{{ old('name', $user->name) }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">อีเมล</label>
-                            <input type="email" class="form-control" value="{{ $user->email }}" disabled>
-                            <small class="text-muted">
-                                (การเปลี่ยนอีเมล + ยืนยันผ่านเมล จะทำในขั้นตอนต่อไป)
-                            </small>
-                        </div>
-
-                        <button class="btn btn-primary">บันทึกโปรไฟล์</button>
-                    </form>
-                </div>
-            </div>
+      <form method="POST" action="{{ route('account.delete') }}">
+        @csrf
+        <div class="modal-body">
+          <p class="mb-2">การลบบัญชีเป็นแบบ <b>Soft delete</b> (ซ่อนบัญชี) สามารถกู้คืนภายหลังได้โดยแอดมิน</p>
+          <div class="mb-3">
+            <label class="form-label">ยืนยันรหัสผ่าน</label>
+            <input type="password" name="current_password" class="form-control" required>
+            @error('current_password')
+              <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
+          </div>
         </div>
-
-        <div class="col-md-6 mb-4">
-            <div class="card mb-4">
-                <div class="card-header">เปลี่ยนรหัสผ่าน</div>
-                <div class="card-body">
-                    @if (session('status_password'))
-                        <div class="alert alert-success">{{ session('status_password') }}</div>
-                    @endif
-
-                    <form method="POST" action="{{ route('account.updatePassword') }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label">รหัสผ่านเดิม</label>
-                            <input type="password" name="current_password" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">รหัสผ่านใหม่</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">ยืนยันรหัสผ่านใหม่</label>
-                            <input type="password" name="password_confirmation" class="form-control" required>
-                        </div>
-                        <button class="btn btn-warning">เปลี่ยนรหัสผ่าน</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header text-danger">ลบบัญชี</div>
-                <div class="card-body">
-                    <p class="text-muted small mb-2">
-                        การลบบัญชีจะทำให้ไม่สามารถเข้าสู่ระบบด้วยบัญชีนี้ได้อีก
-                    </p>
-                    <form method="POST" action="{{ route('account.destroy') }}"
-                          onsubmit="return confirm('ยืนยันลบบัญชีนี้จริงหรือไม่?');">
-                        @csrf
-                        @method('DELETE')
-                        <div class="mb-2">
-                            <label class="form-label">พิมพ์คำว่า DELETE เพื่อยืนยัน</label>
-                            <input type="text" name="confirm" class="form-control" required>
-                        </div>
-                        <button class="btn btn-danger">ลบบัญชี</button>
-                    </form>
-                </div>
-            </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">ยกเลิก</button>
+          <button class="btn btn-danger">ลบบัญชี</button>
         </div>
+      </form>
     </div>
+  </div>
+</div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger mt-3">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $e)
-                    <li>{{ $e }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 @endsection

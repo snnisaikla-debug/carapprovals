@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AccountController;
+use Illuminate\Support\Facades\Mail;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -42,19 +45,45 @@ Route::middleware('auth')->group(function () {
     Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
     Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
     Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])->name('approvals.show');
+ 
+    Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])->name('approvals.edit');
+    Route::put('/approvals/{groupId}', [ApprovalController::class, 'update'])->name('approvals.update');
+    Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');
 
     // ดาวน์โหลด PDF
-    Route::get('/approvals/{groupId}/pdf', [ApprovalController::class, 'downloadPdf'])
-        ->name('approvals.pdf');
+    // Route::get('/approvals/{groupId}/pdf', [ApprovalController::class, 'downloadPdf'])
+        // ->name('approvals.pdf');
 
-    //เปลี่ยนรูป + เปลี่ยนรหัส/อีเมล “ยืนยันผ่านเมล
+
+Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-    Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
 
-    Route::post('/account/change-email', [AccountController::class, 'requestChangeEmail'])->name('account.changeEmail');
-    Route::post('/account/change-password', [AccountController::class, 'requestChangePassword'])->name('account.changePassword');
+    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
+    Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
 
-    Route::get('/account/confirm/{token}', [AccountController::class, 'confirm'])->name('account.confirm');
+    Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+
+    // ✅ Avatar
+    Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
+    Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
+
+    // ✅ Soft delete
+    Route::post('/account/delete', [AccountController::class, 'destroy'])->name('account.delete');
+});
+
+    // menu navbar
+
+Route::middleware('auth')->group(function () {
+    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+
+    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
+    Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
+
+    Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+});
+
 
     /*
     |--------------------------------------------------------------------------
@@ -97,11 +126,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/password', [AuthController::class, 'updatePassword'])->name('account.updatePassword');
     Route::delete('/account', [AuthController::class, 'destroyAccount'])->name('account.destroy');
     });
-/*
-    |--------------------------------------------------------------------------
-    | เพิ่ม/ลบ/แก้ไข sale
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])->name('approvals.edit');
-    Route::put('/approvals/{groupId}', [ApprovalController::class, 'update'])->name('approvals.update');
-    Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');

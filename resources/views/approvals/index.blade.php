@@ -23,19 +23,21 @@
             @endforeach
         </select>
     </form>
+@php
+    $currentSort = request('sort', 'newest');
+    $nextSort = $currentSort === 'newest' ? 'oldest' : 'newest';
+@endphp
 
     {{-- ปุ่มเรียงวันที่ --}}
-            <div>
-        เรียงวันที่:
-        <a href="{{ route('approvals.index', ['sort' => 'newest', 'sales' => request('sales')]) }}"
-           class="btn btn-sm {{ request('sort') === 'newest' ? 'btn-primary' : 'btn-outline-primary' }}">
-            ล่าสุดก่อน
-        </a>
-
-        <a href="{{ route('approvals.index', ['sort' => 'oldest', 'sales' => request('sales')]) }}"
-           class="btn btn-sm {{ request('sort') === 'oldest' ? 'btn-primary' : 'btn-outline-primary' }}">
-            เก่าสุดก่อน
-        </a>
+          <div>
+            เรียงวันที่:
+                <a href="{{ route('approvals.index', [
+                    'sort' => $nextSort,
+                    'sales' => request('sales')
+                    ]) }}"
+                    class="btn btn-sm btn-primary">
+                {{ $currentSort === 'newest' ? 'เก่าสุด' : 'ล่าสุด' }}
+                </a>
             </div>
         </div>
     </div>
@@ -63,12 +65,6 @@
         <td>{{ $row->sales_name }}</td> {{-- ชื่อ-สกุลจากบัญชี --}}
         <td>{{ $row->status }}</td>
         <td>{{ $row->updated_at }}</td>
-        <td>
-            <a href="{{ route('approvals.show', $row->group_id) }}"
-               class="btn btn-primary btn-sm mb-1">
-                รายละเอียด
-            </a>
-        </td>
         </form>
              {{-- เชื่อมไฟล์ partials --}}
         

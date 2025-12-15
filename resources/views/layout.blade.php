@@ -7,7 +7,8 @@
 
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         body {
             background-color: #ffffffff; /* พื้นหลัง เทาอ่อน */
@@ -30,6 +31,7 @@
             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo me-2">
             <span class="fw-bold">ฟอร์มอนุมัติการขายรถ</span>
         </div>
+        @include('partials.profile_menu')
 
         @auth
             <div class="dropdown">
@@ -62,6 +64,8 @@
                     </li>
                 </ul>
             </div>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
         @endauth
     </div>
 </div>
