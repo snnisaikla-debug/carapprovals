@@ -6,13 +6,13 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
+    /* =========================
+    |  Public Routes
+    ========================= */
 
 // หน้าแรก -> เด้งไป login
 Route::get('/', function () {
@@ -30,17 +30,15 @@ Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->nam
 Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 
 
-/*
-|--------------------------------------------------------------------------
-| Protected Routes (ต้อง login)
-|--------------------------------------------------------------------------
-*/
+    /* =========================
+    |  Protected Routes (ต้อง login)
+    ========================= */
 Route::middleware('auth')->group(function () {
 
-    // Logout
+    // Logout 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Approvals (Sales/Admin/Head)
+    // APPROVALS (Sales/Admin/Head)
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
     Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
@@ -50,12 +48,20 @@ Route::middleware('auth')->group(function () {
     Route::put('/approvals/{groupId}', [ApprovalController::class, 'update'])->name('approvals.update');
     Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');
 
-    // ดาวน์โหลด PDF
+    /*=========================
+    |  ดาวน์โหลด PDF
+    =========================*/
     // Route::get('/approvals/{groupId}/pdf', [ApprovalController::class, 'downloadPdf'])
         // ->name('approvals.pdf');
 
+   
+    // ACCOUNT / MY PROFILE
+    Route::get('/account', [AuthController::class, 'showAccount'])->name('account.show');
+    Route::post('/account/profile', [AuthController::class, 'updateProfile'])->name('account.updateProfile');
+    Route::post('/account/photo', [AuthController::class, 'uploadPhoto'])->name('account.photo');
+    Route::post('/account/password', [AuthController::class, 'updatePassword'])->name('account.updatePassword');
+    Route::delete('/account', [AuthController::class, 'destroyAccount'])->name('account.destroy');
 
-Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
 
     Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
@@ -72,7 +78,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/delete', [AccountController::class, 'destroy'])->name('account.delete');
 });
 
-    // menu navbar
+
+    /* =========================
+    |  Menu navbar
+    ========================= */
 
 Route::middleware('auth')->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
@@ -85,11 +94,10 @@ Route::middleware('auth')->group(function () {
 });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Admin Routes
-    |--------------------------------------------------------------------------
-    */
+    /* =========================
+     |  ADMIN ROUTES
+     ========================= */
+   
     Route::middleware('admin')->group(function () {
 
         // อนุมัติรอบแรก
@@ -101,11 +109,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Head Routes
-    |--------------------------------------------------------------------------
-    */
+    /* =========================
+     |  HEAD ROUTES
+     ========================= */
+   
     Route::middleware('head')->group(function () {
 
         // รายชื่อ Sales
@@ -116,13 +123,22 @@ Route::middleware('auth')->group(function () {
             ->name('approvals.headAction');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | My Account
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/account', [AuthController::class, 'showAccount'])->name('account.show');
-    Route::post('/account/profile', [AuthController::class, 'updateProfile'])->name('account.updateProfile');
-    Route::post('/account/password', [AuthController::class, 'updatePassword'])->name('account.updatePassword');
-    Route::delete('/account', [AuthController::class, 'destroyAccount'])->name('account.destroy');
-    });
+        Route::get('/lang/{lang}', function (Request $request, string $lang) {
+        $allowed = ['th', 'en'];
+        if (!in_array($lang, $allowed)) $lang = 'th';
+
+        // เก็บใน session (หลัก)
+        $request->session()->put('lang', $lang);
+
+        // เก็บใน cookie ด้วย (กัน session หมดอายุ)
+        return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30)); // 30 วัน
+    })  ->name('lang.switch');
+
+    Route::get('/lang/{locale}', function ($locale) {
+        if (!in_array($locale, ['th', 'en'])) {
+            abort(400);
+        }
+
+    Session::put('locale', $locale);
+            return back();
+        })->name('lang.switch');
