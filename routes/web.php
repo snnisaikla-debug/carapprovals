@@ -5,140 +5,110 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AccountController;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-    /* =========================
-    |  Public Routes
-    ========================= */
+// หน้าแรก
+Route::get('/', fn () => redirect()->route('login'));
 
-// หน้าแรก -> เด้งไป login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
-
-// Login / Register
+// Auth
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
-// Reset Password
+// Reset password
 Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->name('password.request');
 Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 
-
-    /* =========================
-    |  Protected Routes (ต้อง login)
-    ========================= */
+/*
+|--------------------------------------------------------------------------
+| Protected Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
 
-    // Logout 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // APPROVALS (Sales/Admin/Head)
+    /*
+    |--------------------------------------------------------------------------
+    | Approvals
+    |--------------------------------------------------------------------------
+    */
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
     Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
-    Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])->name('approvals.show');
- 
-    Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])->name('approvals.edit');
-    Route::put('/approvals/{groupId}', [ApprovalController::class, 'update'])->name('approvals.update');
-    Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');
 
-    /*=========================
-    |  ดาวน์โหลด PDF
-    =========================*/
-    // Route::get('/approvals/{groupId}/pdf', [ApprovalController::class, 'downloadPdf'])
-        // ->name('approvals.pdf');
+    // ✅ ดูเอกสาร (ใช้ groupId)
+    Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])
+        ->name('approvals.show');
 
-   
-    // ACCOUNT / MY PROFILE
-    Route::get('/account', [AuthController::class, 'showAccount'])->name('account.show');
-    Route::post('/account/profile', [AuthController::class, 'updateProfile'])->name('account.updateProfile');
-    Route::post('/account/photo', [AuthController::class, 'uploadPhoto'])->name('account.photo');
-    Route::post('/account/password', [AuthController::class, 'updatePassword'])->name('account.updatePassword');
-    Route::delete('/account', [AuthController::class, 'destroyAccount'])->name('account.destroy');
+    // ✅ แก้ไข
+    Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])
+        ->name('approvals.edit');
+    Route::post('/approvals/{groupId}/update', [ApprovalController::class, 'update'])
+        ->name('approvals.update');
 
+    // ✅ ลบทั้ง group
+    Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])
+        ->name('approvals.destroy');
+
+    // ✅ Export PDF (ใช้ approval id)
+    Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])
+        ->name('approvals.pdf');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Account
+    |--------------------------------------------------------------------------
+    */
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-
     Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
     Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
 
     Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
     Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
 
-    // ✅ Avatar
     Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
     Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
-
-    // ✅ Soft delete
-    Route::post('/account/delete', [AccountController::class, 'destroy'])->name('account.delete');
 });
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
+Route::middleware('admin')->group(function () {
+    Route::post('/admin/approvals/{groupId}', [ApprovalController::class, 'adminAction'])
+        ->name('approvals.adminAction');
 
-    /* =========================
-    |  Menu navbar
-    ========================= */
-
-Route::middleware('auth')->group(function () {
-    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-
-    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
-    Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
-
-    Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
-    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
 
+/*
+|--------------------------------------------------------------------------
+| HEAD
+|--------------------------------------------------------------------------
+*/
+Route::middleware('head')->group(function () {
+    Route::post('/head/approvals/{groupId}', [ApprovalController::class, 'headAction'])
+        ->name('approvals.headAction');
+});
 
-    /* =========================
-     |  ADMIN ROUTES
-     ========================= */
-   
-    Route::middleware('admin')->group(function () {
-
-        // อนุมัติรอบแรก
-        Route::post('/admin/approvals/{groupId}', [ApprovalController::class, 'adminAction'])
-            ->name('approvals.adminAction');
-
-        // จัดการบัญชี (Admin)
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
-    });
-
-    /* =========================
-     |  HEAD ROUTES
-     ========================= */
-   
-    Route::middleware('head')->group(function () {
-
-        // รายชื่อ Sales
-        Route::get('/sales', [UserController::class, 'salesList'])->name('sales.list');
-
-        // อนุมัติรอบสุดท้าย (HEAD)
-        Route::post('/head/approvals/{groupId}', [ApprovalController::class, 'headAction'])
-            ->name('approvals.headAction');
-    });
-
-        Route::get('/lang/{lang}', function (Request $request, string $lang) {
-        $allowed = ['th', 'en'];
-        if (!in_array($lang, $allowed)) $lang = 'th';
-
-        // เก็บใน session (หลัก)
-        $request->session()->put('lang', $lang);
-
-        // เก็บใน cookie ด้วย (กัน session หมดอายุ)
-        return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30)); // 30 วัน
-    })  ->name('lang.switch');
-
-    Route::get('/lang/{locale}', function ($locale) {
-        if (!in_array($locale, ['th', 'en'])) {
-            abort(400);
-        }
-
-    Session::put('locale', $locale);
-            return back();
-        })->name('lang.switch');
+/*
+|--------------------------------------------------------------------------
+| Language
+|--------------------------------------------------------------------------
+*/
+Route::get('/lang/{lang}', function (Request $request, string $lang) {
+    if (!in_array($lang, ['th', 'en'])) abort(400);
+    $request->session()->put('lang', $lang);
+    return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30));
+})->name('lang.switch');

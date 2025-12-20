@@ -4,38 +4,19 @@ namespace App\Policies;
 
 use App\Models\Approval;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ApprovalPolicy
 {
-    public function view(User $user, Approval $approval): bool
-        {
-            return true; // ทุก role ดูได้ (หรือจำกัดตามบริษัทก็ได้)
-        }
-
     public function update(User $user, Approval $approval): bool
-        {
-            // sale แก้ได้เฉพาะของตัวเอง และยังไม่ผ่านหัวหน้า
-            return $user->role === 'sale'
-                && $approval->sales_user_id === $user->id
-                && in_array($approval->status, ['WAIT_ADMIN','REJECTED_ADMIN','REJECTED_HEAD']);
+    {
+        // sale แก้ได้เฉพาะของตัวเอง
+        if (strtolower($user->role) === 'sale') {
+            return $approval->user_id === $user->id; // แนะนำใช้ user_id
+            // ถ้ายังไม่มี user_id ใช้ sales_name ชั่วคราว:
+            // return $approval->sales_name === $user->name;
         }
 
-    public function delete(User $user, Approval $approval): bool
-        {
-            return $user->role === 'sale'
-                && $approval->sales_user_id === $user->id
-                && $approval->status !== 'APPROVED';
-        }
-
-    public function approve(User $user, Approval $approval): bool
-        {
-            return ($user->role === 'admin' && $approval->status === 'WAIT_ADMIN')
-                || ($user->role === 'head'  && $approval->status === 'WAIT_HEAD');
-        }
-
-    public function reject(User $user, Approval $approval): bool
-        {
-            return $this->approve($user, $approval);
-        }
+        // admin/head ไม่ให้แก้ (แล้วแต่ระบบคุณ)
+        return false;
+    }
 }

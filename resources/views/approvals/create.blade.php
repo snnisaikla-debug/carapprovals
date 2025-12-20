@@ -1,3 +1,4 @@
+
 @extends('layout')
 
 @section('title', 'สร้างใบอนุมัติ (Mobile UI)')
@@ -21,7 +22,12 @@
 
 <form method="POST" action="{{ route('approvals.store') }}">
     @csrf
-
+    <div class="d-flex justify-content-between mb-3">
+        <button type="button" onclick="history.back()" class="btn btn-secondary">
+            ← กลับ
+        </button>
+    </div>
+    
     <ins><h2>ใบขออนุมัติเงื่อนไขการขายYPB</h2></ins>
     <br>
     {{-- 1. ข้อมูลลูกค้า --}}
@@ -70,7 +76,7 @@
 
     <div class="mb-3">
         <label class="form-label">ราคา (บาท)</label>
-        <input type="number" step="0.01" class="form-control" name="car_price" required>
+        <input id="car_price" class="form-control" type="number" step="0.01" name="car_price">
     </div>
     <div class="row">
         <div class="col-6 mb-3">
@@ -86,33 +92,33 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">ดาวน์ (%)</label>
-            <input type="number" step="0.01" class="form-control" name="down_percent">
+            <input id="down_percent" class="form-control" type="number" step="0.01" name="down_percent">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">ดาวน์ (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="down_amount">
+            <input id="down_amount" class="form-control" type="number" step="0.01" name="down_amount" placeholder="--- คำนวนอัตโนมัติ ---">
         </div>
     </div>
 
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">ยอดจัด (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="finance_amount">
+            <input id="finance_amount" class="form-control" type="number" readonly name="finance_amount">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">งวดละ (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="installment_per_month">
+             <input id="installment_per_month" class="form-control" type="number" readonly name="installment_per_month" placeholder="--- คำนวนอัตโนมัติ ---">
         </div>
     </div>
 
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">จำนวนงวด</label>
-            <input type="number" class="form-control" name="installment_months">
+            <input id="installment_months" class="form-control" type="number" name="installment_months">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">ดอกเบี้ย (%)</label>
-            <input type="number" step="0.01" class="form-control" name="interest_rate">
+            <input id="interest_rate" class="form-control" type="number" step="0.01" name="interest_rate">
         </div>
     </div>
 
@@ -120,11 +126,11 @@
 
         <div class="mb-3">
             <label class="form-label">คัชซี</label>
-            <input type="number" step="0.01" class="form-control" name="interest_rate">
+            <input type="number" step="0.01" class="form-control" name="Chassis">
         </div>
         <div class="mb-3">
             <label class="form-label">เลขสต๊อก</label>
-            <input type="number" step="0.01" class="form-control" name="interest_rate">
+            <input type="number" step="0.01" class="form-control" name="stock_number">
         </div>
 
     <div class="section-title"></div></br>
@@ -151,7 +157,7 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">ประเภทการขาย</label><br>
-            <input type="checkbox" name="options[]" value="GE"> GE<br>
+            <input type="checkbox" name="sale_type_options[]" value="GE"> GE<br>
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label><br>
@@ -408,5 +414,34 @@
             saleComPad.output.value = saleComPad.sigPad.toDataURL('image/png');
         }
     });
+</script>
+{{-- ================== SCRIPT คำนวณ ================== --}}
+<script>
+function calculateFinance() {
+    const price = parseFloat(car_price.value) || 0;
+    const downPercent = parseFloat(down_percent.value) || 0;
+    let downAmount = parseFloat(down_amount.value) || 0;
+    const months = parseInt(installment_months.value) || 0;
+    const interest = parseFloat(interest_rate.value) || 0;
+
+    if (downPercent > 0) {
+        downAmount = price * (downPercent / 100);
+        down_amount.value = downAmount.toFixed(2);
+    }
+
+    const finance = price - downAmount;
+    finance_amount.value = finance.toFixed(2);
+
+    const interestTotal = finance * (interest / 100) * (months / 12);
+    const total = finance + interestTotal;
+
+    installment_per_month.value = months > 0
+        ? (total / months).toFixed(2)
+        : '';
+}
+
+document.querySelectorAll(
+    '#car_price,#down_percent,#down_amount,#installment_months,#interest_rate'
+).forEach(el => el.addEventListener('input', calculateFinance));
 </script>
 @endsection

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Approval;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Approval;
 
 class ApprovalController extends Controller
 {
@@ -173,10 +173,11 @@ class ApprovalController extends Controller
             ->orderBy('version')
             ->get();
 
-        $current = $versions->last();
+        $approval = $versions->last(); // ✅ ใช้ชื่อนี้
 
-        return view('approvals.show', compact('versions', 'current'));
+        return view('approvals.show', compact('versions', 'approval'));
     }
+
 
     // Admin อนุมัติ / ไม่อนุมัติ
     public function adminAction(Request $request, $groupId)
@@ -229,48 +230,40 @@ class ApprovalController extends Controller
 
         return redirect()->route('approvals.show', $groupId);
         }
-    public function downloadPdf($groupId)
-        {
-            $current = Approval::where('group_id', $groupId)
-                ->orderByDesc('version')
-                ->firstOrFail();
+    public function exportPdf($id)
+    {
+        $approval = Approval::findOrFail($id);
 
-            // โหลด view แล้วแปลงเป็น PDF
-            $pdf = Pdf::loadView('approvals.pdf', [
-                'current' => $current,
-            ])->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('approvals.pdf', compact('approval'))
+            ->setPaper('A4', 'portrait');
 
-            // ถ้าอยากให้โหลดเลย
-            return $pdf->download("approval_group_{$groupId}.pdf");
+        return $pdf->stream('approval_'.$approval->id.'.pdf');
+    }
+    public function edit($groupId)
+    {
+        // ดึงเวอร์ชันล่าสุดของ group นี้
+        $current = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
-            // หรือถ้าอยากให้เปิดในเบราว์เซอร์ก่อนค่อยกด Save
-            // return $pdf->stream("approval_group_{$groupId}.pdf");
-        }
-        public function edit($groupId)
-        {
-            // ดึงเวอร์ชันล่าสุดของ group นี้
-            $current = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-            // อนุญาตให้ SALE แก้เฉพาะของตัวเอง (กันแก้ของคนอื่น)
-            if (Auth::user()->role === 'sale' && $current->sales_name !== Auth::user()->name) {
-                abort(403);
-            }
-
-            // เปิดฟอร์มแก้ไข (ใช้ create เดิมก็ได้ หรือทำ edit แยก)
-            return view('approvals.edit', compact('current'));
+        // อนุญาตให้ SALE แก้เฉพาะของตัวเอง (กันแก้ของคนอื่น)
+        if (Auth::user()->role === 'sale' && $current->sales_name !== Auth::user()->name) {
+        abort(403);
         }
 
-        public function update(Request $request, $groupId)
-        {
-            $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+        // เปิดฟอร์มแก้ไข (ใช้ create เดิมก็ได้ หรือทำ edit แยก)
+        return view('approvals.edit', compact('current'));
+    }
 
-            // ✅ SALE แก้เฉพาะของตัวเอง
-            if (Auth::user()->role === 'sale' && $latest->sales_name !== Auth::user()->name) {
-                abort(403);
-            }
+    public function update(Request $request, $groupId)
+    {
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
-            // ✅ validate (ค่อยๆ เพิ่มทีหลังได้)
-            $data = $request->validate([
+        // ✅ SALE แก้เฉพาะของตัวเอง
+        if (Auth::user()->role === 'sale' && $latest->sales_name !== Auth::user()->name) {
+        abort(403);
+    }
+
+        // ✅ validate (ค่อยๆ เพิ่มทีหลังได้)
+        $data = $request->validate([
                 'customer_name' => 'required|string|max:255',
                 'customer_district' => 'nullable|string|max:255',
                 'customer_province' => 'nullable|string|max:255',
@@ -337,4 +330,5 @@ class ApprovalController extends Controller
 
             return redirect()->route('approvals.index')->with('success', 'ลบเอกสารชุดนี้เรียบร้อย');
         }
+
     }

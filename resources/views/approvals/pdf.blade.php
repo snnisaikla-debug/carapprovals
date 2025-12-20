@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
-    <meta charset="UTF-8">
-    <title>ใบอนุมัติการขายรถ Group {{ $current->group_id }}</title>
+<meta charset="utf-8">
 
-    <style>
-        /* ประกาศฟอนต์ไทยให้ dompdf รู้จัก */
-        @font-face {
-            font-family: 'THSarabunNew';
-            font-style: normal;
-            font-weight: normal;
-            src: url("{{ public_path('fonts/THSarabunNew.ttf') }}") format('truetype');
-        }
+<style>
+    @page {
+        size: A4;
+        margin: 20mm;
+    }
 
-        @font-face {
-            font-family: 'THSarabunNew';
-            font-style: normal;
-            font-weight: bold;
-            src: url("{{ public_path('fonts/THSarabunNew Bold.ttf') }}") format('truetype');
-        }
+    body {
+        font-family: "THSarabunNew", sans-serif;
+        font-size: 16px;
+        color: #000;
+    }
 
-        body {
-            font-family: 'THSarabunNew', DejaVu Sans, sans-serif;
-            font-size: 14pt;
-        }
+    h2 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
 
-        h2, h3, h4, h5, h6, strong, b {
-            font-family: 'THSarabunNew', DejaVu Sans, sans-serif;
-            font-weight: bold;
-        }
+    .section {
+        margin-top: 15px;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 8px;
-            font-family: 'THSarabunNew', DejaVu Sans, sans-serif;
-            font-size: 12pt;
-        }
+    .section-title {
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        margin-bottom: 5px;
+    }
 
-        th, td {
-            border: 1px solid #000;
-            padding: 4px;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .section-title {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-    </style>
+    td {
+        padding: 6px;
+        vertical-align: top;
+    }
+
+    .border td {
+        border: 1px solid #000;
+    }
+    @font-face {
+    font-family: 'THSarabunNew';
+    src: url('{{ storage_path("fonts/THSarabunNew.ttf") }}') format('truetype');
+}
+
+</style>
 </head>
 
 <body>

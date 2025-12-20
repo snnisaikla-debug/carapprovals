@@ -73,8 +73,7 @@
 }
 </style>
 @endsection
-        <a href="{{ route('approvals.pdf', $current->group_id) }}"
-   class="fab-download">
-    PDF
+      <a href="{{ route('approvals.pdf', $approval->id) }}"
+   class="btn btn-danger">
+    Export PDF
 </a>
-

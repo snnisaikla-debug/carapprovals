@@ -12,7 +12,7 @@
     
     {{-- Dropdown เลือก Sales --}}
     <form action="{{ route('approvals.index') }}" method="GET" class="d-flex align-items-center">
-        <label class="me-2">เลือกดู</label>
+        <label class="me-2">เลือกดู</label> 
         <select name="sales" class="form-select form-select-sm me-2" onchange="this.form.submit()">
             <option value="">-- ทั้งหมด --</option>
             @foreach ($salesList as $sales)
@@ -65,6 +65,10 @@
         <td>{{ $row->sales_name }}</td> {{-- ชื่อ-สกุลจากบัญชี --}}
         <td>{{ $row->status }}</td>
         <td>{{ $row->updated_at }}</td>
+        <td class="text-nowrap">
+            @include('approvals.partials.actions_sale', ['row' => $row])
+        </td>
+
         </form>
              {{-- เชื่อมไฟล์ partials --}}
         

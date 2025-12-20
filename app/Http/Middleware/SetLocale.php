@@ -12,12 +12,6 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next)
     {
-        // รองรับ 3 แหล่ง: URL (?lang=en) > session > cookie
-       $lang = $request->query('lang')
-            ?? ($request->hasSession() ? $request->session()->get('lang') : null)
-            ?? $request->cookie('lang')
-            ?? 'th';
-
 
          $locale = Session::get('locale', 'th'); // default ภาษาไทย
         App::setLocale($locale);
@@ -31,6 +25,12 @@ class SetLocale
 
         app()->setLocale($lang);
 
+        // รองรับ 3 แหล่ง: URL (?lang=en) > session > cookie
+       $lang = $request->query('lang')
+            ?? ($request->hasSession() ? $request->session()->get('lang') : null)
+            ?? $request->cookie('lang')
+            ?? 'th';
+            
         // ถ้ามีส่งมาจาก URL ให้ “บันทึกลง session” อัตโนมัติ
         if ($request->has('lang')) {
             $request->session()->put('lang', $lang);
