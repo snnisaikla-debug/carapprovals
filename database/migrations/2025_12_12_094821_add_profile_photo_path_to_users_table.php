@@ -14,9 +14,9 @@ return new class extends Migration
         $table->string('profile_photo_path')->nullable()->after('email');
     });
 }
-public function down(): void {
-    Schema::table('users', function (Blueprint $table) {
-        $table->dropColumn('profile_photo_path');
-    });
-}
+    public function down(): void {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('profile_photo_path');
+        });
+    }
 };

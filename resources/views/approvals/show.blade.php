@@ -3,6 +3,7 @@
 @section('title', 'ประวัติใบอนุมัติ')
 
 @section('content')
+
     <h4>ประวัติใบอนุมัติ Group {{ $current->group_id }}</h4>
 
     <a href="{{ route('approvals.index') }}" class="btn btn-secondary mb-3">ย้อนกลับ</a>
@@ -17,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($versions as $v)
+            @foreach ($approvals as $v)
                 <tr @if($v->id == $current->id) class="table-info" @endif>
                     <td>{{ $v->version }}</td>
                     <td>{{ $v->status }}</td>
@@ -33,7 +34,6 @@
             <h5>ข้อมูลเวอร์ชันล่าสุด (v{{ $current->version }})</h5>
             <p>รุ่นรถ: {{ $current->car_model }}</p>
             <p>ราคา: {{ $current->car_price }}</p>
-            <p>ลูกค้า: {{ $current->customer_name }}</p>
             <p>หมายเหตุ: {{ $current->remark }}</p>
             <p>สถานะปัจจุบัน: <strong>{{ $current->status }}</strong></p>
         </div>
@@ -72,8 +72,9 @@
     color: #fff;
 }
 </style>
-@endsection
-      <a href="{{ route('approvals.pdf', $approval->id) }}"
-   class="btn btn-danger">
+    <a href="{{ route('approvals.pdf', $current->id) }}"
+        class="fab-download text-decoration-none">
     Export PDF
-</a>
+    </a>
+@endsection
+

@@ -48,7 +48,6 @@
                 <th>#</th>
                 <th>GroupID</th>
                 <th>รุ่นรถ</th>
-                <th>ชื่อลูกค้า</th>
                 <th>ชื่อผู้ส่งคำขอ</th>
                 <th>สถานะ</th>
                 <th>อัปเดตล่าสุด</th>
@@ -61,13 +60,9 @@
         <td>{{ $loop->iteration }}</td>
         <td>{{ $row->group_id }}</td>
         <td>{{ $row->car_model }}</td>
-        <td>{{ $row->customer_name }}</td>
         <td>{{ $row->sales_name }}</td> {{-- ชื่อ-สกุลจากบัญชี --}}
         <td>{{ $row->status }}</td>
         <td>{{ $row->updated_at }}</td>
-        <td class="text-nowrap">
-            @include('approvals.partials.actions_sale', ['row' => $row])
-        </td>
 
         </form>
              {{-- เชื่อมไฟล์ partials --}}

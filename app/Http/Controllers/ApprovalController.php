@@ -168,16 +168,15 @@ class ApprovalController extends Controller
 
     // ดูประวัติทั้ง group + ปุ่มอนุมัติ
     public function showGroup($groupId)
-    {
-        $versions = Approval::where('group_id', $groupId)
-            ->orderBy('version')
-            ->get();
+{
+    $approvals = Approval::where('group_id', $groupId)
+        ->orderBy('version', 'asc')
+        ->get();
 
-        $approval = $versions->last(); // ✅ ใช้ชื่อนี้
+    $current = $approvals->first(); // ตัวแทน group
 
-        return view('approvals.show', compact('versions', 'approval'));
-    }
-
+    return view('approvals.show', compact('approvals', 'current'));
+}
 
     // Admin อนุมัติ / ไม่อนุมัติ
     public function adminAction(Request $request, $groupId)
