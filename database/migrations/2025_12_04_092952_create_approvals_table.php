@@ -6,36 +6,29 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-    {
-        Schema::create('approvals', function (Blueprint $table) {
+            {
+            Schema::create('approvals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('group_id');    // กลุ่มเอกสารชุดเดียวกัน
-            $table->unsignedInteger('version');        // เวอร์ชันที่เท่าไร
-            $table->enum('status', [
-                'WAIT_ADMIN',      // รอ Admin
-                'WAIT_HEAD',       // ผ่าน Admin รอหัวหน้า
-                'APPROVED',        // ผ่านทุกขั้นตอน
-                'REJECTED_ADMIN',  // Admin ไม่อนุมัติ
-                'REJECTED_HEAD',   // หัวหน้าไม่อนุมัติ
-            ])->default('WAIT_ADMIN');
 
-            $table->string('car_model');
-            $table->decimal('car_price', 10, 2);
-            $table->string('customer_name')->nullable();
-            $table->text('remark')->nullable();
+            $table->string('group_id');
+            $table->integer('version')->default(1);
 
-            $table->string('created_by')->nullable();  // ใครเป็นคนสร้างเวอร์ชันนี้
+            $table->unsignedBigInteger('sales_user_id')->nullable();
+            $table->string('sales_name')->nullable();
+
+            $table->decimal('down_percent', 5, 2)->nullable();
+            $table->decimal('down_amount', 10, 2)->nullable();
+            $table->decimal('finance_amount', 10, 2)->nullable();
+
+            $table->string('sc_signature')->nullable();
+            $table->string('sale_com_signature')->nullable();
+
             $table->timestamps();
         });
+
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('approvals');
