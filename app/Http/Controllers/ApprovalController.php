@@ -21,6 +21,10 @@ class ApprovalController extends Controller
     }
 
     $salesFilter = $request->input('sales');
+    $statusFilter = $request->input('status');
+    $statusList = Approval::select('status')->distinct()->orderBy('status')->pluck('status');
+    
+    return view('approvals.index', compact('approvals', 'salesList', 'statusList'));
 
     $query = Approval::select('approvals.*')
         ->join(DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
@@ -30,9 +34,11 @@ class ApprovalController extends Controller
             });
 
     if (!empty($salesFilter)) {
-        $query->where('sales_name', $salesFilter);
+        $query->where('approvals.sales_name', $salesFilter);
     }
-
+    if (!empty($statusFilter)) {                 // ✅ เพิ่ม
+        $query->where('approvals.status', $statusFilter);
+    }
     if ($sort === 'oldest') {
         $query->orderBy('approvals.updated_at', 'ASC');
     } else {

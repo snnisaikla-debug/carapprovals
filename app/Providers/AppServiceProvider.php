@@ -20,10 +20,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
         {
             //
-        }
-        
-        /** ลงทะเบียน policy */
-    protected $policies = [
-        \App\Models\Approval::class => \App\Policies\ApprovalPolicy::class,
-        ];
+        }        
 }

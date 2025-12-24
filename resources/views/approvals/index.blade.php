@@ -10,19 +10,6 @@
 
     <div class="d-flex align-items-center gap-3">
     
-    {{-- Dropdown เลือก Sales --}}
-    <form action="{{ route('approvals.index') }}" method="GET" class="d-flex align-items-center">
-        <label class="me-2">เลือกดู</label> 
-        <select name="sales" class="form-select form-select-sm me-2" onchange="this.form.submit()">
-            <option value="">-- ทั้งหมด --</option>
-            @foreach ($salesList as $sales)
-                <option value="{{ $sales }}"
-                        {{ request('sales') == $sales ? 'selected' : '' }}>
-                    {{ $sales }}
-                </option>
-            @endforeach
-        </select>
-    </form>
 @php
     $currentSort = request('sort', 'newest');
     $nextSort = $currentSort === 'newest' ? 'oldest' : 'newest';
@@ -32,11 +19,11 @@
           <div>
             เรียงวันที่:
                 <a href="{{ route('approvals.index', [
-                    'sort' => $nextSort,
-                    'sales' => request('sales')
-                    ]) }}"
-                    class="btn btn-sm btn-secondary">
-                {{ $currentSort === 'newest' ? 'เก่าสุด' : 'ล่าสุด' }}
+                    'sort' => request('sort') === 'newest' ? 'oldest' : 'newest',  // ถ้าอยากให้ปุ่มเดียวสลับ
+                    'sales' => request('sales'),
+                    'status' => request('status'),
+                ]) }}" class="btn btn-sm btn-outline-primary">
+                    เรียงวันที่: {{ request('sort','newest') === 'newest' ? 'ล่าสุด' : 'เก่าสุด' }}
                 </a>
             </div>
         </div>

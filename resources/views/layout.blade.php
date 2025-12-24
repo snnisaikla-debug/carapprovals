@@ -36,6 +36,39 @@
         <img src="{{ asset('images/en.png') }}" width="24" alt="EN">
     </a>
 
+    @if(request()->routeIs('approvals.index'))
+    <form action="{{ route('approvals.index') }}" method="GET" class="d-flex align-items-center gap-2">
+
+        {{-- ✅ คง sort ไว้ (ไม่ให้หายเวลาเปลี่ยน filter) --}}
+        <input type="hidden" name="sort" value="{{ request('sort', 'newest') }}">
+
+        {{-- Sales --}}
+        <label class="text-white mb-0">Sales:</label>
+        <select name="sales" class="form-select form-select-sm" style="width:160px"
+                onchange="this.form.submit()">
+            <option value="">ทั้งหมด</option>
+            @foreach($salesList as $sales)
+                <option value="{{ $sales }}" {{ request('sales') == $sales ? 'selected' : '' }}>
+                    {{ $sales }}
+                </option>
+            @endforeach
+        </select>
+
+        {{-- ✅ สถานะ --}}
+        <label class="text-white mb-0">สถานะ:</label>
+        <select name="status" class="form-select form-select-sm" style="width:180px"
+                onchange="this.form.submit()">
+            <option value="">ทั้งหมด</option>
+            @foreach($statusList as $st)
+                <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>
+                    {{ $st }}
+                </option>
+            @endforeach
+        </select>
+
+    </form>
+@endif
+
     {{-- dropdown โปรไฟล์ --}}
     <div class="dropdown">
         <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
