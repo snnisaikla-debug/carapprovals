@@ -37,6 +37,7 @@ return new class extends Migration
         $table->integer('version')->default(1);
         $table->integer('group_id')->nullable(); // สำหรับทำ Versioning
         
+        $table->string('sales_name')->nullable();
         $table->timestamps();
     });
 }
