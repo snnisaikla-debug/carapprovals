@@ -54,6 +54,7 @@ class Approval extends Model
     'sale_com_signature',
     'sales_name',
     ];
+
 public function salesUser() {
     return $this->belongsTo(User::class, 'sales_user_id');
     }
