@@ -29,7 +29,7 @@
         class="form-select form-select-sm" 
         style="width:160px" 
         onchange="this.form.submit()">
-            <option value="">ทั้งหมด</option>
+            <option value="">-- ทั้งหมด --</option>
             @foreach ($salesList as $sales)
                 <option value="{{ $sales }}" {{ request('sales') == $sales ? 'selected' : '' }}>
                     {{ $sales }}
