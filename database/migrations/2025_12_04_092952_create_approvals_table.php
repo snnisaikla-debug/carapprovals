@@ -37,7 +37,13 @@ return new class extends Migration
         $table->integer('version')->default(1);
         $table->integer('group_id')->nullable(); // สำหรับทำ Versioning
         
+        // ส่วนของ Sales
         $table->string('sales_name')->nullable();
+        $table->decimal('sale_type_amount', 15, 2)->nullable();
+        $table->decimal('plus_head', 15, 2)->nullable(); // จาก Body ที่ส่งมา
+        $table->string('chassis')->nullable();
+        $table->string('stock_number')->nullable();
+        
         $table->timestamps();
     });
 }

@@ -10,30 +10,52 @@ class Approval extends Model
     use HasFactory;
 
     protected $fillable = [
+        // customer
         'customer_name', 
         'customer_district', 
         'customer_province', 
         'customer_phone',
+
+        // car
         'car_model', 
         'car_color', 
         'car_options', 
         'car_price',
-        'fn', 'down_percent', 
+
+        // finance
+        'fn', 
+        'down_percent', 
         'down_amount', 
         'finance_amount',
         'installment_per_month', 
         'installment_months', 
         'interest_rate',
-        'sale_type_amount', 
+
+        // ของแถมและสถานะ
+        'free_items',
+        'free_items_over', 
+        'extra_purchase_items',
+        'is_commercial_30000', 
+        'group_id',
+        'version', 
+        'status', 
+
+        // ส่วนของ Sales
+        'sales_name',
+        'sale_type_amount',
+        'plus_head',
+        'chassis',
+        'stock_number',
+        'com_fn_option', 
+        'com_fn_amount',
+        'sc_signature',
+        'sale_com_signature', 
+        
+        // campaign
         'fleet_amount', 
         'insurance_deduct', 
         'insurance_used',
         'kickback_amount', 
-        'com_fn_option', 
-        'com_fn_amount',
-        'free_items', 
-        'free_items_over', 
-        'extra_purchase_items',
         'campaigns_available', 
         'campaigns_used', 
         'decoration_amount',
@@ -42,13 +64,7 @@ class Approval extends Model
         'over_decoration_amount',
         'over_decoration_status', 
         'over_reason', 
-        'sc_signature',
-        'sale_com_signature', 
-        'is_commercial_30000', 
-        'group_id',
-        'version', 
-        'status', 
+        
         'created_by', 
-        'sales_name'
     ];
 }
