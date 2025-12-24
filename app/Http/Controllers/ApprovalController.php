@@ -90,7 +90,7 @@ class ApprovalController extends Controller
             'car_price'         => 'required|numeric',
 
             // 3–12 การเงิน
-            'plus_menager'             => 'nullable|numeric',
+            'plus_head'             => 'nullable|numeric',
             'fn'                    => 'nullable|string',
             'down_percent'          => 'nullable|numeric',
             'down_amount'           => 'nullable|numeric',
