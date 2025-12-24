@@ -32,8 +32,8 @@ class ApprovalService
     {
         $latest = $this->latest($groupId);
 
-        if ($actor->role === 'admin') $latest->status = 'WAIT_HEAD';
-        if ($actor->role === 'head')  $latest->status = 'APPROVED';
+        if ($actor->role === 'admin') $latest->status = 'WAIT_MENAGER';
+        if ($actor->role === 'menager')  $latest->status = 'APPROVED';
 
         $latest->save();
         return $latest;
@@ -44,7 +44,7 @@ class ApprovalService
         $latest = $this->latest($groupId);
 
         if ($actor->role === 'admin') $latest->status = 'REJECTED_ADMIN';
-        if ($actor->role === 'head')  $latest->status = 'REJECTED_HEAD';
+        if ($actor->role === 'menager')  $latest->status = 'REJECTED_MENAGER';
 
         $latest->save();
         return $latest;

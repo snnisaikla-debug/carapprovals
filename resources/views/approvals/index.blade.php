@@ -3,68 +3,160 @@
 @section('title', 'รายการใบอนุมัติ')
 
 @section('content')
-    <div class="d-flex justify-content-between mb-3">
-        <a href="{{ route('approvals.create') }}" class="btn btn-success">
-            + สร้างใบอนุมัติใหม่
-        </a>
 
-    <div class="d-flex align-items-center gap-3">
-    
 @php
-    $currentSort = request('sort', 'newest');
-    $nextSort = $currentSort === 'newest' ? 'oldest' : 'newest';
+    // แยก Draft ออกเป็นอีกตาราง (ใช้ชุดเดียวกับ approvals ที่โชว์ใน index)
+    $draftApprovals = $approvals->where('status', 'Draft');
+    $mainApprovals  = $approvals->where('status', '!=', 'Draft');
 @endphp
 
-    {{-- ปุ่มเรียงวันที่ --}}
-          <div>
-            เรียงวันที่:
-                <a href="{{ route('approvals.index', [
-                    'sort' => request('sort') === 'newest' ? 'oldest' : 'newest',  // ถ้าอยากให้ปุ่มเดียวสลับ
-                    'sales' => request('sales'),
-                    'status' => request('status'),
-                ]) }}" class="btn btn-sm btn-outline-primary">
-                    เรียงวันที่: {{ request('sort','newest') === 'newest' ? 'ล่าสุด' : 'เก่าสุด' }}
-                </a>
-            </div>
-        </div>
+{{-- แถว 1: ปุ่มสร้าง (ชิดซ้ายบนสุด) --}}
+<div class="d-flex justify-content-start mb-3">
+    <a href="{{ route('approvals.create') }}" class="btn btn-success">
+        + สร้างใบอนุมัติใหม่
+    </a>
+</div>
+
+{{-- แถว 2: ตัวกรอง + เรียงวันที่ --}}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+    <form action="{{ route('approvals.index') }}" 
+        method="GET" 
+        class="d-flex align-items-center gap-2 flex-wrap">
+       
+        {{-- Sales --}}
+        <select name="sales" 
+        class="form-select form-select-sm" 
+        style="width:160px" 
+        onchange="this.form.submit()">
+            <option value="">ทั้งหมด</option>
+            @foreach ($salesList as $sales)
+                <option value="{{ $sales }}" {{ request('sales') == $sales ? 'selected' : '' }}>
+                    {{ $sales }}
+                </option>
+            @endforeach
+        </select>
+
+        {{-- Status --}}
+        <select name="status" class="form-select form-select-sm" style="width:180px" onchange="this.form.submit()">
+            <option value="">-- ทุกสถานะ --</option>
+            @foreach ($statusList as $st)
+                <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>
+                    {{ $st }}
+                </option>
+            @endforeach
+        </select>
+
+        {{-- เก็บ sort เดิมไว้ตอนเปลี่ยน filter --}}
+        <input type="hidden" name="sort" value="{{ request('sort','newest') }}">
+    </form>
+
+    {{-- เรียงวันที่ (แยกไว้ขวา) --}}
+    <div class="d-flex align-items-center gap-2">
+        <span class="small text-muted"></span>
+
+        @php
+            $currentSort = request('sort','newest');
+            $toggleSort = $currentSort === 'newest' ? 'oldest' : 'newest';
+            $toggleText = $currentSort === 'newest' ? 'เรียงวันที่: ล่าสุด' : 'เรียงวันที่: เก่าสุด';
+        @endphp
+
+        <a href="{{ route('approvals.index', [
+                'sort' => $toggleSort,
+                'sales' => request('sales'),
+                'status' => request('status'),
+            ]) }}"
+           class="btn btn-sm btn-outline-primary">
+            {{ $toggleText }}
+        </a>
     </div>
 
-    <table class="table table-bordered table-sm">
+</div>
+
+{{-- แถว 3: ตารางหลัก (ไม่รวม Draft) --}}
+<div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle">
         <thead class="text-center">
             <tr>
-                <th>#</th>
-                <th>GroupID</th>
+                <th style="width:40px">#</th>
+                <th style="width:90px">GroupID</th>
                 <th>รุ่นรถ</th>
                 <th>ชื่อผู้ส่งคำขอ</th>
-                <th>สถานะ</th>
-                <th>อัปเดตล่าสุด</th>
-                <th></th> {{-- เปลี่ยนหัวคอลัมน์ --}}
+                <th style="width:160px">สถานะ</th>
+                <th style="width:170px">อัปเดตล่าสุด</th>
+                <th style="width:260px"></th>
             </tr>
-            </thead>
-<tbody>
-    @foreach($approvals as $row)
-    <tr>
-        <td>{{ $loop->iteration }}</td>
-        <td>{{ $row->group_id }}</td>
-        <td>{{ $row->car_model }}</td>
-        <td>{{ $row->sales_name }}</td> {{-- ชื่อ-สกุลจากบัญชี --}}
-        <td>{{ $row->status }}</td>
-        <td>{{ $row->updated_at }}</td>
+        </thead>
+        <tbody>
+        @forelse($mainApprovals as $row)
+            <tr>
+                <td class="text-center">{{ $loop->iteration }}</td>
+                <td class="text-center">{{ $row->group_id }}</td>
+                <td>{{ $row->car_model }}</td>
+                <td>{{ $row->sales_name }}</td>
+                <td class="text-center">{{ $row->status }}</td>
+                <td class="text-center">{{ $row->updated_at }}</td>
 
-        </form>
-             {{-- เชื่อมไฟล์ partials --}}
-        
-        <td class="text-nowrap">
-            @if(auth()->user()->role === 'sale')
-                @include('approvals.partials.actions_sale', ['row' => $row])
-            @elseif(auth()->user()->role === 'admin')
-                @include('approvals.partials.actions_admin', ['row' => $row])
-            @elseif(auth()->user()->role === 'head')
-                @include('approvals.partials.actions_head', ['row' => $row])
-            @endif
-        </td>
+                <td class="text-nowrap text-center">
+                    @if(auth()->user()->role === 'sale')
+                        @include('approvals.partials.actions_sale', ['row' => $row])
+                    @elseif(auth()->user()->role === 'admin')
+                        @include('approvals.partials.actions_admin', ['row' => $row])
+                    @else
+                        @include('approvals.partials.actions_head', ['row' => $row])
+                    @endif
+                </td>
             </tr>
-    @endforeach
-</tbody>
+        @empty
+            <tr><td colspan="7" class="text-center text-muted">ไม่มีรายการ</td></tr>
+        @endforelse
+        </tbody>
     </table>
+</div>
+
+{{-- ตาราง Draft แยกด้านล่าง --}}
+@if($draftApprovals->count())
+    <hr class="my-4">
+
+    <h6 class="fw-bold mb-2">งานสถานะ Draft</h6>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle">
+            <thead class="text-center">
+                <tr>
+                    <th style="width:40px">#</th>
+                    <th style="width:90px">GroupID</th>
+                    <th>รุ่นรถ</th>
+                    <th>ชื่อผู้ส่งคำขอ</th>
+                    <th style="width:160px">สถานะ</th>
+                    <th style="width:170px">อัปเดตล่าสุด</th>
+                    <th style="width:260px"></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach($draftApprovals as $row)
+                <tr>
+                    <td class="text-center">{{ $loop->iteration }}</td>
+                    <td class="text-center">{{ $row->group_id }}</td>
+                    <td>{{ $row->car_model }}</td>
+                    <td>{{ $row->sales_name }}</td>
+                    <td class="text-center">{{ $row->status }}</td>
+                    <td class="text-center">{{ $row->updated_at }}</td>
+
+                    <td class="text-nowrap text-center">
+                        @if(auth()->user()->role === 'sale')
+                            @include('approvals.partials.actions_sale', ['row' => $row])
+                        @elseif(auth()->user()->role === 'admin')
+                            @include('approvals.partials.actions_admin', ['row' => $row])
+                        @else
+                            @include('approvals.partials.actions_head', ['row' => $row])
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
+@endif
+
 @endsection

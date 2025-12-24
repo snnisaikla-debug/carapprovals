@@ -21,7 +21,7 @@ class Approval extends Model
     'customer_phone',
     'car_color',
     'car_options',
-    'plus_head',
+    'plus_menager',
     'fn',
     'down_percent',
     'down_amount',

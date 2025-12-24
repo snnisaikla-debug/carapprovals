@@ -26,7 +26,7 @@
                             <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;">
                                 <option value="sale"  @selected($u->role === 'sale')>sale</option>
                                 <option value="admin" @selected($u->role === 'admin')>admin</option>
-                                <option value="head"  @selected($u->role === 'head')>head</option>
+                                <option value="menager"  @selected($u->role === 'menager')>menager</option>
                             </select>
                             <button class="btn btn-sm btn-primary">บันทึก</button>
                         </form>

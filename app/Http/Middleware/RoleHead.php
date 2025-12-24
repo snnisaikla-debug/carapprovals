@@ -5,11 +5,11 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 
-class RoleHead
+class RoleMenager
 {
     public function handle($request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->role !== 'HEAD') {
+        if (!Auth::check() || Auth::user()->role !== 'MENAGER') {
             abort(403, 'คุณไม่มีสิทธิ์เข้าถึงส่วนนี้');
         }
 

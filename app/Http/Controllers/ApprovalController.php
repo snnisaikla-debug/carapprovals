@@ -15,46 +15,57 @@ class ApprovalController extends Controller
     // แสดงรายการใบล่าสุดของแต่ละ group
     public function index(Request $request)
 {
-    $sort = $request->input('sort', 'newest'); // default = ล่าสุดก่อน
-    if ($sort === 'date') {
-        $sort = 'newest'; // รองรับของเดิมที่ใช้ ?sort=date
-    }
-
-    $salesFilter = $request->input('sales');
+    $sort = $request->input('sort', 'newest');
+    $salesFilter  = $request->input('sales');
     $statusFilter = $request->input('status');
-    $statusList = Approval::select('status')->distinct()->orderBy('status')->pluck('status');
-    
-    return view('approvals.index', compact('approvals', 'salesList', 'statusList'));
 
+    // 1️⃣ query เวอร์ชันล่าสุดของแต่ละ group
     $query = Approval::select('approvals.*')
-        ->join(DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
-            function ($join) {
-                $join->on('approvals.group_id', '=', 'latest.group_id');
-                $join->on('approvals.version', '=', 'latest.max_version');
-            });
+        ->join(DB::raw('(
+            SELECT group_id, MAX(version) as max_version
+            FROM approvals
+            GROUP BY group_id
+        ) latest'), function ($join) {
+            $join->on('approvals.group_id', '=', 'latest.group_id');
+            $join->on('approvals.version', '=', 'latest.max_version');
+        });
 
+    // 2️⃣ filter sales
     if (!empty($salesFilter)) {
         $query->where('approvals.sales_name', $salesFilter);
     }
-    if (!empty($statusFilter)) {                 // ✅ เพิ่ม
+
+    // 3️⃣ filter status
+    if (!empty($statusFilter)) {
         $query->where('approvals.status', $statusFilter);
     }
+
+    // 4️⃣ sort วันที่
     if ($sort === 'oldest') {
         $query->orderBy('approvals.updated_at', 'ASC');
     } else {
         $query->orderBy('approvals.updated_at', 'DESC');
     }
 
+    // 5️⃣ execute
+    $approvals = $query->get();
+
+    // 6️⃣ dropdown lists
     $salesList = Approval::select('sales_name')
         ->distinct()
         ->orderBy('sales_name')
         ->pluck('sales_name');
 
-    return view('approvals.index', [
-        'approvals' => $query->get(),
-        'sort'      => $sort,
-        'salesList' => $salesList,
-    ]);
+    $statusList = Approval::select('status')
+        ->distinct()
+        ->orderBy('status')
+        ->pluck('status');
+
+    return view('approvals.index', compact(
+        'approvals',
+        'salesList',
+        'statusList'
+    ));
 }
 
     // ฟอร์มสร้างใบอนุมัติ (Sales)
@@ -79,7 +90,7 @@ class ApprovalController extends Controller
             'car_price'         => 'required|numeric',
 
             // 3–12 การเงิน
-            'plus_head'             => 'nullable|numeric',
+            'plus_menager'             => 'nullable|numeric',
             'fn'                    => 'nullable|string',
             'down_percent'          => 'nullable|numeric',
             'down_amount'           => 'nullable|numeric',
@@ -168,21 +179,85 @@ class ApprovalController extends Controller
         // ให้ group_id == id แรกของตัวเอง
         $approval->group_id = $approval->id;
         $approval->save();
-
+        $approval->status = 'Draft';
+       
         return redirect()->route('approvals.index');
     }
+    
+    // Submit
+    public function submit($groupId)
+    {
+        $user = auth()->user();
 
-    // ดูประวัติทั้ง group + ปุ่มอนุมัติ
-    public function showGroup($groupId)
+        // ดึงเวอร์ชันล่าสุดของ group นี้
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+        // อนุญาตเฉพาะ sale เจ้าของใบ (ปรับได้ตาม policy)
+        // abort_unless($user->role === 'sale' && $latest->sales_user_id === $user->id, 403);
+
+        $latest->status = 'Pending_Admin';
+        $latest->save();
+
+        return back()->with('status', 'ส่งคำขอไปที่ Admin แล้ว');
+    }
+
+    // Approve Admin
+    public function approveAdmin($groupId)
+    {
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+        $latest->status = 'Pending_Menager';
+        $latest->save();
+
+        return back()->with('status', 'Admin อนุมัติแล้ว ส่งต่อ Menager');
+    }
+
+    // Approve Menager
+    public function approveMenager($groupId)
+    {
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+        $latest->status = 'Approved';
+        $latest->save();
+
+        return back()->with('status', 'Menager อนุมัติเรียบร้อย');
+    }
+    
+    // Reject
+    public function reject(Request $request, $groupId)
+    {
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+        $latest->status = 'Reject';
+        $latest->save();
+
+        return back()->with('status', 'ปฏิเสธเรียบร้อย');
+    }
+
+    // New version หลัง Reject 
+    public function createNewVersion($groupId)
 {
-    $approvals = Approval::where('group_id', $groupId)
-        ->orderBy('version', 'asc')
-        ->get();
+    $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
-    $current = $approvals->first(); // ตัวแทน group
+    $new = $latest->replicate();     // copy ทุก field
+    $new->version = $latest->version + 1;
+    $new->status = 'Draft';
+    $new->save();
 
-    return view('approvals.show', compact('approvals', 'current'));
+    return redirect()->route('approvals.edit', [$groupId, $new->version]);
 }
+
+        // ดูประวัติทั้ง group + ปุ่มอนุมัติ
+    public function showGroup($groupId)
+    {
+        $approvals = Approval::where('group_id', $groupId)
+            ->orderBy('version', 'asc')
+            ->get();
+
+        $current = $approvals->first(); // ตัวแทน group
+
+        return view('approvals.show', compact('approvals', 'current'));
+    }
 
     // Admin อนุมัติ / ไม่อนุมัติ
     public function adminAction(Request $request, $groupId)
@@ -194,7 +269,7 @@ class ApprovalController extends Controller
             ->first();
 
         $newVersion = $current->version + 1;
-        $newStatus = $action === 'approve' ? 'WAIT_HEAD' : 'REJECTED_ADMIN';
+        $newStatus = $action === 'approve' ? 'WAIT_MENAGER' : 'REJECTED_ADMIN';
 
         Approval::create([
             'group_id'      => $groupId,
@@ -211,7 +286,7 @@ class ApprovalController extends Controller
     }
 
     // หัวหน้า อนุมัติ / ไม่อนุมัติ
-    public function headAction(Request $request, $groupId)
+    public function menagerAction(Request $request, $groupId)
     {
         $action = $request->input('action'); // approve / reject
 
@@ -220,7 +295,7 @@ class ApprovalController extends Controller
             ->first();
 
         $newVersion = $current->version + 1;
-        $newStatus = $action === 'approve' ? 'APPROVED' : 'REJECTED_HEAD';
+        $newStatus = $action === 'approve' ? 'APPROVED' : 'REJECTED_MENAGER';
 
         Approval::create([
             'group_id'      => $groupId,
@@ -230,7 +305,7 @@ class ApprovalController extends Controller
             'car_price'     => $current->car_price,
             'customer_name' => $current->customer_name,
             'remark'        => $current->remark,
-            'created_by'    => 'HEAD',
+            'created_by'    => 'MENAGER',
         ]);
 
         return redirect()->route('approvals.show', $groupId);
@@ -292,7 +367,7 @@ class ApprovalController extends Controller
             $new->status = 'WAIT_ADMIN';
 
             // ใครเป็นคนสร้างเวอร์ชันนี้
-            $new->created_by = strtoupper(Auth::user()->role); // SALE/ADMIN/HEAD
+            $new->created_by = strtoupper(Auth::user()->role); // SALE/ADMIN/MENAGER
 
             // ✅ ต้องเก็บชื่อ sales ในทุกเวอร์ชัน (ถ้ามี field นี้)
             $new->sales_name = $latest->sales_name ?? Auth::user()->name;
@@ -308,8 +383,8 @@ class ApprovalController extends Controller
             $new->car_options = $data['car_options'] ?? null;
             $new->car_price = $data['car_price'];
 
-            // ✅ ถ้ามีฟิลด์อื่น ๆ ก็ใส่ต่อ (plus_head, fn, down_percent, …)
-            // $new->plus_head = $request->input('plus_head');
+            // ✅ ถ้ามีฟิลด์อื่น ๆ ก็ใส่ต่อ (plus_MENAGER, fn, down_percent, …)
+            // $new->plus_menager = $request->input('plus_menager');
             // ...
 
             $new->save();

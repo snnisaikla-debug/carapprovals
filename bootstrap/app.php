@@ -15,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // ✅ ใส่ใน group web เท่านั้น (มี session แน่นอน)
         $middleware->appendToGroup('web', SetLocale::class);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+   ->withExceptions(function (Exceptions $exceptions): void {
     //
-    })
+})
 ->create();
+

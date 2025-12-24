@@ -8,33 +8,45 @@ use App\Http\Controllers\AccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
-/*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | Public Routes
+    |--------------------------------------------------------------------------
+    */
 
-// หน้าแรก
-Route::get('/', fn () => redirect()->route('login'));
+    // หน้าแรก
+    Route::get('/', fn () => redirect()->route('login'));
 
-// Auth
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+    // Auth
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 
-// Reset password
-Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->name('password.request');
-Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
+    // Reset password
+    Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->name('password.request');
+    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 
-/*
-|--------------------------------------------------------------------------
-| Protected Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware('auth')->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Protected Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    /*
+    |--------------------------------------------------------------------------
+    | จัดหน้า หน้าแรก sale/admin/menager
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/lang/toggle', function () {
+        $current = session('lang', config('app.locale', 'th'));
+        $next = $current === 'th' ? 'en' : 'th';
+        session(['lang' => $next]);
+        return back();
+    })->name('lang.toggle');
 
     /*
     |--------------------------------------------------------------------------
@@ -63,6 +75,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])
         ->name('approvals.pdf');
 
+    // ✅ Submit
+    Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
+    ->name('approvals.submit');
+
+    // ✅ Menager Approve” → Approved (จบ)
+    Route::post('/approvals/{groupId}/approve-menager', [ApprovalController::class, 'approveMenager'])
+    ->name('approvals.approveMenager');
+
+    // ✅ Reject (Admin หรือ Menager กด Reject)
+    Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
+    ->name('approvals.reject');
+
     /*
     |--------------------------------------------------------------------------
     | Account
@@ -79,36 +103,36 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
 });
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN
-|--------------------------------------------------------------------------
-*/
-Route::middleware('admin')->group(function () {
-    Route::post('/admin/approvals/{groupId}', [ApprovalController::class, 'adminAction'])
-        ->name('approvals.adminAction');
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('admin')->group(function () {
+        Route::post('/admin/approvals/{groupId}', [ApprovalController::class, 'adminAction'])
+            ->name('approvals.adminAction');
 
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
 
-/*
-|--------------------------------------------------------------------------
-| HEAD
-|--------------------------------------------------------------------------
-*/
-Route::middleware('head')->group(function () {
-    Route::post('/head/approvals/{groupId}', [ApprovalController::class, 'headAction'])
-        ->name('approvals.headAction');
+    /*
+    |--------------------------------------------------------------------------
+    | MENAGER
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('menager')->group(function () {
+        Route::post('/menager/approvals/{groupId}', [ApprovalController::class, 'menagerAction'])
+            ->name('approvals.menagerAction');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Language
-|--------------------------------------------------------------------------
-*/
-Route::get('/lang/{lang}', function (Request $request, string $lang) {
-    if (!in_array($lang, ['th', 'en'])) abort(400);
-    $request->session()->put('lang', $lang);
-    return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30));
-})->name('lang.switch');
+    /*
+    |--------------------------------------------------------------------------
+    | Language
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/lang/{lang}', function (Request $request, string $lang) {
+        if (!in_array($lang, ['th', 'en'])) abort(400);
+        $request->session()->put('lang', $lang);
+        return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30));
+    })->name('lang.switch');

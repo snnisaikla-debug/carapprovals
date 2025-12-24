@@ -21,129 +21,70 @@
         .topbar .logo {
             height: 40px;
         }
+        .topbar{
+        background:#b0120a;
+        padding:8px 0;
+        }
+
+        .bg-pink { background-color: #ec4899 !important; }   /* pink */
+        .bg-orange { background-color: #f97316 !important; } /* orange */
+
     </style>
 </head>
 <body>
 
 <div class="topbar mb-4">
-    <div class="d-flex align-items-center gap-2">
+     <div class="container-fluid d-flex align-items-center px-3">
 
-    {{-- ปุ่มเปลี่ยนภาษา --}}
-    <a href="{{ route('lang.switch', 'th') }}">
-        <img src="{{ asset('images/th.png') }}" width="24" alt="TH">
-    </a>
-    <a href="{{ route('lang.switch', 'en') }}">
-        <img src="{{ asset('images/en.png') }}" width="24" alt="EN">
-    </a>
-
-    @if(request()->routeIs('approvals.index'))
-    <form action="{{ route('approvals.index') }}" method="GET" class="d-flex align-items-center gap-2">
-
-        {{-- ✅ คง sort ไว้ (ไม่ให้หายเวลาเปลี่ยน filter) --}}
-        <input type="hidden" name="sort" value="{{ request('sort', 'newest') }}">
-
-        {{-- Sales --}}
-        <label class="text-white mb-0">Sales:</label>
-        <select name="sales" class="form-select form-select-sm" style="width:160px"
-                onchange="this.form.submit()">
-            <option value="">ทั้งหมด</option>
-            @foreach($salesList as $sales)
-                <option value="{{ $sales }}" {{ request('sales') == $sales ? 'selected' : '' }}>
-                    {{ $sales }}
-                </option>
-            @endforeach
-        </select>
-
-        {{-- ✅ สถานะ --}}
-        <label class="text-white mb-0">สถานะ:</label>
-        <select name="status" class="form-select form-select-sm" style="width:180px"
-                onchange="this.form.submit()">
-            <option value="">ทั้งหมด</option>
-            @foreach($statusList as $st)
-                <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>
-                    {{ $st }}
-                </option>
-            @endforeach
-        </select>
-
-    </form>
-@endif
-
-    {{-- dropdown โปรไฟล์ --}}
-    <div class="dropdown">
-        <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-            {{ auth()->user()->name }}
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-            <li>
-                <a class="dropdown-item" href="{{ route('account.show') }}">
-                    {{ __('messages.my_account') }}
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                </form>
-            </li>
-        </ul>
-    </div>
-
-</div>
-
-    <div class="container-fluid px-0">
+        {{-- โลโก้ + ชื่อระบบ --}}
         <div class="d-flex justify-content-between align-items-center px-3">
             <div class="d-flex align-items-center">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo me-2">
                 <span class="fw-bold">ฟอร์มอนุมัติการขายรถ</span>
             </div>
+        </div>
 
+{{-- ขวา: ปุ่มภาษา (ปุ่มเดียวสลับ) + บัญชีของฉัน --}}
+<div class="d-flex align-items-center gap-2 ms-auto">
+
+        {{-- ปุ่มสลับภาษา (ปุ่มเดียว) --}}
+        <a href="{{ route('lang.toggle') }}"
+            class="btn-sm">
+      
+        @php $lang = session('lang', 'th'); @endphp
+        @if($lang === 'th')
+          <span><img src="{{ asset('images/flags/th.png') }}" 
+          style="width:22px;height:22px;border-radius:50%;"></span>
+        @else
+          <span><img src="{{ asset('images/flags/en.png') }}" 
+          style="width:22px;height:22px;border-radius:50%;"></span>
+        @endif
+        </a>
+
+      {{-- โปรไฟล์ --}}
+        <div class="dropdown">
             @auth
-                 <div class="d-flex align-items-center gap-2">
-                {{-- ธงเปลี่ยนภาษา --}}
-                <a href="{{ route('lang.switch', 'th') }}" class="text-decoration-none" title="ไทย">
-                    <img src="{{ asset('images/flags/th.png') }}" style="width:22px;height:22px;border-radius:50%;">
-                </a>
-                <a href="{{ route('lang.switch', 'en') }}" class="text-decoration-none" title="English">
-                    <img src="{{ asset('images/flags/en.png') }}" style="width:22px;height:22px;border-radius:50%;">
-                </a>
+            <button class="btn btn-light btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown">
+            {{ auth()->user()->name }}
+            </button>
+            @endauth
 
-                {{-- โปรไฟล์ --}}
-                <div class="dropdown">
-                    <button class="btn btn-light btn-sm dropdown-toggle d-flex align-items-center"
-                            type="button" id="profileMenu"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="rounded-circle bg-secondary text-white d-inline-flex justify-content-center align-items-center me-2"
-                            style="width:28px;height:28px;">
-                            {{ mb_substr(auth()->user()->name,0,1) }}
-                        </span>
-                        <span class="me-1">{{ auth()->user()->name }}</span>
-                        <span class="text-muted">({{ strtolower(auth()->user()->role) }})</span>
-                    </button>
-
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('account.show') }}">
-                                บัญชีของฉัน
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button class="dropdown-item text-danger" type="submit">
-                                    ออกจากระบบ
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-
-            </div>
-        @endauth
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ route('account.show') }}">บัญชีของฉัน</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="dropdown-item text-danger">ออกจากระบบ</button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </div>
-</div>
+
+  </div>
+</div>    
 
 <div class="container mb-4">
     @yield('content')
