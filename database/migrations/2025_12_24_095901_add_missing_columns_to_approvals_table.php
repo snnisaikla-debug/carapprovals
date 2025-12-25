@@ -43,6 +43,8 @@ return new class extends Migration
         $table->decimal('fleet_amount', 15, 2)->default(0);
         $table->decimal('plus_head', 15, 2)->default(0);
         $table->decimal('decoration_amount', 15, 2)->default(0);
+        $table->string('sales_name')->nullable();
+        $table->unsignedBigInteger('sales_user_id')->nullable(); // เพิ่มตัวนี้เพื่อให้ Join กับตาราง Users ได้
 
         foreach ($missing as $column => $type) {
             if (!Schema::hasColumn('approvals', $column)) {

@@ -1,6 +1,3 @@
-<div class="alert alert-info">
-    ค่า Role ปัจจุบันของคุณคือ: <strong>{{ Auth::user()->role }}</strong>
-</div>
 @extends('layout')
 
 @section('title', 'รายการใบอนุมัติ')
@@ -28,16 +25,16 @@
         class="d-flex align-items-center gap-2 flex-wrap">
        
         {{-- Sales --}}
-        <select name="sales" 
+        <select name="sales_user_id" 
         class="form-select form-select-sm" 
         style="width:160px" 
         onchange="this.form.submit()">
             <option value="">-- ทั้งหมด --</option>
-            @foreach ($salesList as $sales)
-                <option value="{{ $sales }}" {{ request('sales') == $sales ? 'selected' : '' }}>
-                    {{ $sales }}
-                </option>
-            @endforeach
+        @foreach($salesList as $id => $name)
+            <option value="{{ $id }}" {{ request('sales_user_id') == $id ? 'selected' : '' }}>
+            {{ $name }}
+            </option>
+        @endforeach
         </select>
 
         {{-- Status --}}

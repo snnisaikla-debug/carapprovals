@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Approval;
+use App\Models\User;
 
 class ApprovalController extends Controller
 {
@@ -16,23 +17,26 @@ class ApprovalController extends Controller
     public function index(Request $request)
 {
     $sort = $request->input('sort', 'newest');
-    $salesFilter  = $request->input('sales');
+    $salesFilter  = $request->input('sales_user_id');
     $statusFilter = $request->input('status');
 
     // 1️⃣ query เวอร์ชันล่าสุดของแต่ละ group
-    $query = Approval::select('approvals.*')
-        ->join(DB::raw('(
-            SELECT group_id, MAX(version) as max_version
-            FROM approvals
-            GROUP BY group_id
-        ) latest'), function ($join) {
-            $join->on('approvals.group_id', '=', 'latest.group_id');
-            $join->on('approvals.version', '=', 'latest.max_version');
-        });
+    $query = Approval::select(
+        'approvals.*', 
+        'users.name as sales_name'
+        )
+        ->join(
+            DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
+            function ($join) {
+                $join->on('approvals.group_id', '=','latest.group_id');
+                $join->on('approvals.version', '=','latest.max_version');
+            }
+        )
+        ->leftJoin('users', 'users.id', '=', 'approvals.sales_user_id');
 
     // 2️⃣ filter sales
     if (!empty($salesFilter)) {
-        $query->where('approvals.sales_name', $salesFilter);
+        $query->where('approvals.sales_user_id', $salesFilter);
     }
 
     // 3️⃣ filter status
@@ -50,11 +54,10 @@ class ApprovalController extends Controller
     // 5️⃣ execute
     $approvals = $query->get();
 
-    // 6️⃣ dropdown lists
-    $salesList = Approval::select('sales_name')
-        ->distinct()
-        ->orderBy('sales_name')
-        ->pluck('sales_name');
+    // 6️⃣ dropdown lists sales
+    $salesList = User::where('role', 'sale')
+        ->orderBy('name')
+        ->pluck('name', 'id'); // [id => name]
 
     $statusList = Approval::select('status')
         ->distinct()
@@ -269,7 +272,7 @@ class ApprovalController extends Controller
             ->first();
 
         $newVersion = $current->version + 1;
-        $newStatus = $action === 'approve' ? 'WAIT_MENAGER' : 'REJECTED_ADMIN';
+        $newStatus = $action === 'approve' ? 'Pending_MENAGER' : 'REJECTED_ADMIN';
 
         Approval::create([
             'group_id'      => $groupId,
@@ -364,7 +367,7 @@ class ApprovalController extends Controller
 
             // สถานะเมื่อ “แก้ไขแล้วส่งใหม่”
             // โดย workflow ของเปา: ส่งเข้า admin ใหม่เสมอ
-            $new->status = 'WAIT_ADMIN';
+            $new->status = 'Pending_ADMIN';
 
             // ใครเป็นคนสร้างเวอร์ชันนี้
             $new->created_by = strtoupper(Auth::user()->role); // SALE/ADMIN/MENAGER
@@ -410,7 +413,7 @@ class ApprovalController extends Controller
 
             return redirect()->route('approvals.index')->with('success', 'ลบเอกสารชุดนี้เรียบร้อย');
         }
-        
+
         // ตัวอย่างฟังก์ชันสำหรับ Admin และ Manager ใน Controller
         public function updateStatus(Request $request, $id)
         {
