@@ -64,7 +64,6 @@ class Approval extends Model
         'over_decoration_amount',
         'over_decoration_status', 
         'over_reason', 
-        
         'created_by', 
     ];
 }

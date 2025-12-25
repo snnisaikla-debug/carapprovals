@@ -171,7 +171,7 @@ class ApprovalController extends Controller
         $approval = Approval::create(array_merge($data, [
             'group_id'   => 0,
             'version'    => 1,
-            'status'     => 'WAIT_ADMIN',
+            'status'     => 'Draft',
             'created_by' => $user->role,    // SALE
             'sales_name' => $user->name,    // ชื่อ Sales (ไว้ sort / ดูรายการ)
         ]));
