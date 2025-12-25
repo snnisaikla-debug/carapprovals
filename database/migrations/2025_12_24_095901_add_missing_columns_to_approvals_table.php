@@ -6,17 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-   public function up(): void
+  public function up(): void
 {
     Schema::table('approvals', function (Blueprint $table) {
-        // 1. รวมคอลัมน์ทั้งหมดที่ต้องการเพิ่มไว้ในที่เดียว
         $missingColumns = [
             'sales_user_id'          => 'unsignedBigInteger',
             'sales_name'             => 'string',
+            'customer_district'      => 'string', // ฟิลด์ที่ขาด (อำเภอ)
+            'customer_province'      => 'string', // ฟิลด์ที่ขาด (จังหวัด)
             'car_model'              => 'string',
             'car_color'              => 'string',
             'car_options'            => 'text',
             'plus_head'              => 'decimal',
+            'fn'                     => 'string', // ฟิลด์ที่ขาด (ไฟแนนซ์)
+            'down_percent'           => 'decimal',
+            'down_amount'            => 'decimal',
+            'finance_amount'         => 'decimal',
+            'installment_per_month'  => 'decimal',
+            'installment_months'     => 'integer',
+            'interest_rate'          => 'decimal',
             'fleet_amount'           => 'decimal',
             'sale_type_amount'       => 'decimal',
             'decoration_amount'      => 'decimal',
@@ -29,6 +37,7 @@ return new class extends Migration
             'insurance_deduct'       => 'decimal',
             'insurance_used'         => 'decimal',
             'kickback_amount'        => 'decimal',
+            'free_items'             => 'text',
             'free_items_over'        => 'text',
             'extra_purchase_items'   => 'text',
             'campaigns_available'    => 'text',
@@ -39,13 +48,15 @@ return new class extends Migration
             'sc_signature'           => 'string',
             'sale_com_signature'     => 'string',
             'is_commercial_30000'    => 'boolean',
+            'created_by'             => 'string', // ฟิลด์ที่ใช้เช็ค Role ตอนสร้าง
         ];
 
-        // 2. ใช้ Loop ตรวจสอบและสร้างคอลัมน์ (ป้องกัน Error Duplicate 100%)
         foreach ($missingColumns as $column => $type) {
             if (!Schema::hasColumn('approvals', $column)) {
                 if ($type === 'decimal') {
                     $table->decimal($column, 15, 2)->default(0);
+                } elseif ($type === 'integer') {
+                    $table->integer($column)->default(0);
                 } elseif ($type === 'text') {
                     $table->text($column)->nullable();
                 } elseif ($type === 'boolean') {
