@@ -36,8 +36,13 @@ return new class extends Migration
             'over_reason' => 'text',
             'sc_signature' => 'string',
             'sale_com_signature' => 'string',
-            'is_commercial_30000' => 'boolean',
+            'is_commercial_30000' => 'boolean', 
         ];
+
+        $table->string('sales_name')->nullable();
+        $table->decimal('fleet_amount', 15, 2)->default(0);
+        $table->decimal('plus_head', 15, 2)->default(0);
+        $table->decimal('decoration_amount', 15, 2)->default(0);
 
         foreach ($missing as $column => $type) {
             if (!Schema::hasColumn('approvals', $column)) {

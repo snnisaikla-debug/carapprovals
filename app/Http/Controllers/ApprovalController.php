@@ -410,5 +410,29 @@ class ApprovalController extends Controller
 
             return redirect()->route('approvals.index')->with('success', 'ลบเอกสารชุดนี้เรียบร้อย');
         }
+        
+        // ตัวอย่างฟังก์ชันสำหรับ Admin และ Manager ใน Controller
+        public function updateStatus(Request $request, $id)
+        {
+            $approval = Approval::find($id);
+            $action = $request->action; // รับค่าจากปุ่มที่กด: approve หรือ reject
 
+            if ($approval->status == 'Pending_Admin') {
+                if ($action == 'approve') {
+                    $approval->status = 'Pending_Manager'; // ส่งต่อให้ Manager
+                } elseif ($action == 'reject') {
+                    $approval->status = 'Reject'; // ตีกลับไปที่ Sale
+                }
+            } 
+            elseif ($approval->status == 'Pending_Manager') {
+                if ($action == 'approve') {
+                    $approval->status = 'Approved'; // อนุมัติเสร็จสมบูรณ์
+                } elseif ($action == 'reject') {
+                    $approval->status = 'Reject'; // ตีกลับไปที่ Sale
+                }
+            }
+
+            $approval->save();
+            return back()->with('success', 'ดำเนินการเรียบร้อยแล้ว');
+        }
     }

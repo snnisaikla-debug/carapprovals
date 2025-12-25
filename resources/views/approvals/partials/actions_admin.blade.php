@@ -3,18 +3,10 @@
     รายละเอียด
 </a>
 
-@if($row->status === 'WAIT_ADMIN')
-    <form action="{{ route('approvals.approve', $row->group_id) }}"
-          method="POST"
-          class="d-inline">
+@if($item->status == 'Pending_Admin')
+    <form action="{{ route('approvals.updateStatus', $item->id) }}" method="POST" style="display:inline;">
         @csrf
-        <button class="btn btn-sm btn-success">Approve</button>
-    </form>
-
-    <form action="{{ route('approvals.reject', $row->group_id) }}"
-          method="POST"
-          class="d-inline">
-        @csrf
-        <button class="btn btn-sm btn-danger">Reject</button>
+        <button name="action" value="approve" class="btn btn-primary btn-sm">ส่งให้ Manager</button>
+        <button name="action" value="reject" class="btn btn-danger btn-sm">Reject (ตีกลับ Sale)</button>
     </form>
 @endif

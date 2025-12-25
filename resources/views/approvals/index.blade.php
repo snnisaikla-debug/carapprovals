@@ -1,3 +1,6 @@
+<div class="alert alert-info">
+    ค่า Role ปัจจุบันของคุณคือ: <strong>{{ Auth::user()->role }}</strong>
+</div>
 @extends('layout')
 
 @section('title', 'รายการใบอนุมัติ')
@@ -97,13 +100,13 @@
                 <td class="text-center">{{ $row->status }}</td>
                 <td class="text-center">{{ $row->updated_at }}</td>
 
-                <td class="text-nowrap text-center">
-                    @if(auth()->user()->role === 'sale')
-                        @include('approvals.partials.actions_sale', ['row' => $row])
-                    @elseif(auth()->user()->role === 'admin')
-                        @include('approvals.partials.actions_admin', ['row' => $row])
-                    @else
-                        @include('approvals.partials.actions_head', ['row' => $row])
+                <td>
+                    @if(strtolower(Auth::user()->role) == 'admin')
+                        @include('partials.action_admin')
+                    @elseif(strtolower(Auth::user()->role) == 'manager')
+                        @include('partials.action_manager')
+                    @elseif(strtolower(Auth::user()->role) == 'sale')
+                        @include('partials.action_sale')
                     @endif
                 </td>
             </tr>

@@ -14,4 +14,8 @@
         <button class="btn btn-danger btn-sm">ลบ</button>
     </form>
 </div>
-      
+    @if($item->status == 'Draft' || $item->status == 'Reject')
+        <a href="{{ route('approvals.edit', $item->id) }}" class="btn btn-warning btn-sm">
+            {{ $item->status == 'Reject' ? 'แก้ไขงานที่ถูกตีกลับ' : 'แก้ไข Draft' }}
+        </a>
+    @endif

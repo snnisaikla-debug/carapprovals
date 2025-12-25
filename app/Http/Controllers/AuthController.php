@@ -20,10 +20,10 @@ class AuthController extends Controller
         $data = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => [
-                'required',
-                'email',
-                'regex:/@ypb\.co\.th$/i',  // ต้องเป็น @ypb.co.th เท่านั้น
-                'unique:users,email',
+            'required',
+            'email',
+            'regex:/@ypb\.co\.th$/i',  // ต้องเป็น @ypb.co.th เท่านั้น
+            'unique:users,email',
         ],
             'password' => 'required|string|min:6|confirmed',
     ]);
@@ -32,7 +32,7 @@ class AuthController extends Controller
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
-            'role'     => 'SALE',  // ทุกคนที่สมัครเป็น SALE
+            'role'     => 'sale',  // ทุกคนที่สมัครเป็น sale
         ]);
 
         Auth::login($user);
