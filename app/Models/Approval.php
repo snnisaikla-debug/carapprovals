@@ -41,8 +41,8 @@ class Approval extends Model
         'status', 
 
         // ส่วนของ Sales
-        'sales_name',
         'sales_user_id',
+        'sales_name',
         'sale_type_amount',
         'plus_head',
         'chassis',

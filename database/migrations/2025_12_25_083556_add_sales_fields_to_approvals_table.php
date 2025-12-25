@@ -19,10 +19,19 @@ return new class extends Migration
         // เพิ่ม sales_user_id เพื่อให้ Controller ทำ Join ได้ (สำคัญมาก)
         if (!Schema::hasColumn('approvals', 'sales_user_id')) {
             $table->unsignedBigInteger('sales_user_id')->nullable();
-        }  
+        }
+        // เพิ่มคอลัมน์สำหรับเก็บ ID (เพื่อให้ Join ใน Controller ผ่าน)
+        if (!Schema::hasColumn('approvals', 'sales_user_id')) {
+            $table->unsignedBigInteger('sales_user_id')->nullable()->after('id');
+        }
+        
+        // เพิ่มคอลัมน์สำหรับเก็บชื่อ (ตามที่คุณต้องการ)
+        if (!Schema::hasColumn('approvals', 'sales_name')) {
+            $table->string('sales_name')->nullable()->after('sales_user_id');
+        }
     });
 }
-
+       
     /**
      * Reverse the migrations.
      */
