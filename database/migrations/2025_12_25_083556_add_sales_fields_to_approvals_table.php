@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+{
+    Schema::table('approvals', function (Blueprint $table) {
+        // เพิ่ม sales_name ตามที่คุณต้องการ
+        if (!Schema::hasColumn('approvals', 'sales_name')) {
+            $table->string('sales_name')->nullable();
+        }
+        // เพิ่ม sales_user_id เพื่อให้ Controller ทำ Join ได้ (สำคัญมาก)
+        if (!Schema::hasColumn('approvals', 'sales_user_id')) {
+            $table->unsignedBigInteger('sales_user_id')->nullable();
+        }  
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('approvals', function (Blueprint $table) {
+            //
+        });
+    }
+};
