@@ -4,11 +4,9 @@
 
 @section('content')
 <div class="d-flex justify-content-between mb-3" style="font-size:16px;">
-    <a href="{{ route('approvals.create') }}"
-       class="btn btn-sm text-white"
-       style="background-color:#b0120a;">
-        + สร้างใบอนุมัติใหม่ (Sales)
-    </a>
+     <button type="button" onclick="history.back()" class="btn btn-secondary">
+        ← กลับ
+    </button>
 
     <div class="d-flex align-items-center gap-3" style="font-size:16px;">
         {{-- content เดิม --}}
@@ -133,10 +131,6 @@
             <strong class="text-danger">Danger Zone</strong>
         </div>
             <div class="card-body">
-              <p class="mb-2 text-danger">
-                  ลบบัญชี (Soft delete) = ซ่อนไว้ ไม่ได้ลบข้อมูลถาวร
-              </p> 
-
             <form method="POST" action="{{ route('account.destroy') }}"
                   onsubmit="return confirm('ยืนยันลบบัญชี? (Soft delete)');">
                 @csrf

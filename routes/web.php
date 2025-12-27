@@ -92,15 +92,22 @@ use Illuminate\Support\Facades\Session;
     | Account
     |--------------------------------------------------------------------------
     */
-    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+    // หน้าหลักของบัญชี
+    // Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+
     Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
     Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
-
+    
     Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
     Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
-
+    // Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
+    
+    // update
     Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
     Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
+    // Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
+    // Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
+    // Route::delete('/account/destroy', [AccountController::class, 'destroy'])->name('account.destroy');
 });
 
     /*
@@ -136,3 +143,12 @@ use Illuminate\Support\Facades\Session;
         $request->session()->put('lang', $lang);
         return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30));
     })->name('lang.switch');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+    Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
+    Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
+    Route::delete('/account/destroy', [AccountController::class, 'destroy'])->name('account.destroy');
+});

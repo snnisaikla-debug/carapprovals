@@ -30,6 +30,20 @@
     
     <ins><h2>ใบขออนุมัติการขายรถยนต์</h2></ins>
     <br>
+
+    {{-- DATE --}}
+    <div class="row">
+        <div class="col-6 mb-3">
+            <label class="form-label">วันที่ขอแคมเปญ</label>
+            <input type="date" class="form-control" name="Request_date">
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">วันที่จะส่งมอบรถ</label>
+            <input type="date" class="form-control" name="Date_delivery">
+        </div>
+    </div>
+
+
     {{-- 1. ข้อมูลลูกค้า --}}
     <div class="section-title">ข้อมูลลูกค้า</div>
 
@@ -102,8 +116,8 @@
 
     <div class="row">
         <div class="col-6 mb-3">
-            <label class="form-label">ยอดจัด (บาท)</label>
-            <input id="finance_amount" class="form-control" type="number" readonly name="finance_amount">
+            <label class="form-label">จำนวนงวด</label>
+            <input id="installment_months" class="form-control" type="number" name="installment_months">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">งวดละ (บาท)</label>
@@ -113,12 +127,12 @@
 
     <div class="row">
         <div class="col-6 mb-3">
-            <label class="form-label">จำนวนงวด</label>
-            <input id="installment_months" class="form-control" type="number" name="installment_months">
-        </div>
-        <div class="col-6 mb-3">
             <label class="form-label">ดอกเบี้ย (%)</label>
             <input id="interest_rate" class="form-control" type="number" step="0.01" name="interest_rate">
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">ยอดจัด (บาท)</label>
+            <input id="finance_amount" class="form-control" type="number" readonly name="finance_amount">
         </div>
     </div>
 

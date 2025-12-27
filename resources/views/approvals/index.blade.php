@@ -11,11 +11,13 @@
 @endphp
 
 {{-- แถว 1: ปุ่มสร้าง (ชิดซ้ายบนสุด) --}}
-<div class="d-flex justify-content-start mb-3">
-    <a href="{{ route('approvals.create') }}" class="btn btn-success">
-        + สร้างใบอนุมัติใหม่
-    </a>
-</div>
+    @if(Auth::user()->role == 'sale')
+        <div class="d-flex justify-content-start mb-3">
+            <a href="{{ route('approvals.create') }}" class="btn btn-success">
+                + สร้างใบอนุมัติใหม่
+            </a>
+        </div>
+    @endif
 
 {{-- แถว 2: ตัวกรอง + เรียงวันที่ --}}
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">

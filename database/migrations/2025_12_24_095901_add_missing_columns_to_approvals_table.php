@@ -6,19 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-  public function up(): void
+ public function up(): void
 {
     Schema::table('approvals', function (Blueprint $table) {
         $missingColumns = [
             'sales_user_id'          => 'unsignedBigInteger',
             'sales_name'             => 'string',
-            'customer_district'      => 'string', // ฟิลด์ที่ขาด (อำเภอ)
-            'customer_province'      => 'string', // ฟิลด์ที่ขาด (จังหวัด)
+            'status'                 => 'string',
+            'version'                => 'integer',
+            'group_id'               => 'integer',
+            'created_by'             => 'string',
+            'customer_district'      => 'string', // ตัวที่ Error ฟ้องล่าสุด
+            'customer_province'      => 'string', // ตัวที่ Error ฟ้องล่าสุด
             'car_model'              => 'string',
             'car_color'              => 'string',
             'car_options'            => 'text',
             'plus_head'              => 'decimal',
-            'fn'                     => 'string', // ฟิลด์ที่ขาด (ไฟแนนซ์)
+            'fn'                     => 'string', // ตัวที่ Error ฟ้องล่าสุด
             'down_percent'           => 'decimal',
             'down_amount'            => 'decimal',
             'finance_amount'         => 'decimal',
@@ -48,10 +52,10 @@ return new class extends Migration
             'sc_signature'           => 'string',
             'sale_com_signature'     => 'string',
             'is_commercial_30000'    => 'boolean',
-            'created_by'             => 'string', // ฟิลด์ที่ใช้เช็ค Role ตอนสร้าง
         ];
 
         foreach ($missingColumns as $column => $type) {
+            // เช็คก่อนสร้างเสมอ เพื่อป้องกัน Error Duplicate Column
             if (!Schema::hasColumn('approvals', $column)) {
                 if ($type === 'decimal') {
                     $table->decimal($column, 15, 2)->default(0);
@@ -63,9 +67,11 @@ return new class extends Migration
                     $table->boolean($column)->default(false);
                 } elseif ($type === 'unsignedBigInteger') {
                     $table->unsignedBigInteger($column)->nullable();
-                } else {
-                    $table->string($column)->nullable();
-                }
+                } elseif ($type === 'unsignedBigInteger') {
+                    $table->unsignedBigInteger($column)->nullable();
+                } elseif ($type === 'integer') {
+                    $table->integer($column)->default(1);
+                } else $table->string($column)->nullable();
             }
         }
     });
