@@ -39,7 +39,7 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">วันที่จะส่งมอบรถ</label>
-            <input type="date" class="form-control" name="Date_delivery">
+            <input type="date" class="form-control" name=" ">
         </div>
     </div>
 

@@ -57,58 +57,26 @@ class ApprovalController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $user = Auth::user();
-        $data = $request->validate([
-            'customer_name'     => 'required|string',
-            'customer_district' => 'nullable|string',
-            'customer_province' => 'nullable|string',
-            'customer_phone'    => 'nullable|string',
-            'car_model'         => 'required|string',
-            'car_color'         => 'nullable|string',
-            'car_options'       => 'nullable|string',
-            'car_price'         => 'required|numeric',
-            'plus_head'         => 'nullable|numeric',
-            'fn'                => 'nullable|string',
-            'down_percent'      => 'nullable|numeric',
-            'down_amount'       => 'nullable|numeric',
-            'finance_amount'    => 'nullable|numeric',
-            'installment_per_month' => 'nullable|numeric',
-            'installment_months'    => 'nullable|integer',
-            'interest_rate'     => 'nullable|numeric',
-            'remark'            => 'nullable|string',
-            // ... เพิ่ม Validation ฟิลด์อื่นๆ ตามต้องการ ...
-        ]);
+{
+    $user = auth()->user();
+    
+    // ... (ส่วนการจัดการ Signature และ Validation) ...
 
-        // จัดการลายเซ็น
-        $saveSignature = function($base64, $prefix) {
-            if (!$base64 || !str_contains($base64, ',')) return null;
-            $fileData = base64_decode(explode(',', $base64)[1]);
-            $fileName = $prefix.'_'.time().'_'.uniqid().'.png';
-            $path = 'signatures/'.$fileName;
-            Storage::disk('public')->put($path, $fileData);
-            return 'storage/'.$path;
-        };
+    // สร้างข้อมูลชุดแรก
+    $approval = Approval::create(array_merge($data, [
+        'group_id'      => 0, // ค่าชั่วคราว
+        'version'       => 1,
+        'status'        => 'Draft',
+        'created_by'    => strtoupper($user->role),
+        'sales_name'    => $user->name,
+        'sales_user_id' => $user->id,
+    ]));
 
-        $data['sc_signature'] = $saveSignature($request->input('sc_signature_data'), 'sc');
-        $data['sale_com_signature'] = $saveSignature($request->input('sale_com_signature_data'), 'salecom');
-        $data['is_commercial_30000'] = $request->has('is_commercial_30000');
+    // อัปเดต group_id ให้เท่ากับ id ของตัวเอง
+    $approval->update(['group_id' => $approval->id]);
 
-        // บันทึก Version 1
-        $approval = Approval::create(array_merge($data, [
-            'group_id'      => 0, 
-            'version'       => 1,
-            'status'        => 'Draft',
-            'created_by'    => strtoupper($user->role),
-            'sales_name'    => $user->name,
-            'sales_user_id' => $user->id,
-        ]));
-
-        // อัปเดต group_id ให้ตรงกับ id แรก
-        $approval->update(['group_id' => $approval->id]);
-
-        return redirect()->route('approvals.index')->with('success', 'บันทึกร่างเรียบร้อยแล้ว');
-    }
+    return redirect()->route('approvals.index')->with('success', 'บันทึกสำเร็จ');
+}
 
     /**
      * 3. กระบวนการส่งและอนุมัติ (Workflow)

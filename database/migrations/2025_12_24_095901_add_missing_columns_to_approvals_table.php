@@ -9,57 +9,30 @@ return new class extends Migration
 public function up(): void
 {
     Schema::table('approvals', function (Blueprint $table) {
-        $columns = [
-            'Date_delivery' => 'date',
-            'Request_date' => 'date',
-            'customer_name' => 'string',
-            'customer_district' => 'string',
-            'customer_province' => 'string',
-            'customer_phone' => 'string',
-            'car_model' => 'string',
-            'car_color' => 'string',
-            'car_options' => 'text',
-            'car_price' => 'decimal',
-            'plus_head' => 'decimal',
-            'fn' => 'string',
-            'down_percent' => 'decimal',
-            'down_amount' => 'decimal',
-            'finance_amount' => 'decimal',
-            'installment_per_month' => 'decimal',
-            'installment_months' => 'integer',
-            'interest_rate' => 'decimal',
-            'sale_type_amount' => 'decimal',
-            'fleet_amount' => 'decimal',
-            'free_items' => 'text',
-            'free_items_over' => 'text',
-            'extra_purchase_items' => 'text',
-            'campaigns_available' => 'text',
-            'campaigns_used' => 'text',
-            'decoration_amount' => 'decimal',
-            'over_campaign_amount' => 'decimal',
-            'over_decoration_amount' => 'decimal',
-            'over_reason' => 'text',
-            'sc_signature' => 'text',
-            'sale_com_signature' => 'text',
-            'is_commercial_30000' => 'boolean',
-            'sales_name' => 'string',
-            'status' => 'string',
-            'version' => 'integer',
-            'group_id' => 'integer',
-            'created_by' => 'string',
-        ];
+        // 1. ตรวจสอบและสร้าง sales_name ก่อน
+        if (!Schema::hasColumn('approvals', 'sales_name')) {
+            $table->string('sales_name')->nullable();
+        }
 
-        foreach ($columns as $column => $type) {
-            if (!Schema::hasColumn('approvals', $column)) {
-                if ($type === 'decimal') $table->decimal($column, 15, 2)->nullable();
-                elseif ($type === 'integer') $table->integer($column)->default(0);
-                elseif ($type === 'boolean') $table->boolean($column)->default(false);
-                elseif ($type === 'text') $table->text($column)->nullable();
-                else $table->string($column)->nullable();
+        // 2. ตรวจสอบและสร้าง sales_user_id (วางต่อจาก sales_name ได้แล้วเพราะสร้างไปข้างบนแล้ว)
+        if (!Schema::hasColumn('approvals', 'sales_user_id')) {
+            $table->unsignedBigInteger('sales_user_id')->nullable()->after('sales_name');
+        }
+
+        // 3. ตรวจสอบและสร้าง customer_district (ตัวต้นเหตุที่ทำให้บันทึกไม่ได้)
+        if (!Schema::hasColumn('approvals', 'customer_district')) {
+            $table->string('customer_district')->nullable()->after('customer_name');
+        }
+
+        // 4. เพิ่มคอลัมน์อื่นๆ ที่อาจจะยังขาดอยู่ (ถ้ามี)
+        $others = ['customer_province', 'customer_phone', 'fn', 'status'];
+        foreach ($others as $col) {
+            if (!Schema::hasColumn('approvals', $col)) {
+                $table->string($col)->nullable();
             }
         }
     });
-} 
+}
 
     /**
      * Reverse the migrations.

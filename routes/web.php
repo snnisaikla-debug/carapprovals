@@ -125,7 +125,7 @@ use Illuminate\Support\Facades\Session;
 
     /*
     |--------------------------------------------------------------------------
-    | MENAGER
+    | MANAGER
     |--------------------------------------------------------------------------
     */
     Route::middleware('manager')->group(function () {
