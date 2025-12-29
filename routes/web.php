@@ -145,6 +145,8 @@ use Illuminate\Support\Facades\Session;
     })->name('lang.switch');
 
 
+
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
     Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
