@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Session;
 
     /*
     |--------------------------------------------------------------------------
-    | จัดหน้า หน้าแรก sale/admin/menager
+    | จัดหน้า หน้าแรก sale/admin/manager
     |--------------------------------------------------------------------------
     */
     Route::get('/lang/toggle', function () {
@@ -79,11 +79,11 @@ use Illuminate\Support\Facades\Session;
     Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
     ->name('approvals.submit');
 
-    // ✅ Menager Approve” → Approved (จบ)
-    Route::post('/approvals/{groupId}/approve-menager', [ApprovalController::class, 'approveMenager'])
-    ->name('approvals.approveMenager');
+    // ✅ Manager Approve” → Approved (จบ)
+    Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])
+    ->name('approvals.approveManager');
 
-    // ✅ Reject (Admin หรือ Menager กด Reject)
+    // ✅ Reject (Admin หรือ Manager กด Reject)
     Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
     ->name('approvals.reject');
 
@@ -128,9 +128,9 @@ use Illuminate\Support\Facades\Session;
     | MENAGER
     |--------------------------------------------------------------------------
     */
-    Route::middleware('menager')->group(function () {
-        Route::post('/menager/approvals/{groupId}', [ApprovalController::class, 'menagerAction'])
-            ->name('approvals.menagerAction');
+    Route::middleware('manager')->group(function () {
+        Route::post('/manager/approvals/{groupId}', [ApprovalController::class, 'managerAction'])
+            ->name('approvals.managerAction');
 });
 
     /*

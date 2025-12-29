@@ -17,6 +17,6 @@ class Approval extends Model
     'installment_months', 'interest_rate', 'fleet_amount', 'sale_type_amount',
     'decoration_amount', 'over_campaign_amount', 'over_decoration_amount',
     'free_items', 'free_items_over', 'extra_purchase_items', 'campaigns_available',
-    'campaigns_used', 'over_reason', 'is_commercial_30000', 'sc_signature', 'sale_com_signature'
+    'Request_date','Date_delivery','campaigns_used', 'over_reason', 'is_commercial_30000', 'sc_signature', 'sale_com_signature'
 ];
 }

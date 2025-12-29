@@ -4,74 +4,53 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Approval;
 use App\Models\User;
 
 class ApprovalController extends Controller
 {
-    // แสดงรายการใบล่าสุดของแต่ละ group
+    /**
+     * 1. รายการทั้งหมด (แสดงเฉพาะเวอร์ชันล่าสุดของแต่ละกลุ่ม)
+     */
     public function index(Request $request)
-{
-    $sort = $request->input('sort', 'newest');
-    $salesFilter  = $request->input('sales_user_id');
-    $statusFilter = $request->input('status');
+    {
+        $sort = $request->input('sort', 'newest');
+        $salesFilter = $request->input('sales_user_id');
+        $statusFilter = $request->input('status');
 
-    // 1️⃣ query เวอร์ชันล่าสุดของแต่ละ group
-    $query = Approval::select(
-        'approvals.*', 
-        'users.name as sales_name'
-        )
-        ->join(
-            DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
-            function ($join) {
-                $join->on('approvals.group_id', '=','latest.group_id');
-                $join->on('approvals.version', '=','latest.max_version');
-            }
-        )
-        ->leftJoin('users', 'users.id', '=', 'approvals.sales_user_id');
+        $query = Approval::select('approvals.*', 'users.name as sales_name')
+            ->join(
+                DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
+                function ($join) {
+                    $join->on('approvals.group_id', '=', 'latest.group_id')
+                         ->on('approvals.version', '=', 'latest.max_version');
+                }
+            )
+            ->leftJoin('users', 'users.id', '=', 'approvals.sales_user_id');
 
-    // 2️⃣ filter sales
-    if (!empty($salesFilter)) {
-        $query->where('approvals.sales_user_id', $salesFilter);
+        if (!empty($salesFilter)) {
+            $query->where('approvals.sales_user_id', $salesFilter);
+        }
+
+        if (!empty($statusFilter)) {
+            $query->where('approvals.status', $statusFilter);
+        }
+
+        $query->orderBy('approvals.updated_at', ($sort === 'oldest' ? 'ASC' : 'DESC'));
+        
+        $approvals = $query->get();
+        $salesList = User::where('role', 'sale')->orderBy('name')->pluck('name', 'id');
+        $statusList = Approval::select('status')->distinct()->pluck('status');
+
+        return view('approvals.index', compact('approvals', 'salesList', 'statusList'));
     }
 
-    // 3️⃣ filter status
-    if (!empty($statusFilter)) {
-        $query->where('approvals.status', $statusFilter);
-    }
-
-    // 4️⃣ sort วันที่
-    if ($sort === 'oldest') {
-        $query->orderBy('approvals.updated_at', 'ASC');
-    } else {
-        $query->orderBy('approvals.updated_at', 'DESC');
-    }
-
-    // 5️⃣ execute
-    $approvals = $query->get();
-
-    // 6️⃣ dropdown lists sales
-    $salesList = User::where('role', 'sale')
-        ->orderBy('name')
-        ->pluck('name', 'id'); // [id => name]
-
-    $statusList = Approval::select('status')
-        ->distinct()
-        ->orderBy('status')
-        ->pluck('status');
-
-    return view('approvals.index', compact(
-        'approvals',
-        'salesList',
-        'statusList'
-    ));
-}
-
-    // ฟอร์มสร้างใบอนุมัติ (Sales)
+    /**
+     * 2. กระบวนการสร้าง (SALE)
+     */
     public function create()
     {
         return view('approvals.create');
@@ -79,260 +58,120 @@ class ApprovalController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
         $data = $request->validate([
-            // 1. ข้อมูลลูกค้า
             'customer_name'     => 'required|string',
             'customer_district' => 'nullable|string',
             'customer_province' => 'nullable|string',
             'customer_phone'    => 'nullable|string',
-
-            // 2. ข้อมูลรถ
             'car_model'         => 'required|string',
             'car_color'         => 'nullable|string',
             'car_options'       => 'nullable|string',
             'car_price'         => 'required|numeric',
-
-            // 3–12 การเงิน
-            'plus_head'             => 'nullable|numeric',
-            'fn'                    => 'nullable|string',
-            'down_percent'          => 'nullable|numeric',
-            'down_amount'           => 'nullable|numeric',
-            'finance_amount'        => 'nullable|numeric',
+            'plus_head'         => 'nullable|numeric',
+            'fn'                => 'nullable|string',
+            'down_percent'      => 'nullable|numeric',
+            'down_amount'       => 'nullable|numeric',
+            'finance_amount'    => 'nullable|numeric',
             'installment_per_month' => 'nullable|numeric',
             'installment_months'    => 'nullable|integer',
-            'interest_rate'         => 'nullable|numeric',
-            'campaign_code'         => 'nullable|string',
-            'sale_type'             => 'nullable|string',
-            'sale_type_amount'      => 'nullable|numeric',
-            'fleet_amount'          => 'nullable|numeric',
-
-            // 13–17
-            'insurance_deduct'      => 'nullable|numeric',
-            'insurance_used'        => 'nullable|numeric',
-            'kickback_amount'       => 'nullable|numeric',
-            'com_fn_option'         => 'nullable|string',
-            'com_fn_amount'         => 'nullable|numeric',
-            'free_items'            => 'nullable|string',
-            'free_items_over'       => 'nullable|string',
-            'extra_purchase_items'  => 'nullable|string',
-
-            // 19–20
-            'campaigns_available'   => 'nullable|string',
-            'campaigns_used'        => 'nullable|string',
-
-            // 21–24
-            'decoration_amount'     => 'nullable|numeric',
-            'over_campaign_amount'  => 'nullable|numeric',
-            'over_campaign_status'  => 'nullable|string',
-            'over_decoration_amount'=> 'nullable|numeric',
-            'over_decoration_status'=> 'nullable|string',
-
-            // 25–27
-            'over_reason'           => 'nullable|string',
-            'sc_signature'          => 'nullable|string',
-            'sale_com_signature'    => 'nullable|string',
-
-            // หมายเหตุท้ายฟอร์ม
-            'remark'                => 'nullable|string',
-            'sc_signature_data'        => 'nullable|string',
-            'sale_com_signature_data'  => 'nullable|string',
+            'interest_rate'     => 'nullable|numeric',
+            'remark'            => 'nullable|string',
+            // ... เพิ่ม Validation ฟิลด์อื่นๆ ตามต้องการ ...
         ]);
-        $scPath = null;
-        $saleComPath = null;
 
-        // ฟังก์ชันช่วยเซฟ base64 เป็นไฟล์
+        // จัดการลายเซ็น
         $saveSignature = function($base64, $prefix) {
-            if (!$base64) return null;
-
-            @list($type, $fileData) = explode(';', $base64);
-            @list(, $fileData) = explode(',', $fileData);
-
-            if (!$fileData) return null;
-
-            $fileData = base64_decode($fileData);
+            if (!$base64 || !str_contains($base64, ',')) return null;
+            $fileData = base64_decode(explode(',', $base64)[1]);
             $fileName = $prefix.'_'.time().'_'.uniqid().'.png';
             $path = 'signatures/'.$fileName;
-
-            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $fileData);
-
-
-            return 'storage/'.$path; // path สำหรับแสดงรูป
+            Storage::disk('public')->put($path, $fileData);
+            return 'storage/'.$path;
         };
 
-        $scPath = $saveSignature($request->input('sc_signature_data'), 'sc');
-        $saleComPath = $saveSignature($request->input('sale_com_signature_data'), 'salecom');
-
-        $data['sc_signature']      = $scPath;
-        $data['sale_com_signature'] = $saleComPath;
-
-        // checkbox จะส่งมาเฉพาะตอนติ๊ก
+        $data['sc_signature'] = $saveSignature($request->input('sc_signature_data'), 'sc');
+        $data['sale_com_signature'] = $saveSignature($request->input('sale_com_signature_data'), 'salecom');
         $data['is_commercial_30000'] = $request->has('is_commercial_30000');
 
-        $user = Auth::user();
-
-        // version แรก
+        // บันทึก Version 1
         $approval = Approval::create(array_merge($data, [
-            'group_id'   => 0,
-            'version'    => 1,
-            'status'     => 'Draft',
-            'created_by' => $user->role,    // SALE
-            'sales_name' => $user->name,    // ชื่อ Sales (ไว้ sort / ดูรายการ)
+            'group_id'      => 0, 
+            'version'       => 1,
+            'status'        => 'Draft',
+            'created_by'    => strtoupper($user->role),
+            'sales_name'    => $user->name,
+            'sales_user_id' => $user->id,
         ]));
 
-        // ให้ group_id == id แรกของตัวเอง
-        $approval->group_id = $approval->id;
-        $approval->save();
-        $approval->status = 'Draft';
-       
-        return redirect()->route('approvals.index');
+        // อัปเดต group_id ให้ตรงกับ id แรก
+        $approval->update(['group_id' => $approval->id]);
+
+        return redirect()->route('approvals.index')->with('success', 'บันทึกร่างเรียบร้อยแล้ว');
     }
-    
-    // Submit
+
+    /**
+     * 3. กระบวนการส่งและอนุมัติ (Workflow)
+     */
+
+    // Sale กดส่งไปให้ Admin
     public function submit($groupId)
     {
-        $user = auth()->user();
-
-        // ดึงเวอร์ชันล่าสุดของ group นี้
         $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-        // อนุญาตเฉพาะ sale เจ้าของใบ (ปรับได้ตาม policy)
-        // abort_unless($user->role === 'sale' && $latest->sales_user_id === $user->id, 403);
-
-        $latest->status = 'Pending_Admin';
-        $latest->save();
-
+        $latest->update(['status' => 'Pending_Admin']);
         return back()->with('status', 'ส่งคำขอไปที่ Admin แล้ว');
     }
 
-    // Approve Admin
-    public function approveAdmin($groupId)
+    // Admin/Manager Action (ฟังก์ชันรวมเพื่อลดความซ้ำซ้อน)
+    public function updateStatus(Request $request, $groupId)
     {
         $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+        $action = $request->input('action'); // approve / reject
 
-        $latest->status = 'Pending_Menager';
+        if ($latest->status === 'Pending_Admin') {
+            $latest->status = ($action === 'approve') ? 'Pending_Manager' : 'Reject';
+        } 
+        elseif ($latest->status === 'Pending_Manager') {
+            $latest->status = ($action === 'approve') ? 'Approved' : 'Reject';
+        }
+
         $latest->save();
-
-        return back()->with('status', 'Admin อนุมัติแล้ว ส่งต่อ Menager');
+        return back()->with('success', 'ดำเนินการเรียบร้อยแล้ว');
     }
 
-    // Approve Menager
-    public function approveMenager($groupId)
-    {
-        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-        $latest->status = 'Approved';
-        $latest->save();
-
-        return back()->with('status', 'Menager อนุมัติเรียบร้อย');
-    }
-    
-    // Reject
-    public function reject(Request $request, $groupId)
-    {
-        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-        $latest->status = 'Reject';
-        $latest->save();
-
-        return back()->with('status', 'ปฏิเสธเรียบร้อย');
-    }
-
-    // New version หลัง Reject 
+    // กรณีถูก Reject: Sale สร้างเวอร์ชันใหม่เพื่อแก้ไข
     public function createNewVersion($groupId)
-{
-    $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+    {
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
-    $new = $latest->replicate();     // copy ทุก field
-    $new->version = $latest->version + 1;
-    $new->status = 'Draft';
-    $new->save();
+        $newVersion = $latest->replicate(); 
+        $newVersion->version = $latest->version + 1;
+        $newVersion->status = 'Draft';
+        $newVersion->save();
 
-    return redirect()->route('approvals.edit', [$groupId, $new->version]);
-}
+        return redirect()->route('approvals.edit', $groupId);
+    }
 
-        // ดูประวัติทั้ง group + ปุ่มอนุมัติ
+    /**
+     * 4. การแสดงผลและจัดการข้อมูล
+     */
+
     public function showGroup($groupId)
     {
-        $approvals = Approval::where('group_id', $groupId)
-            ->orderBy('version', 'asc')
-            ->get();
-
-        $current = $approvals->first(); // ตัวแทน group
-
+        $approvals = Approval::where('group_id', $groupId)->orderBy('version', 'asc')->get();
+        $current = $approvals->last(); // แสดงข้อมูลเวอร์ชันล่าสุดเป็นหลัก
         return view('approvals.show', compact('approvals', 'current'));
     }
 
-    // Admin อนุมัติ / ไม่อนุมัติ
-    public function adminAction(Request $request, $groupId)
-    {
-        $action = $request->input('action'); // approve / reject
-
-        $current = Approval::where('group_id', $groupId)
-            ->orderByDesc('version')
-            ->first();
-
-        $newVersion = $current->version + 1;
-        $newStatus = $action === 'approve' ? 'Pending_MENAGER' : 'REJECTED_ADMIN';
-
-        Approval::create([
-            'group_id'      => $groupId,
-            'version'       => $newVersion,
-            'status'        => $newStatus,
-            'car_model'     => $current->car_model,
-            'car_price'     => $current->car_price,
-            'customer_name' => $current->customer_name,
-            'remark'        => $current->remark,
-            'created_by'    => 'ADMIN',
-        ]);
-
-        return redirect()->route('approvals.show', $groupId);
-    }
-
-    // หัวหน้า อนุมัติ / ไม่อนุมัติ
-    public function menagerAction(Request $request, $groupId)
-    {
-        $action = $request->input('action'); // approve / reject
-
-        $current = Approval::where('group_id', $groupId)
-            ->orderByDesc('version')
-            ->first();
-
-        $newVersion = $current->version + 1;
-        $newStatus = $action === 'approve' ? 'APPROVED' : 'REJECTED_MENAGER';
-
-        Approval::create([
-            'group_id'      => $groupId,
-            'version'       => $newVersion,
-            'status'        => $newStatus,
-            'car_model'     => $current->car_model,
-            'car_price'     => $current->car_price,
-            'customer_name' => $current->customer_name,
-            'remark'        => $current->remark,
-            'created_by'    => 'MENAGER',
-        ]);
-
-        return redirect()->route('approvals.show', $groupId);
-        }
-    public function exportPdf($id)
-    {
-        $approval = Approval::findOrFail($id);
-
-        $pdf = Pdf::loadView('approvals.pdf', compact('approval'))
-            ->setPaper('A4', 'portrait');
-
-        return $pdf->stream('approval_'.$approval->id.'.pdf');
-    }
     public function edit($groupId)
     {
-        // ดึงเวอร์ชันล่าสุดของ group นี้
         $current = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-        // อนุญาตให้ SALE แก้เฉพาะของตัวเอง (กันแก้ของคนอื่น)
-        if (Auth::user()->role === 'sale' && $current->sales_name !== Auth::user()->name) {
-        abort(403);
+        
+        // เช็คสิทธิ์: เฉพาะเจ้าของหรือ Admin
+        if (Auth::user()->role === 'sale' && $current->sales_user_id !== Auth::id()) {
+            abort(403);
         }
 
-        // เปิดฟอร์มแก้ไข (ใช้ create เดิมก็ได้ หรือทำ edit แยก)
         return view('approvals.edit', compact('current'));
     }
 
@@ -340,102 +179,43 @@ class ApprovalController extends Controller
     {
         $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
-        // ✅ SALE แก้เฉพาะของตัวเอง
-        if (Auth::user()->role === 'sale' && $latest->sales_name !== Auth::user()->name) {
-        abort(403);
-    }
-
-        // ✅ validate (ค่อยๆ เพิ่มทีหลังได้)
         $data = $request->validate([
-                'customer_name' => 'required|string|max:255',
-                'customer_district' => 'nullable|string|max:255',
-                'customer_province' => 'nullable|string|max:255',
-                'customer_phone' => 'nullable|string|max:50',
+            'customer_name' => 'required|string',
+            'car_model'     => 'required|string',
+            'car_price'     => 'required|numeric',
+            // ... ใส่ฟิลด์ที่ต้องการให้อัปเดต ...
+        ]);
 
-                'car_model' => 'required|string|max:255',
-                'car_color' => 'nullable|string|max:255',
-                'car_options' => 'nullable|string|max:255',
-                'car_price' => 'required|numeric',
+        // สร้างเวอร์ชันใหม่เสมอเมื่อมีการแก้ไข (Audit Trail)
+        $newVersion = $latest->replicate();
+        $newVersion->fill($data);
+        $newVersion->version = $latest->version + 1;
+        $newVersion->status = 'Pending_Admin'; // แก้ไขแล้วส่งกลับไปเริ่ม Workflow ใหม่
+        $newVersion->save();
 
-                // ใส่ฟิลด์อื่นๆ ที่มีในฟอร์มตามจริงได้เรื่อย ๆ
-            ]);
-
-            // ✅ สร้างเวอร์ชันใหม่ (ไม่ทับของเดิม)
-            $new = new Approval();
-            $new->group_id = $latest->group_id;
-            $new->version  = $latest->version + 1;
-
-            // สถานะเมื่อ “แก้ไขแล้วส่งใหม่”
-            // โดย workflow ของเปา: ส่งเข้า admin ใหม่เสมอ
-            $new->status = 'Pending_ADMIN';
-
-            // ใครเป็นคนสร้างเวอร์ชันนี้
-            $new->created_by = strtoupper(Auth::user()->role); // SALE/ADMIN/MENAGER
-
-            // ✅ ต้องเก็บชื่อ sales ในทุกเวอร์ชัน (ถ้ามี field นี้)
-            $new->sales_name = $latest->sales_name ?? Auth::user()->name;
-
-            // map ข้อมูลจากฟอร์มลง model
-            $new->customer_name = $data['customer_name'];
-            $new->customer_district = $data['customer_district'] ?? null;
-            $new->customer_province = $data['customer_province'] ?? null;
-            $new->customer_phone = $data['customer_phone'] ?? null;
-
-            $new->car_model = $data['car_model'];
-            $new->car_color = $data['car_color'] ?? null;
-            $new->car_options = $data['car_options'] ?? null;
-            $new->car_price = $data['car_price'];
-
-            // ✅ ถ้ามีฟิลด์อื่น ๆ ก็ใส่ต่อ (plus_MENAGER, fn, down_percent, …)
-            // $new->plus_menager = $request->input('plus_menager');
-            // ...
-
-            $new->save();
-
-            return redirect()->route('approvals.show', $groupId)->with('success', 'สร้างเวอร์ชันใหม่เรียบร้อย');
-        }
-
-        public function destroy($groupId)
-        {
-            // ลบทั้ง group (ทุกเวอร์ชัน)
-            $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-            if (Auth::user()->role === 'sale' && $latest->sales_name !== Auth::user()->name) {
-                abort(403);
-            }
-
-            // แนะนำ: ให้ลบได้เฉพาะยังไม่ APPROVED
-            if ($latest->status === 'APPROVED') {
-                return back()->with('error', 'เอกสารอนุมัติแล้ว ไม่อนุญาตให้ลบ');
-            }
-
-            Approval::where('group_id', $groupId)->delete();
-
-            return redirect()->route('approvals.index')->with('success', 'ลบเอกสารชุดนี้เรียบร้อย');
-        }
-
-        // ตัวอย่างฟังก์ชันสำหรับ Admin และ Manager ใน Controller
-        public function updateStatus(Request $request, $id)
-        {
-            $approval = Approval::find($id);
-            $action = $request->action; // รับค่าจากปุ่มที่กด: approve หรือ reject
-
-            if ($approval->status == 'Pending_Admin') {
-                if ($action == 'approve') {
-                    $approval->status = 'Pending_Manager'; // ส่งต่อให้ Manager
-                } elseif ($action == 'reject') {
-                    $approval->status = 'Reject'; // ตีกลับไปที่ Sale
-                }
-            } 
-            elseif ($approval->status == 'Pending_Manager') {
-                if ($action == 'approve') {
-                    $approval->status = 'Approved'; // อนุมัติเสร็จสมบูรณ์
-                } elseif ($action == 'reject') {
-                    $approval->status = 'Reject'; // ตีกลับไปที่ Sale
-                }
-            }
-
-            $approval->save();
-            return back()->with('success', 'ดำเนินการเรียบร้อยแล้ว');
-        }
+        return redirect()->route('approvals.show', $groupId)->with('success', 'สร้างเวอร์ชันใหม่และส่งตรวจสอบแล้ว');
     }
+
+    public function destroy($groupId)
+    {
+        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
+
+        if (Auth::user()->role === 'sale' && $latest->sales_user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($latest->status === 'Approved') {
+            return back()->with('error', 'เอกสารอนุมัติแล้ว ไม่อนุญาตให้ลบ');
+        }
+
+        Approval::where('group_id', $groupId)->delete();
+        return redirect()->route('approvals.index')->with('success', 'ลบเอกสารเรียบร้อย');
+    }
+
+    public function exportPdf($id)
+    {
+        $approval = Approval::findOrFail($id);
+        $pdf = Pdf::loadView('approvals.pdf', compact('approval'))->setPaper('A4', 'portrait');
+        return $pdf->stream('approval_'.$approval->id.'.pdf');
+    }
+}

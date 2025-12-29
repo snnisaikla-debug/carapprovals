@@ -16,7 +16,7 @@ class ApprovalPolicy
             // return $approval->sales_name === $user->name;
         }
 
-        // admin/menager ไม่ให้แก้ (แล้วแต่ระบบคุณ)
+        // admin/manager ไม่ให้แก้ (แล้วแต่ระบบคุณ)
         return false;
     }
 }
