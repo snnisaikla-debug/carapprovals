@@ -59,10 +59,59 @@ class ApprovalController extends Controller
     public function store(Request $request)
 {
     $user = auth()->user();
-    
-    // ... (ส่วนการจัดการ Signature และ Validation) ...
 
-    // สร้างข้อมูลชุดแรก
+    // 1. เพิ่มส่วนนี้เข้าไปเพื่อประกาศตัวแปร $data
+    $data = $request->validate([
+    // 1. ข้อมูลลูกค้า (Customer Info)
+    'customer_name'         => 'required|string|max:255',
+    'customer_district'     => 'nullable|string|max:255',
+    'customer_province'     => 'nullable|string|max:255',
+    'customer_phone'        => 'nullable|string|max:50',
+
+    // 2. ข้อมูลรถ (Car Info)
+    'car_model'             => 'required|string|max:255',
+    'car_color'             => 'nullable|string|max:255',
+    'car_options'           => 'nullable|string',
+    'car_price'             => 'required|numeric',
+
+    // 3. ข้อมูลการเงิน (Finance & Installment)
+    'plus_head'             => 'nullable|numeric',
+    'fn'                    => 'nullable|string|max:255',
+    'down_percent'          => 'nullable|numeric|between:0,100',
+    'down_amount'           => 'nullable|numeric',
+    'finance_amount'        => 'nullable|numeric',
+    'installment_per_month' => 'nullable|numeric',
+    'installment_months'    => 'nullable|integer',
+    'interest_rate'         => 'nullable|numeric',
+
+    // 4. แคมเปญและส่วนลด (Campaign & Discounts)
+    'sale_type_amount'      => 'nullable|numeric',
+    'fleet_amount'          => 'nullable|numeric',
+    'kickback_amount'       => 'nullable|numeric',
+    'campaigns_available'   => 'nullable|string',
+    'campaigns_used'        => 'nullable|string',
+
+    // 5. รายการของแถมและอุปกรณ์ตกแต่ง (Free Items & Decoration)
+    'free_items'            => 'nullable|string',
+    'free_items_over'       => 'nullable|string',
+    'extra_purchase_items'  => 'nullable|string',
+    'decoration_amount'     => 'nullable|numeric',
+    'over_campaign_amount'  => 'nullable|numeric',
+    'over_decoration_amount' => 'nullable|numeric',
+
+    // 6. ข้อมูลอื่นๆ และสาเหตุ (Others)
+    'over_reason'           => 'nullable|string',
+    'remark'                => 'nullable|string',
+
+    // 7. ลายเซ็น (Signature Data - รับค่าเป็น Base64)
+    'sc_signature_data'     => 'nullable|string',
+    'sale_com_signature_data' => 'nullable|string',
+    ]);
+
+    // 2. จัดการลายเซ็นและข้อมูลเพิ่มเติม (ถ้ามี)
+    $data['is_commercial_30000'] = $request->has('is_commercial_30000');
+
+    // 3. บรรทัดที่ 66 (ที่เคย Error) จะใช้งานได้แล้วเพราะมี $data แล้ว
     $approval = Approval::create(array_merge($data, [
         'group_id'      => 0, // ค่าชั่วคราว
         'version'       => 1,
@@ -72,23 +121,11 @@ class ApprovalController extends Controller
         'sales_user_id' => $user->id,
     ]));
 
-    // อัปเดต group_id ให้เท่ากับ id ของตัวเอง
+    // 4. อัปเดต group_id ให้เท่ากับ id ของตัวเอง
     $approval->update(['group_id' => $approval->id]);
 
     return redirect()->route('approvals.index')->with('success', 'บันทึกสำเร็จ');
 }
-
-    /**
-     * 3. กระบวนการส่งและอนุมัติ (Workflow)
-     */
-
-    // Sale กดส่งไปให้ Admin
-    public function submit($groupId)
-    {
-        $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-        $latest->update(['status' => 'Pending_Admin']);
-        return back()->with('status', 'ส่งคำขอไปที่ Admin แล้ว');
-    }
 
     // Admin/Manager Action (ฟังก์ชันรวมเพื่อลดความซ้ำซ้อน)
     public function updateStatus(Request $request, $groupId)
