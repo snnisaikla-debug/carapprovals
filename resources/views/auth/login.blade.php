@@ -19,24 +19,21 @@
             <div class="form-text">ไม่ต้องเติม @ ก็ได้</div>
         </div>
 
-        <div class="mb-3 position-relative">
+        <div class="mb-3">
             <label class="form-label">รหัสผ่าน</label>
-
-            <input
-                type="password"
-                id="password"
-                name="password"
-                class="form-control pe-5"
-            >
-
-            <button
-                type="button"
-                class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-2"
-                onclick="togglePassword('password', this)"
-                tabindex="-1"
-            >
-                <i class="bi bi-eye"></i>
-            </button>
+            <div class="position-relative"> <input type="password" 
+                        id="login_password" 
+                        name="password"
+                        class="form-control pe-5" 
+                        required>
+                
+                <button type="button"
+                        class="btn position-absolute end-0 top-50 translate-middle-y me-2 p-0"
+                        onclick="togglePassword('login_password', this)"
+                        style="border:none; background:transparent; display: flex; align-items: center; height: 100%;">
+                    <i class="bi bi-eye fs-5"></i>
+                </button>
+            </div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -76,5 +73,20 @@
         }
         document.getElementById('login_email')?.addEventListener('blur', () => normalizeEmail('login_email'));
         document.querySelector('form').addEventListener('submit', () => normalizeEmail('login_email'));
+    
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                // เปลี่ยนไอคอนเป็นรูปตาที่มีขีดฆ่า
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                // เปลี่ยนไอคอนกลับเป็นรูปตาปกติ
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
     </script>
 @endsection

@@ -9,25 +9,20 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+   public function up(): void
 {
     Schema::table('approvals', function (Blueprint $table) {
-        // เพิ่ม sales_name ตามที่คุณต้องการ
-        if (!Schema::hasColumn('approvals', 'sales_name')) {
-            $table->string('sales_name')->nullable();
-        }
-        // เพิ่ม sales_user_id เพื่อให้ Controller ทำ Join ได้ (สำคัญมาก)
+        // เช็คก่อนว่าถ้ายังไม่มีคอลัมน์นี้ ถึงจะเพิ่ม
         if (!Schema::hasColumn('approvals', 'sales_user_id')) {
-            $table->unsignedBigInteger('sales_user_id')->nullable();
-        }
-        // เพิ่มคอลัมน์สำหรับเก็บ ID (เพื่อให้ Join ใน Controller ผ่าน)
-        if (!Schema::hasColumn('approvals', 'sales_user_id')) {
-            $table->unsignedBigInteger('sales_user_id')->nullable()->after('id');
+            $table->bigInteger('sales_user_id')->unsigned()->nullable()->after('id');
         }
         
-        // เพิ่มคอลัมน์สำหรับเก็บชื่อ (ตามที่คุณต้องการ)
-        if (!Schema::hasColumn('approvals', 'sales_name')) {
-            $table->string('sales_name')->nullable()->after('sales_user_id');
+        // สำหรับคอลัมน์อื่นๆ ที่คุณต้องการเพิ่ม (เช่นที่เคย Error ก่อนหน้านี้) ให้ใส่เช็คแบบนี้ด้วยครับ
+        if (!Schema::hasColumn('approvals', 'customer_district')) {
+            $table->string('customer_district')->nullable();
+        }
+        if (!Schema::hasColumn('approvals', 'car_color')) {
+            $table->string('car_color')->nullable();
         }
     });
 }

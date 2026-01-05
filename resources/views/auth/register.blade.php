@@ -18,34 +18,34 @@
             <div class="form-text">กรุณาใช้อีเมล @ypb.co.th"</div>
         </div>
 
-        <div class="mb-3 position-relative">
+        <div class="mb-3">
             <label class="form-label">รหัสผ่าน</label>
-
-            <input type="password" 
-                    id="password" 
-                    name="password"
-                    class="form-control pe-5" required>
-
-            <button type="button"
-                    class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-0"
-                    onclick="togglePassword('password', this)"
-                    style="border:none; background:transparent;">
-                <i class="bi bi-eye fs-5"></i>
-            </button>
+            <div class="position-relative"> <input type="password" 
+                        id="password" 
+                        name="password"
+                        class="form-control pe-5" required>
+                <button type="button"
+                        class="btn position-absolute end-0 top-50 translate-middle-y me-2 p-0"
+                        onclick="togglePassword('password', this)"
+                        style="border:none; background:transparent; line-height: 1; display: flex; align-items: center; height: 100%;">
+                    <i class="bi bi-eye fs-5"></i>
+                </button>
+            </div>
         </div>
 
         <div class="mb-3">
             <label class="form-label">ยืนยันรหัสผ่าน</label>
-            <input type="password" 
-                    name="password_confirmation" 
-                    class="form-control pe-5" required>
-            
-            <button type="button"
-                    class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-0"
-                    onclick="togglePassword('password', this)"
-                    style="border:none; background:transparent;">
-                <i class="bi bi-eye fs-5"></i>
-            </button>
+            <div class="position-relative"> <input type="password" 
+                        id="password_confirmation" 
+                        name="password_confirmation" 
+                        class="form-control pe-5" required>
+                <button type="button"
+                        class="btn position-absolute end-0 top-50 translate-middle-y me-2 p-0"
+                        onclick="togglePassword('password_confirmation', this)"
+                        style="border:none; background:transparent; line-height: 1; display: flex; align-items: center; height: 100%;">
+                    <i class="bi bi-eye fs-5"></i>
+                </button>
+            </div>
         </div>
 
         <button class="btn btn-success w-100">สมัครสมาชิก</button>
@@ -76,5 +76,18 @@
         }
         document.getElementById('reg_email')?.addEventListener('blur', () => normalizeEmail('reg_email'));
         document.querySelector('form').addEventListener('submit', () => normalizeEmail('reg_email'));
+    
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
     </script>
+    
 @endsection
