@@ -35,11 +35,11 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">วันที่ขอแคมเปญ</label>
-            <input type="date" class="form-control" name="Request_date">
+            <input type="date" class="form-control" name="request_date">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">วันที่จะส่งมอบรถ</label>
-            <input type="date" class="form-control" name=" ">
+            <input type="date" class="form-control" name="delivery_date">
         </div>
     </div>
 
