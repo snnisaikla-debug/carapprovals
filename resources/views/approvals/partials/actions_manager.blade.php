@@ -3,8 +3,8 @@
     รายละเอียด
 </a>
 
-@if($approval->status == 'Pending_Admin')
-    <form action="{{ route('approvals.updateStatus', $approval->id) }}" method="POST" style="display:inline;">
+@if($approval->status == 'Pending_Manager')
+    <form action="{{ route('approvals.updateStatus', $row->id) }}" method="POST" style="display:inline;">
         @csrf
         <button name="action" value="approve" class="btn btn-success btn-sm">อนุมัติ</button>
         <button name="action" value="reject" class="btn btn-danger btn-sm">ไม่อนุมัติ</button>

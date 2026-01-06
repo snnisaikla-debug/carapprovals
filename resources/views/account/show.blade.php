@@ -4,9 +4,11 @@
 
 @section('content')
 <div class="d-flex justify-content-between mb-3" style="font-size:16px;">
-     <button type="button" onclick="history.back()" class="btn btn-secondary">
-        ← กลับ
-    </button>
+    {{-- ใช้คำสั่ง route('approvals.index') เพื่อระบุปลายทางให้แน่นอน --}}
+    <a href="{{ route('approvals.index') }}" class="btn btn-secondary">
+        ← ย้อนกลับ
+    </a>
+</div>
 
     <div class="d-flex align-items-center gap-3" style="font-size:16px;">
         {{-- content เดิม --}}
@@ -126,19 +128,22 @@
     </div>
 
     {{-- ✅ การ์ด: ลบบัญชี (Soft delete) --}}
-        <div class="card shadow-sm border-danger">
-          <div class="card-header bg-white">
-            <strong class="text-danger">Danger Zone</strong>
-        </div>
-            <div class="card-body">
-            <form method="POST" action="{{ route('account.destroy') }}"
-                  onsubmit="return confirm('ยืนยันลบบัญชี? (Soft delete)');">
-                @csrf
-                @method('DELETE')
-                <button class="btn btn-outline-danger">ลบบัญชี</button>
-            </form>
-        </div>
-    </div>
+        {{-- ส่วนล่างของไฟล์ edit.blade.php --}}
+        <hr class="my-5">
 
+        <div class="card border-danger shadow-sm mb-5">
+            <div class="card-header bg-transparent border-danger">
+                <h5 class="text-danger mb-0">Danger Zone</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">หากลบบัญชี ข้อมูลของคุณจะถูกระงับการใช้งานชั่วคราว (Soft Delete)</p>
+                
+                <form method="POST" action="{{ route('account.destroy') }}" onsubmit="return confirm('ยืนยันลบบัญชี? ระบบจะทำการ Logout ทันที');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger btn-sm">ลบบัญชี</button>
+                </form>
+            </div>
+        </div>
 </div>
 @endsection

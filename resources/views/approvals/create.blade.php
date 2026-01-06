@@ -24,7 +24,7 @@
     @csrf
     <div class="d-flex justify-content-between mb-3">
         <button type="button" onclick="history.back()" class="btn btn-secondary">
-            ← กลับ
+            ← ย้อนกลับ
         </button>
     </div>
     
@@ -344,23 +344,19 @@
             <textarea rows="2" class="form-control" name="over_reason"></textarea>
         </div>
 
-
     {{-- 25–27 --}}
     <div class="section-title"></div><br>
-
-    
-
     <div class="mb-3">
-        <label class="form-label">SC (ชื่อ/ลายเซ็น)</label>
+        <label class="form-label">SC (ชื่อ)</label>
         <input type="text" class="form-control" name="sc_signature">
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Com การขาย (ชื่อ/ลายเซ็น)</label>
+        <label class="form-label">Com การขาย (ชื่อ)</label>
         <input type="text" class="form-control" name="sale_com_signature">
     </div>
 
-    <button class="btn btn-primary w-100 mt-3">บันทึกและส่งให้ Admin</button>
+    <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
 
 </form>
     <div class="section-title">ลายเซ็น</div>

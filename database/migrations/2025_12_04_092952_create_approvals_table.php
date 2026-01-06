@@ -13,10 +13,10 @@ return new class extends Migration
 {
     Schema::create('approvals', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('sales_user_id')->nullable()->constrained('users')->onDelete('cascade');
+        $table->foreignId('sales_user_id')->nullable()->constrained('users');
         $table->string('sales_name')->nullable();
         
-        // ข้อมูลลูกค้า
+        // ข้อมูลลูกค้า (อิงตามฟอร์ม)
         $table->string('customer_name');
         $table->string('customer_district')->nullable();
         $table->string('customer_province')->nullable();
@@ -28,7 +28,7 @@ return new class extends Migration
         $table->text('car_options')->nullable();
         $table->decimal('car_price', 15, 2);
 
-        // การเงิน
+        // การเงิน (Finance)
         $table->decimal('plus_head', 15, 2)->nullable();
         $table->string('fn')->nullable();
         $table->decimal('down_percent', 5, 2)->nullable();
@@ -38,7 +38,7 @@ return new class extends Migration
         $table->integer('installment_months')->nullable();
         $table->decimal('interest_rate', 5, 2)->nullable();
 
-        // แคมเปญ & ของแถม (ใช้ text เพราะข้อมูลอาจยาว)
+        // ของแถมและส่วนลด
         $table->decimal('sale_type_amount', 15, 2)->nullable();
         $table->decimal('fleet_amount', 15, 2)->nullable();
         $table->decimal('kickback_amount', 15, 2)->nullable();
@@ -51,14 +51,14 @@ return new class extends Migration
         $table->decimal('over_campaign_amount', 15, 2)->nullable();
         $table->decimal('over_decoration_amount', 15, 2)->nullable();
 
-        // อื่นๆ
+        // หมายเหตุและลายเซ็น
         $table->text('over_reason')->nullable();
         $table->text('remark')->nullable();
         $table->longText('sc_signature_data')->nullable();
         $table->longText('sale_com_signature_data')->nullable();
         $table->boolean('is_commercial_30000')->default(false);
 
-        // ระบบเวอร์ชัน
+        // ระบบเวอร์ชัน (Version Control)
         $table->integer('group_id')->default(0);
         $table->integer('version')->default(1);
         $table->string('status')->default('Draft');

@@ -14,18 +14,18 @@ use Illuminate\Support\Facades\Session;
     |--------------------------------------------------------------------------
     */
 
-    // หน้าแรก
-    Route::get('/', fn () => redirect()->route('login'));
+        // หน้าแรก
+        Route::get('/', fn () => redirect()->route('login'));
 
-    // Auth
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+        // Auth
+        Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [AuthController::class, 'register']);
 
-    // Reset password
-    Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->name('password.request');
-    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
+        // Reset password
+        Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->name('password.request');
+        Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 
     /*
     |--------------------------------------------------------------------------
@@ -33,59 +33,63 @@ use Illuminate\Support\Facades\Session;
     |--------------------------------------------------------------------------
     */
     Route::middleware('auth')->group(function () {
+        Route::resource('approvals', ApprovalController::class);
+    
+    // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
+        Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
 
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     /*
     |--------------------------------------------------------------------------
     | จัดหน้า หน้าแรก sale/admin/manager
     |--------------------------------------------------------------------------
-    */
-    Route::get('/lang/toggle', function () {
-        $current = session('lang', config('app.locale', 'th'));
-        $next = $current === 'th' ? 'en' : 'th';
-        session(['lang' => $next]);
-        return back();
-    })->name('lang.toggle');
+        */
+        Route::get('/lang/toggle', function () {
+            $current = session('lang', config('app.locale', 'th'));
+            $next = $current === 'th' ? 'en' : 'th';
+            session(['lang' => $next]);
+            return back();
+        })->name('lang.toggle');
 
     /*
     |--------------------------------------------------------------------------
     | Approvals
     |--------------------------------------------------------------------------
     */
-    Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
-    Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
-    Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
+        Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+        Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
+        Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
 
-    // ✅ ดูเอกสาร (ใช้ groupId)
-    Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])
-        ->name('approvals.show');
+        // ✅ ดูเอกสาร (ใช้ groupId)
+        Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])
+            ->name('approvals.show');
 
-    // ✅ แก้ไข
-    Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])
-        ->name('approvals.edit');
-    Route::post('/approvals/{groupId}/update', [ApprovalController::class, 'update'])
-        ->name('approvals.update');
+        // ✅ แก้ไข
+        Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])
+            ->name('approvals.edit');
+        Route::post('/approvals/{groupId}/update', [ApprovalController::class, 'update'])
+            ->name('approvals.update');
 
-    // ✅ ลบทั้ง group
-    Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])
-        ->name('approvals.destroy');
+        // ✅ ลบทั้ง group
+        Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])
+            ->name('approvals.destroy');
 
-    // ✅ Export PDF (ใช้ approval id)
-    Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])
-        ->name('approvals.pdf');
+        // ✅ Export PDF (ใช้ approval id)
+        Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])
+            ->name('approvals.pdf');
 
-    // ✅ Submit
-    Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
-    ->name('approvals.submit');
+        // ✅ Submit
+        Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
+        ->name('approvals.submit');
 
-    // ✅ Manager Approve” → Approved (จบ)
-    Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])
-    ->name('approvals.approveManager');
+        // ✅ Manager Approve” → Approved (จบ)
+        Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])
+        ->name('approvals.approveManager');
 
-    // ✅ Reject (Admin หรือ Manager กด Reject)
-    Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
-    ->name('approvals.reject');
+        // ✅ Reject (Admin หรือ Manager กด Reject)
+        Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
+        ->name('approvals.reject');
 
     /*
     |--------------------------------------------------------------------------
@@ -95,20 +99,20 @@ use Illuminate\Support\Facades\Session;
     // หน้าหลักของบัญชี
     // Route::get('/account', [AccountController::class, 'show'])->name('account.show');
 
-    Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
-    Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
-    
-    Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
-    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
-    // Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
-    
-    // update
-    Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
-    Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
-    // Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
-    // Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
-    // Route::delete('/account/destroy', [AccountController::class, 'destroy'])->name('account.destroy');
-});
+        Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
+        Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
+        
+        Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
+        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
+        
+        // update
+        Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
+        Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
+        Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
+        Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
+        Route::delete('/account/destroy', [AccountController::class, 'destroy'])->name('account.destroy');
+    });
 
     /*
     |--------------------------------------------------------------------------

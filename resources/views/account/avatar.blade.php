@@ -20,8 +20,6 @@
       <div class="mb-3">
         <label class="form-label">เลือกรูป</label>
         <input type="file" id="avatarFile" accept="image/*" class="form-control">
-        <div class="form-text">แนะนำรูปสี่เหลี่ยม/หน้าตรง ระบบจะ crop เป็นวงกลมตอนแสดงผล</div>
-      </div>
 
       <div class="border rounded-3 p-2 mb-3" style="max-height:420px; overflow:hidden;">
         <img id="preview" style="max-width:100%; display:none;">
