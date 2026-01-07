@@ -25,7 +25,21 @@
                 @foreach($approvals as $ver)
                 <tr class="text-center {{ $ver->version == $current->version ? 'table-info' : '' }}">
                     <td>{{ $ver->version }}</td>
-                    <td><span class="badge {{ $ver->status == 'Approved' ? 'bg-success' : 'bg-primary' }}">{{ $ver->status }}</span></td>
+                    <td class="text-center">
+                        @if($ver->status == 'Pending_Admin')
+                            <span class="badge px-3 py-2" style="background-color: #fd178aff; color: white;">Pending Admin</span> {{-- สีชมพู --}}
+                        @elseif($ver->status == 'Pending_Manager')
+                            <span class="badge px-3 py-2" style="background-color: #ff6716ff; color: white;">Pending Manager</span> {{-- สีส้ม--}}
+                        @elseif($ver->status == 'Approved')
+                            <span class="badge px-3 py-2" style="background-color: #03b11aff; color: white;">Approved</span> {{-- สีเขียว --}}
+                        @elseif($ver->status == 'Draft')
+                            <span class="badge px-3 py-2" style="background-color: #f7ff07ff; color: black;">Draft</span> {{-- สีเหลือง --}}
+                        @elseif($ver->status == 'Reject')
+                            <span class="badge px-3 py-2" style="background-color: #fe1c1cff; color: white;">Rejected</span> {{-- สีแดง --}}
+                        @else
+                            <span class="badge bg-dark px-3 py-2">{{ $ver->status }}</span>
+                        @endif
+                    </td>
                     <td>{{ $ver->created_by }}</td>
                     <td>{{ $ver->created_at->format('Y-m-d H:i:s') }}</td>
                 </tr>

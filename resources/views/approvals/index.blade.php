@@ -118,6 +118,7 @@
                     <th style="width:90px">GroupID</th>
                     <th>รุ่นรถ</th>
                     <th>ชื่อผู้ส่งคำขอ</th>
+                    <th style="width:160px">สถานะ</th>
                     <th style="width:170px">สร้างเมื่อ</th>
                     <th style="width:200px">จัดการ</th>
                 </tr>
@@ -129,6 +130,16 @@
                     <td class="text-center">{{ $approval->group_id }}</td>
                     <td class="text-center">{{ $approval->car_model }}</td>
                     <td class="text-center">{{ $approval->sales_name }}</td>
+                    <td class="text-center">
+                        @php $role = strtolower(Auth::user()->role); @endphp
+                        @if($role == 'admin')
+                            @include('approvals.partials.actions_admin', ['approval' => $approval])
+                        @elseif($role == 'manager')
+                            @include('approvals.partials.actions_manager', ['approval' => $approval])
+                        @elseif($role == 'sale')
+                            @include('approvals.partials.actions_sale', ['approval' => $approval])
+                        @endif
+                    </td>
                     <td class="text-center text-muted small">{{ $approval->created_at }}</td>
                     <td class="text-center">
                         @include('approvals.partials.actions_sale', ['approval' => $approval])
