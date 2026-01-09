@@ -55,7 +55,7 @@
                         @endif
                     </td>
                     <td>{{ $ver->sales_name }}</td>
-                    <td>{{date('d/m/y H:i:s', strtotime($ver->created_at)) }}</td></tr>
+                    <td>{{ $ver->created_at->format('d/m/Y H:i:s', strtotime($ver->created_at)) }}</td></tr>
                 @endforeach
             </tbody>
         </table>

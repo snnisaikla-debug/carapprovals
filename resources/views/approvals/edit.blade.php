@@ -348,8 +348,8 @@
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">รวมทั้งหมด</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_amount"
-        value="{{ old('decoration_amount', $approval->decoration_amount) }}">
+        <input type="number" step="0.01" class="form-control" name="decoration_amount" id="decoration_amount_input"
+            value="{{ old('decoration_amount', $approval->decoration_amount) }}">
     </div>
 
     {{-- 21–22 commercial / การแต่ง --}}
@@ -433,7 +433,6 @@
             value="{{ old('sale_com_signature', $approval->sale_com_signature) }}">
     </div>
 
-<form>
     <div class="section-title">ลายเซ็น</div>
 
     {{-- Signature SC --}}
@@ -460,6 +459,7 @@
 
     <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
 
+    {{-- ================== SCRIPT Signature ================== --}}
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script>
     function setupSignaturePad(canvasId, clearBtnId, outputId) {
@@ -505,7 +505,6 @@
         }
     });
 </script>
-</form>
 {{-- ================== SCRIPT คำนวณ ================== --}}
 <script>
 function calculateFinance() {
@@ -535,4 +534,5 @@ document.querySelectorAll(
     '#car_price,#down_percent,#down_amount,#installment_months,#interest_rate'
 ).forEach(el => el.addEventListener('input', calculateFinance));
 </script>
+</form>
 @endsection
