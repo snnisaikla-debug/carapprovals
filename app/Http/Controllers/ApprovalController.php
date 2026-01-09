@@ -42,7 +42,13 @@ class ApprovalController extends Controller
 
         $query->orderBy('approvals.updated_at', ($sort === 'oldest' ? 'ASC' : 'DESC'));
         
-        $approvals = $query->get();
+        $approvals = Approval::select('approvals.*')
+            ->join(DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'), function($join) {
+                $join->on('approvals.group_id', '=', 'latest.group_id')
+                    ->on('approvals.version', '=', 'latest.max_version');
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get();
         $salesList = User::where('role', 'sale')->orderBy('name')->pluck('name', 'id');
         $statusList = Approval::select('status')->distinct()->pluck('status');
 

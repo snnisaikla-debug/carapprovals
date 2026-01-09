@@ -1,16 +1,29 @@
 @extends('layout')
 
-@section('title', 'รายละเอียดใบอนุมัติ Group ' . $current->group_id)
+@section ('title', 'รายละเอียดใบอนุมัติ ')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold">ประวัติใบอนุมัติ Group {{ $current->group_id }}</h4>
+<div class="card mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">ประวัติใบอนุมัติ Group {{ $current->group_id }}</h5>
+        
         <a href="{{ route('approvals.index') }}" class="btn btn-secondary shadow-sm">
             <i class="bi bi-arrow-left"></i> ย้อนกลับ
         </a>
     </div>
-
+<style>
+    .table-info {
+        background-color: #5be1edff !important; /* สีฟ้าอ่อนสำหรับแถวที่เลือก */
+    }                                                                                                                                                                                       
+    .table-hover tbody tr:hover {
+        background-color: #2f6295ff; /* สีเมื่อเอาเมาส์ไปชี้ */
+    }
+    .badge {
+        padding: 8px 12px;
+        border-radius: 6px;
+        color: white;
+    }
+</style>
     <div class="table-responsive mb-4">
         <table class="table table-bordered table-sm align-middle shadow-sm">
             <thead class="table-light">
@@ -23,8 +36,9 @@
             </thead>
             <tbody>
                 @foreach($approvals as $ver)
-                <tr class="text-center {{ $ver->version == $current->version ? 'table-info' : '' }}">
-                    <td>{{ $ver->version }}</td>
+                <tr class="clickable-row {{ $ver->group_id == $current->group_id  ? 'table-info' : '' }}" 
+                    data-href="{{ route('approvals.show', $ver->group_id ) }}" style="cursor: pointer;">
+                    <td>{{ $ver->ver }}</td>
                     <td class="text-center">
                         @if($ver->status == 'Pending_Admin')
                             <span class="badge px-3 py-2" style="background-color: #fd178aff; color: white;">Pending Admin</span> {{-- สีชมพู --}}
@@ -41,8 +55,7 @@
                         @endif
                     </td>
                     <td>{{ $ver->sales_name }}</td>
-                    <td>{{ $ver->created_at->format('Y-m-d H:i:s') }}</td>
-                </tr>
+                    <td>{{date('d/m/y H:i:s', strtotime($ver->created_at)) }}</td></tr>
                 @endforeach
             </tbody>
         </table>
@@ -109,5 +122,12 @@
         class="fab-download text-decoration-none">
     Export PDF
     </a>
+<script>
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        row.addEventListener('click', () => {
+            window.location.href = row.dataset.href;
+        });
+    });
+</script>
 @endsection
 

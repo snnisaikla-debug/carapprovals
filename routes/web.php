@@ -64,6 +64,8 @@ use Illuminate\Support\Facades\Session;
         // ✅ ดูเอกสาร (ใช้ groupId)
         Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])
             ->name('approvals.show');
+    // Route::get('/approvals/{groupId}', [ApprovalController::class, 'show'])
+         //  ->name('approvals.show');
 
         // ✅ แก้ไข
         Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])
@@ -90,6 +92,7 @@ use Illuminate\Support\Facades\Session;
         // ✅ Reject (Admin หรือ Manager กด Reject)
         Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
         ->name('approvals.reject');
+        
 
     /*
     |--------------------------------------------------------------------------

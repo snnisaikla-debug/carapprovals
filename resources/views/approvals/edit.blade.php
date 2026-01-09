@@ -2,8 +2,12 @@
 
 @section('content')
 
-<div class="container">
-    <h4>แก้ไขใบอนุมัติ</h4>
+    <div class="d-flex justify-content-between mb-3">
+        <button type="button" onclick="history.back()" class="btn btn-secondary">
+            ← ย้อนกลับ
+        </button>
+    </div>
+    <ins><h2>แก้ไขใบอนุมัติ</h2></ins><br>
 
 {{-- ส่วนหัวฟอร์ม --}}
 <form action="{{ route('approvals.update', $approval->id) }}" method="POST">
