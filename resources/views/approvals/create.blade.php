@@ -272,20 +272,44 @@
         <textarea rows="2" class="form-control" name="campaigns_used"></textarea>
     </div>
      <div class="col-6 mb-3">
-        <label class="form-label">ส่วนลด (เงินสดดาวน์)</label>
+        <label class="form-label">ส่วนลด (เงินสดดาวน์) (บาท)</label>
         <input type="number" step="0.01" class="form-control" name="decoration_amount">
     </div>
     <div class="col-6 mb-3">
-        <label class="form-label">รับรถจ่ายดาวน์/สด</label>
+        <label class="form-label">รับรถจ่ายดาวน์/สด (บาท)</label>
         <input type="text" step="0.01" class="form-control" name="decoration_amount">
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">จ่ายของแต่ง</label>
         <input type="number" step="0.01" class="form-control" name="decoration_amount">
     </div>
-     <div class="col-6 mb-3">
+    <div class="col-6 mb-3">
         <label class="form-label">รวมทั้งหมด</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_amount">
+        <div class="input-group">
+            <input type="number" step="0.01" class="form-control" name="decoration_amount" id="calc_input">
+            <button class="btn btn-outline-secondary" type="button" onclick="openCalculator()">
+                <i class="bi bi-calculator"></i> 🖩
+            </button>
+        </div>
+    </div>
+    <div class="modal fade" id="calcModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div id="calculator-display" class="h3 border p-2 mb-3 bg-light text-end">0</div>
+                    <div class="row g-2">
+                        @foreach(['7','8','9','/','4','5','6','*','1','2','3','-','0','.','C','+'] as $btn)
+                            <div class="col-3">
+                                <button class="btn btn-secondary w-100 py-3" onclick="pressKey('{{ $btn }}')">{{ $btn }}</button>
+                            </div>
+                        @endforeach
+                        <div class="col-12">
+                            <button class="btn btn-primary w-100 py-2" onclick="applyResult()">ยืนยันค่านี้</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- 21–22 commercial / การแต่ง --}}
@@ -356,9 +380,7 @@
         <input type="text" class="form-control" name="sale_com_signature">
     </div>
 
-    <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
-
-</form>
+<form>
     <div class="section-title">ลายเซ็น</div>
 
     {{-- Signature SC --}}
@@ -380,6 +402,39 @@
         <button type="button" id="salecom-clear" class="btn btn-sm btn-outline-danger mt-2">ล้างลายเซ็น Com</button>
         <input type="hidden" name="sale_com_signature_data" id="sale_com_signature_data">
     </div>
+
+    <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
+    
+{{-- ================== SCRIPT เครื่องคิดเลข ================== --}}
+<script>
+let currentExpression = "";
+
+function openCalculator() {
+    var myModal = new bootstrap.Modal(document.getElementById('calcModal'));
+    myModal.show();
+}
+
+function pressKey(key) {
+    const display = document.getElementById('calculator-display');
+    if (key === 'C') {
+        currentExpression = "";
+    } else {
+        currentExpression += key;
+    }
+    display.innerText = currentExpression || "0";
+}
+
+function applyResult() {
+    try {
+        const result = eval(currentExpression); // คำนวณค่า
+        document.getElementById('calc_input').value = result.toFixed(2);
+        bootstrap.Modal.getInstance(document.getElementById('calcModal')).hide();
+    } catch (e) {
+        alert("รูปแบบการคำนวณไม่ถูกต้อง");
+    }
+}
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script>
     function setupSignaturePad(canvasId, clearBtnId, outputId) {
@@ -425,6 +480,7 @@
         }
     });
 </script>
+</form>
 {{-- ================== SCRIPT คำนวณ ================== --}}
 <script>
 function calculateFinance() {

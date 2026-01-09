@@ -173,37 +173,37 @@ class ApprovalController extends Controller
             return view('approvals.show', compact('approvals', 'current'));
         }
 
-    public function edit($groupId)
+    // ส่วนของฟังก์ชัน edit
+    public function edit($id)
         {
-            $current = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-            
-            // เช็คสิทธิ์: เฉพาะเจ้าของหรือ Admin
-            if (Auth::user()->role === 'sale' && $current->sales_user_id !== Auth::id()) {
-                abort(403);
+            $approval = Approval::findOrFail($id);
+            $user = auth()->user();
+
+            // แก้ไขเงื่อนไข 403: 
+            // อนุญาตถ้า: เป็นเจ้าของงาน (Sale) หรือ เป็น Admin หรือ เป็น Manager
+            if ($user->role === 'sale' && $approval->sales_user_id !== $user->id) {
+                abort(403, 'คุณไม่มีสิทธิ์แก้ไขเอกสารนี้');
             }
 
-            return view('approvals.edit', compact('current'));
+            return view('approvals.edit', compact('approval'));
         }
 
-    public function update(Request $request, $groupId)
+    // ส่วนของฟังก์ชัน update (เพื่อให้เก็บประวัติฉบับเก่าไว้)
+    public function update(Request $request, $id)
         {
-            $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
-
-            $data = $request->validate([
-                'customer_name' => 'required|string',
-                'car_model'     => 'required|string',
-                'car_price'     => 'required|numeric',
-                // ... ใส่ฟิลด์ที่ต้องการให้อัปเดต ...
-            ]);
-
-            // สร้างเวอร์ชันใหม่เสมอเมื่อมีการแก้ไข (Audit Trail)
-            $newVersion = $latest->replicate();
-            $newVersion->fill($data);
-            $newVersion->version = $latest->version + 1;
-            $newVersion->status = 'Pending_Admin'; // แก้ไขแล้วส่งกลับไปเริ่ม Workflow ใหม่
+            $oldVersion = Approval::findOrFail($id);
+            
+            // ก๊อปปี้ข้อมูลเดิมมาสร้างแถวใหม่ (Versioning)
+            $newVersion = $oldVersion->replicate(); 
+            
+            // นำข้อมูลใหม่จากฟอร์มมาใส่
+            $newVersion->fill($request->all());
+            
+            $newVersion->version = $oldVersion->version + 1; // เพิ่มเลขเวอร์ชัน
+            $newVersion->status = 'Pending_Admin'; // แก้ไขแล้วส่งกลับไปเริ่ม Workflow ใหม่ (สีชมพู)
             $newVersion->save();
 
-            return redirect()->route('approvals.show', $groupId)->with('success', 'สร้างเวอร์ชันใหม่และส่งตรวจสอบแล้ว');
+            return redirect()->route('approvals.index')->with('success', 'สร้างเวอร์ชันใหม่และส่งตรวจสอบแล้ว');
         }
 
     public function destroy($groupId)
@@ -236,7 +236,7 @@ class ApprovalController extends Controller
             
             // ดึงประวัติทั้งหมดในกลุ่มเดียวกัน (Group ID) เพื่อแสดงในตารางประวัติ
             $approvals = Approval::where('group_id', $current->group_id)
-                                ->orderBy('version', 'asc')
+                                ->orderBy('version', 'desc')
                                 ->get();
 
             return view('approvals.show', compact('current', 'approvals'));

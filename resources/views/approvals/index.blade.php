@@ -131,13 +131,18 @@
                     <td class="text-center">{{ $approval->car_model }}</td>
                     <td class="text-center">{{ $approval->sales_name }}</td>
                     <td class="text-center">
-                        @php $role = strtolower(Auth::user()->role); @endphp
-                        @if($role == 'admin')
-                            @include('approvals.partials.actions_admin', ['approval' => $approval])
-                        @elseif($role == 'manager')
-                            @include('approvals.partials.actions_manager', ['approval' => $approval])
-                        @elseif($role == 'sale')
-                            @include('approvals.partials.actions_sale', ['approval' => $approval])
+                        @if($approval->status == 'Pending_Admin')
+                            <span class="badge px-3 py-2" style="background-color: #fd178aff; color: white;">Pending Admin</span> {{-- สีชมพู --}}
+                        @elseif($approval->status == 'Pending_Manager')
+                            <span class="badge px-3 py-2" style="background-color: #ff6716ff; color: white;">Pending Manager</span> {{-- สีส้ม--}}
+                        @elseif($approval->status == 'Approved')
+                            <span class="badge px-3 py-2" style="background-color: #03b11aff; color: white;">Approved</span> {{-- สีเขียว --}}
+                        @elseif($approval->status == 'Draft')
+                            <span class="badge px-3 py-2" style="background-color: #f7ff07ff; color: black;">Draft</span> {{-- สีเหลือง --}}
+                        @elseif($approval->status == 'Reject')
+                            <span class="badge px-3 py-2" style="background-color: #fe1c1cff; color: white;">Rejected</span> {{-- สีแดง --}}
+                        @else
+                            <span class="badge bg-dark px-3 py-2">{{ $approval->status }}</span>
                         @endif
                     </td>
                     <td class="text-center text-muted small">{{ $approval->created_at }}</td>
@@ -150,4 +155,4 @@
         </table>
     </div>
 @endif
-@endsection
+@endsection 
