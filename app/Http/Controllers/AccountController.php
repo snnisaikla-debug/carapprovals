@@ -8,8 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class AccountController extends Controller
 {
@@ -207,6 +209,11 @@ class AccountController extends Controller
         {
             return view('account.password'); // ต้องไปสร้างไฟล์ View นี้ในข้อ 3
         }
+    // ฟอร์มรหัสผ่าน
+    public function showSecurityForm()
+        {
+            return view('account.password');
+        }
 
     // บันทึกรหัสผ่านใหม่
     public function updatePassword(Request $request)
@@ -219,12 +226,53 @@ class AccountController extends Controller
 
             // อัปเดตรหัสผ่าน
             $user = Auth::user();
-            
-            /** @var \App\Models\User $user */ // Type hinting เพื่อให้ editor รู้จัก method update
-            $user->update([
+            $user->forceFill([
                 'password' => Hash::make($request->new_password)
-            ]);
+                ])->save();
 
             return back()->with('success', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
+        }
+        // ฟังก์ชัน 2: ขอเปลี่ยนอีเมล (ส่งลิงก์ยืนยันไปที่อีเมลใหม่)
+    public function requestEmailChange(Request $request)
+        {
+            $request->validate([
+                'current_password_for_email' => 'required|current_password', // ยืนยันรหัสผ่านก่อนเปลี่ยนเมล
+                'new_email' => 'required|email|unique:users,email',
+            ]);
+
+            $user = Auth::user();
+            $newEmail = $request->new_email;
+
+            // สร้างลิงก์ยืนยันแบบชั่วคราว (หมดอายุใน 30 นาที)
+            $verifyUrl = URL::temporarySignedRoute(
+                'account.email.verify',
+                now()->addMinutes(30),
+                ['user_id' => $user->id, 'new_email' => $newEmail]
+            );
+
+            // ส่งอีเมล (แบบบ้านๆ ใช้ Raw Message เพื่อความรวดเร็ว)
+            // ในโปรเจกต์จริงควรสร้าง Mailable Class สวยๆ
+            Mail::raw("กรุณาคลิกลิงก์เพื่อยืนยันการเปลี่ยนอีเมลเป็น: $newEmail \n\n $verifyUrl", function ($message) use ($newEmail) {
+                $message->to($newEmail)
+                        ->subject('ยืนยันการเปลี่ยนอีเมล (Verify Email Change)');
+            });
+
+            return back()->with('success', 'ระบบได้ส่งลิงก์ยืนยันไปที่ ' . $newEmail . ' กรุณาตรวจสอบกล่องจดหมาย');
+        }
+
+    // ฟังก์ชัน 3: ยืนยันและเปลี่ยนอีเมลจริง
+    public function verifyEmailChange(Request $request)
+        {
+            // ตรวจสอบลายเซ็นของลิงก์ (ป้องกันการปลอมแปลง)
+            if (! $request->hasValidSignature()) {
+                abort(403, 'ลิงก์ยืนยันไม่ถูกต้องหรือหมดอายุ');
+            }
+
+            $user = User::findOrFail($request->user_id);
+            $user->email = $request->new_email;
+            $user->email_verified_at = now(); // ถือว่ายืนยันแล้ว
+            $user->save();
+
+            return redirect()->route('account.security')->with('success', 'เปลี่ยนอีเมลสำเร็จแล้ว!');
         }
 }

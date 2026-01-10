@@ -1,135 +1,116 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>ใบอนุมัติการขายรถ #{{ $approval->id }}</title>
+    <style>
+        /* กำหนดฟอนต์ภาษาไทย (ต้องมีไฟล์ฟอนต์ใน storage/fonts) */
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: normal;
+            src: url("{{ storage_path('fonts/THSarabunNew.ttf') }}") format('truetype');
+        }
+        @font-face {
+            font-family: 'THSarabunNew';
+            font-style: normal;
+            font-weight: bold;
+            src: url("{{ storage_path('fonts/THSarabunNew Bold.ttf') }}") format('truetype');
+        }
 
-<style>
-    @page {
-        size: A4;
-        margin: 20mm;
-    }
+        body {
+            font-family: 'THSarabunNew', sans-serif;
+            font-size: 16pt;
+            line-height: 1.2;
+        }
 
-    body {
-        font-family: "THSarabunNew", sans-serif;
-        font-size: 16px;
-        color: #000;
-    }
-
-    h2 {
-        text-align: center;
-        margin-bottom: 10px;
-    }
-
-    .section {
-        margin-top: 15px;
-    }
-
-    .section-title {
-        font-weight: bold;
-        border-bottom: 1px solid #000;
-        margin-bottom: 5px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    td {
-        padding: 6px;
-        vertical-align: top;
-    }
-
-    .border td {
-        border: 1px solid #000;
-    }
-    @font-face {
-    font-family: 'THSarabunNew';
-    src: url('{{ storage_path("fonts/THSarabunNew.ttf") }}') format('truetype');
-}
-
-</style>
+        h2 { font-size: 20pt; text-align: center; margin-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th, td { border: 1px solid #000; padding: 5px; vertical-align: top; }
+        th { background-color: #f2f2f2; font-weight: bold; width: 30%; text-align: left; }
+        
+        .header-section { background-color: #333; color: white; padding: 5px; font-weight: bold; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .price { color: red; font-weight: bold; }
+        
+        /* ลายเซ็น */
+        .signature-box { margin-top: 30px; text-align: center; float: left; width: 45%; }
+        .signature-img { max-height: 60px; display: block; margin: 0 auto; }
+    </style>
 </head>
-
 <body>
-    <h2>ใบอนุมัติการขายรถยนต์</h2>
-    <p>Group: {{ $current->group_id }} | Version: {{ $current->version }} | Status: {{ $current->status }}</p>
-    <p>Sales: {{ $current->sales_name }}</p>
 
-    <div class="section-title">1. ข้อมูลลูกค้า</div>
-    <table>
-        <tr><td>ชื่อลูกค้า</td><td>{{ $current->customer_name }}</td></tr>
-        <tr><td>อำเภอ</td><td>{{ $current->customer_district }}</td></tr>
-        <tr><td>จังหวัด</td><td>{{ $current->customer_province }}</td></tr>
-        <tr><td>เบอร์โทร</td><td>{{ $current->customer_phone }}</td></tr>
-    </table>
+    <h2>ใบขออนุมัติเงื่อนไขการขาย YPB</h2>
+    <div style="text-align: right; margin-bottom: 10px;">
+        <strong>วันที่ขอแคมเปญ:</strong> {{ $approval->request_date ? $approval->request_date->format('d/m/Y') : '-' }} <br>
+        <strong>วันที่จะส่งมอบรถ:</strong> {{ $approval->delivery_date ? \Carbon\Carbon::parse($approval->delivery_date)->format('d/m/Y H:i') : '-' }}
+    </div>
 
-    <div class="section-title">2. ข้อมูลรถ</div>
-    <table>
-        <tr><td>รุ่นรถ</td><td>{{ $current->car_model }}</td></tr>
-        <tr><td>สี</td><td>{{ $current->car_color }}</td></tr>
-        <tr><td>ออฟชั่น</td><td>{{ $current->car_options }}</td></tr>
-        <tr><td>ราคา</td><td>{{ number_format($current->car_price,2) }}</td></tr>
-    </table>
-
-    <div class="section-title">ข้อมูลไฟแนนซ์</div>
-    <table>
-        <tr><td>บวกหัว</td><td>{{ $current->plus_head }}</td></tr>
-        <tr><td>F/N</td><td>{{ $current->fn }}</td></tr>
-        <tr><td>ดาวน์ (%)</td><td>{{ $current->down_percent }}</td></tr>
-        <tr><td>ดาวน์ (บาท)</td><td>{{ $current->down_amount }}</td></tr>
-        <tr><td>ยอดจัด</td><td>{{ $current->finance_amount }}</td></tr>
-        <tr><td>งวดละ</td><td>{{ $current->installment_per_month }}</td></tr>
-        <tr><td>จำนวนงวด</td><td>{{ $current->installment_months }}</td></tr>
-        <tr><td>ดอกเบี้ย (%)</td><td>{{ $current->interest_rate }}</td></tr>
-    </table>
-
-    <div class="section-title">แคมเปญ / ส่วนลด</div>
-    <table>
-        <tr><td>รหัสแคมเปญ</td><td>{{ $current->campaign_code }}</td></tr>
-        <tr><td>ประเภทการขาย</td><td>{{ $current->sale_type }}</td></tr>
-        <tr><td>จำนวน (บาท)</td><td>{{ $current->sale_type_amount }}</td></tr>
-        <tr><td>Fleet (บาท)</td><td>{{ $current->fleet_amount }}</td></tr>
-        <tr><td>หักประกัน</td><td>{{ $current->insurance_deduct }}</td></tr>
-        <tr><td>ใช้จริง</td><td>{{ $current->insurance_used }}</td></tr>
-        <tr><td>Kickback</td><td>{{ $current->kickback_amount }}</td></tr>
-        <tr><td>Com F/N</td><td>{{ $current->com_fn_option }} ({{ $current->com_fn_amount }})</td></tr>
-    </table>
-
-    <div class="section-title">ของแถม / ซื้อเพิ่ม / แคมเปญ</div>
-    <table>
-        <tr><td>ของแถม</td><td>{{ $current->free_items }}</td></tr>
-        <tr><td>ของแถมเกิน</td><td>{{ $current->free_items_over }}</td></tr>
-        <tr><td>ซื้อเพิ่ม</td><td>{{ $current->extra_purchase_items }}</td></tr>
-        <tr><td>แคมเปญที่มี</td><td>{{ $current->campaigns_available }}</td></tr>
-        <tr><td>แคมเปญที่ใช้</td><td>{{ $current->campaigns_used }}</td></tr>
-        <tr><td>Commercial 30,000</td><td>{{ $current->is_commercial_30000 ? 'ใช่' : 'ไม่' }}</td></tr>
-        <tr><td>แต่ง (มูลค่า)</td><td>{{ $current->decoration_amount }}</td></tr>
-        <tr><td>เกินแคมเปญ</td><td>{{ $current->over_campaign_amount }} ({{ $current->over_campaign_status }})</td></tr>
-        <tr><td>เกินของแต่ง</td><td>{{ $current->over_decoration_amount }} ({{ $current->over_decoration_status }})</td></tr>
-        <tr><td>สาเหตุขอเกิน</td><td>{{ $current->over_reason }}</td></tr>
-    </table>
-
-    <div class="section-title">ลายเซ็น</div>
+    <div class="header-section">1. ข้อมูลลูกค้าและการขาย</div>
     <table>
         <tr>
-            <td>SC</td>
-            <td>
-                @if($current->sc_signature)
-                    <img src="{{ public_path(str_replace('storage/', 'storage/', $current->sc_signature)) }}" 
-                        style="max-width:200px;">
-                @endif
-            </td>
+            <th>ชื่อลูกค้า</th>
+            <td>{{ $approval->customer_name }}</td>
         </tr>
         <tr>
-            <td>Com การขาย</td>
-            <td>
-                @if($current->sale_com_signature)
-                    <img src="{{ public_path(str_replace('storage/', 'storage/', $current->sale_com_signature)) }}" 
-                        style="max-width:200px;">
-                @endif
-            </td>
+            <th>ที่อยู่</th>
+            <td>{{ $approval->customer_address ?? '-' }}</td>
+        </tr>
+        <tr>
+            <th>เบอร์โทร</th>
+            <td>{{ $approval->customer_phone ?? '-' }}</td>
+        </tr>
+        <tr>
+            <th>ที่ปรึกษาการขาย (SC)</th>
+            <td>{{ $approval->sales_name }}</td>
         </tr>
     </table>
+
+    <div class="header-section">2. ข้อมูลรถและราคา</div>
+    <table>
+        <tr>
+            <th>รุ่นรถ (Model)</th>
+            <td>{{ $approval->car_model }}</td>
+        </tr>
+        <tr>
+            <th>ราคารถ</th>
+            <td class="price">{{ number_format($approval->car_price, 2) }} บาท</td>
+        </tr>
+    </table>
+
+    <div class="header-section">3. ของแถมและอุปกรณ์ตกแต่ง</div>
+    <table>
+        <tr>
+            <th>รายการของแถม</th>
+            <td>{!! nl2br(e($approval->free_items)) !!}</td>
+        </tr>
+        <tr>
+            <th>งบอุปกรณ์ตกแต่ง</th>
+            <td>{{ number_format($approval->decoration_amount, 2) }} บาท</td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 20px;">
+        <div class="signature-box">
+            @if($approval->sc_signature_data)
+                <img src="{{ $approval->sc_signature_data }}" class="signature-img">
+            @else
+                <br><br><br>
+            @endif
+            __________________________<br>
+            ( {{ $approval->sales_name }} )<br>
+            ผู้เสนอขาย
+        </div>
+
+        <div class="signature-box" style="float: right;">
+             <br><br><br>
+            __________________________<br>
+            ( ........................ )<br>
+            ผู้อนุมัติ
+        </div>
+    </div>
+
 </body>
 </html>

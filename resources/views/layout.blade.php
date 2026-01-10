@@ -71,11 +71,16 @@
             @endauth
 
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ route('account.show') }}">บัญชีของฉัน</a></li>
+                <li><a class="dropdown-item" href="#">
+                    บัญชีของฉัน</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{{ route('[account.password.update') }}">รหัสผ่านและความปลอดภัย</a></li>
+                <li><a class="dropdown-item" href="{{ route('account.security') }}">
+                    รหัสผ่านและความปลอดภัย</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">
+                    ช่วยเหลือ</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li>
+               
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button class="dropdown-item text-danger">ออกจากระบบ</button>

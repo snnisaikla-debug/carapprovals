@@ -221,10 +221,18 @@ class ApprovalController extends Controller
 
     public function exportPdf($id)
         {
+            // 1. ดึงข้อมูลใบอนุมัติ
             $approval = Approval::findOrFail($id);
-            $pdf = Pdf::loadView('approvals.pdf', compact('approval'))->setPaper('A4', 'portrait');
-            return $pdf->stream('approval_'.$approval->id.'.pdf');
+
+            // 2. สร้าง PDF จากไฟล์ View กำหนดขนาดกระดาษ A4 แนวตั้ง
+            $pdf = Pdf::loadView('approvals.pdf', compact('approval'))
+                    ->setPaper('A4', 'portrait');
+
+            // 3. กำหนด Font ภาษาไทย (เพื่อให้แสดงผลภาษาไทยได้)
+            // 4. ส่งไฟล์ PDF ให้ Browser (Stream = เปิดดู, Download = โหลดลงเครื่อง)
+            return $pdf->stream('approval_' . $approval->id . '.pdf');
         }
+
     // เพิ่มฟังก์ชันนี้เข้าไปใน Controller
     public function show($id)
         {
@@ -238,5 +246,4 @@ class ApprovalController extends Controller
 
             return view('approvals.show', compact('current', 'approvals'));
         }
-        // ฟังก์ชันสำหรับบันทึกการแก้ไขโปรไฟล์
 }

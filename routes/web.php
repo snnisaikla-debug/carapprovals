@@ -7,7 +7,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\HomeController;
 
+ 
+   
     /*
     |--------------------------------------------------------------------------
     | Public Routes
@@ -26,6 +30,9 @@ use Illuminate\Support\Facades\Session;
         // Reset password
         Route::get('/password/reset', [AuthController::class, 'showResetPassword'])->name('password.request');
         Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
+        Route::get('/', function () {
+        return redirect()->route('login');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -36,10 +43,22 @@ use Illuminate\Support\Facades\Session;
         Route::resource('approvals', ApprovalController::class);
     
     // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
-        Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+    Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Custom Routes ของ Approval
+    Route::post('/approvals/{group_id}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+    Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
+    Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
+    Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
 
+    // Change Password/Gmail
+    Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
+    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+    Route::get('/account/security', [AccountController::class, 'showSecurityForm'])->name('account.security');
+    Route::post('/account/email', [AccountController::class, 'requestEmailChange'])->name('account.email.request');
+    Route::get('/account/email/verify', [AccountController::class, 'verifyEmailChange'])->name('account.email.verify');
+    
     /*
     |--------------------------------------------------------------------------
     | จัดหน้า หน้าแรก sale/admin/manager
@@ -64,8 +83,8 @@ use Illuminate\Support\Facades\Session;
         // ✅ ดูเอกสาร (ใช้ groupId)
         Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])
             ->name('approvals.show');
-    // Route::get('/approvals/{groupId}', [ApprovalController::class, 'show'])
-         //  ->name('approvals.show');
+        Route::get('/approvals/{groupId}', [ApprovalController::class, 'show'])
+            ->name('approvals.show');
 
         // ✅ แก้ไข
         Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])
@@ -78,8 +97,8 @@ use Illuminate\Support\Facades\Session;
             ->name('approvals.destroy');
 
         // ✅ Export PDF (ใช้ approval id)
-        Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])
-            ->name('approvals.pdf');
+        Route::get('/approvals/{id}/pdf', [App\Http\Controllers\ApprovalController::class, 'exportPdf'])
+            ->name('approvals.exportPdf');
 
         // ✅ Submit
         Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
@@ -108,10 +127,6 @@ use Illuminate\Support\Facades\Session;
         Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
         Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
         Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
-        
-        // Password
-        Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
-        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
         
         // updateSphp artisan route:clearphp artisan route:clear
         Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
@@ -154,14 +169,3 @@ use Illuminate\Support\Facades\Session;
         $request->session()->put('lang', $lang);
         return back()->withCookie(cookie('lang', $lang, 60 * 24 * 30));
     })->name('lang.switch');
-
-
-
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-    Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
-    Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
-    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
-    Route::delete('/account/destroy', [AccountController::class, 'destroy'])->name('account.destroy');
-});

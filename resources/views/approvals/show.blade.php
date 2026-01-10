@@ -118,9 +118,9 @@
     color: #fff;
 }
 </style>
-    <a href="{{ route('approvals.pdf', $current->id) }}"
+    <a href="{{ route('approvals.exportPdf', $current->id) }}"
         class="fab-download text-decoration-none">
-    Export PDF
+        Export PDF
     </a>
 <script>
     document.querySelectorAll('.clickable-row').forEach(row => {
