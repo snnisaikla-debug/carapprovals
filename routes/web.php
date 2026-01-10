@@ -109,7 +109,11 @@ use Illuminate\Support\Facades\Session;
         Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
         Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
         
-        // update
+        // Password
+        Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
+        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+        
+        // updateSphp artisan route:clearphp artisan route:clear
         Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');
         Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
         Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');

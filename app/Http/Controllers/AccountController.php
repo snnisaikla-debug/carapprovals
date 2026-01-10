@@ -202,5 +202,29 @@ class AccountController extends Controller
             }
         
             return redirect('/');
+            }
+            public function showChangePasswordForm()
+        {
+            return view('account.password'); // ต้องไปสร้างไฟล์ View นี้ในข้อ 3
+        }
+
+    // บันทึกรหัสผ่านใหม่
+    public function updatePassword(Request $request)
+        {
+            // Validate ข้อมูล
+            $request->validate([
+                'current_password' => 'required|current_password',
+                'new_password' => 'required|string|min:8|confirmed',
+            ]);
+
+            // อัปเดตรหัสผ่าน
+            $user = Auth::user();
+            
+            /** @var \App\Models\User $user */ // Type hinting เพื่อให้ editor รู้จัก method update
+            $user->update([
+                'password' => Hash::make($request->new_password)
+            ]);
+
+            return back()->with('success', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
         }
 }
