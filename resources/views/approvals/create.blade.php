@@ -164,7 +164,7 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">หัก (บาท)</label>
-            <input type="number" class="form-control" name="installment_months">
+            <input type="number" class="form-control" name="Flight">
         </div>
     </div>
 
@@ -435,6 +435,7 @@ function applyResult() {
 }
 </script>
 
+{{-- ================== SCRIPT คำนวณ ================== --}}
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
 <script>
     function setupSignaturePad(canvasId, clearBtnId, outputId) {

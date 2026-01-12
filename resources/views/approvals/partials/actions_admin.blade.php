@@ -1,12 +1,21 @@
-<a href="{{ route('approvals.show', $approval->group_id) }}"
-    class="btn btn-sm btn-secondary" style="opacity: 0.6;">
-    รายละเอียด
-</a>
+<div class="d-flex gap-1 justify-content-center">
+    <a href="{{ route('approvals.show', $approval->group_id) }}"
+        class="btn btn-sm btn-secondary" style="opacity: 0.6;">
+        รายละเอียด
+    </a>
 
-@if($approval->status == 'Pending_Admin')
-    <form action="{{ route('approvals.updateStatus', $approval->id) }}" method="POST" style="display:inline;">
-        @csrf
-        <button name="action" value="approve" class="btn btn-success btn-sm">อนุมัติ</button>
-        <button name="action" value="reject" class="btn btn-danger btn-sm">ไม่อนุมัติ</button>
-    </form>
-@endif
+    @if($approval->status == 'Pending_Admin')
+        <form action="{{ route('approvals.updateStatus', $approval->group_id) }}" method="POST" class="d-inline">
+            @csrf
+            <input type="hidden" name="status" value="Approved">
+            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('ยืนยันอนุมัติ?')">Approve</button>
+        </form>
+
+        <form action="{{ route('approvals.updateStatus', $approval->group_id) }}" method="POST" class="d-inline">
+            @csrf
+            <input type="hidden" name="status" value="Reject">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('ยืนยันตีกลับ?')">Reject</button>
+        </form>
+        </form>
+    @endif
+</div> 

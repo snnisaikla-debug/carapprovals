@@ -42,23 +42,23 @@ use App\Http\Controllers\HomeController;
     Route::middleware('auth')->group(function () {
         Route::resource('approvals', ApprovalController::class);
     
-    // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
-    Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
+        Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Custom Routes ของ Approval
-    Route::post('/approvals/{group_id}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
-    Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
-    Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
-    Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
+        // Custom Routes ของ Approval
+        Route::post('/approvals/{group_id}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+        Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
+        Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
+        Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
 
-    // Change Password/Gmail
-    Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
-    Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
-    Route::get('/account/security', [AccountController::class, 'showSecurityForm'])->name('account.security');
-    Route::post('/account/email', [AccountController::class, 'requestEmailChange'])->name('account.email.request');
-    Route::get('/account/email/verify', [AccountController::class, 'verifyEmailChange'])->name('account.email.verify');
-    
+        // Change Password/Gmail
+        Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
+        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
+        Route::get('/account/security', [AccountController::class, 'showSecurityForm'])->name('account.security');
+        Route::post('/account/email', [AccountController::class, 'requestEmailChange'])->name('account.email.request');
+        Route::get('/account/email/verify', [AccountController::class, 'verifyEmailChange'])->name('account.email.verify');
+        
     /*
     |--------------------------------------------------------------------------
     | จัดหน้า หน้าแรก sale/admin/manager
@@ -103,6 +103,10 @@ use App\Http\Controllers\HomeController;
         // ✅ Submit
         Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
         ->name('approvals.submit');
+
+        // ✅ Route สำหรับเปลี่ยนสถานะ (Approve / Reject)
+        Route::post('/approvals/{groupId}/update-status', [ApprovalController::class, 'updateStatus'])
+        ->name('approvals.updateStatus');
 
         // ✅ Manager Approve” → Approved (จบ)
         Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])

@@ -90,6 +90,7 @@ class ApprovalController extends Controller
             'kickback_amount'       => 'nullable|numeric',
             'campaigns_available'   => 'nullable|string',
             'campaigns_used'        => 'nullable|string',
+            'Flight'                => 'nullable|numeric',
 
             // 5. รายการของแถมและอุปกรณ์ตกแต่ง (Free Items & Decoration)
             'free_items'            => 'nullable|string',
@@ -128,24 +129,26 @@ class ApprovalController extends Controller
         }
 
     // Admin/Manager Action (ฟังก์ชันรวมเพื่อลดความซ้ำซ้อน)
-    public function updateStatus(Request $request, $groupId)
+    public function updateStatus(Request $request, $group_id)
         {
-            $latest = Approval::where('group_id', $groupId)->latest()->firstOrFail();
-            $action = $request->input('action'); 
-            $role = strtolower(auth()->user()->role);
+            // 1. ตรวจสอบว่ามีสถานะส่งมาไหม
+            $request->validate([
+                'status' => 'required|in:Approved,Reject,Pending_Manager'
+            ]);
 
-            if ($action === 'approve') {
-                if ($role === 'admin') {
-                    $latest->status = 'Pending_Manager'; // Admin ผ่านไปหา Manager
-                } elseif ($role === 'manager') {
-                    $latest->status = 'Approved'; // Manager อนุมัติจบงาน
-                }
-            } elseif ($action === 'reject') {
-                $latest->status = 'Draft'; // โดน Reject ตีกลับเป็น Draft ให้ Sale แก้ไข
+            // 2. อัปเดตทุกใบใน Group เดียวกันให้เป็นสถานะใหม่
+            $affected = \App\Models\Approval::where('group_id', $group_id)->update([
+                'status' => $request->status,
+                'updated_at' => now()
+            ]);
+
+            if ($affected === 0) {
+                abort(404, 'ไม่พบข้อมูลใบอนุมัติกลุ่มนี้');
             }
 
-            $latest->save();
-            return back()->with('success', 'อัปเดตสถานะเรียบร้อย');
+            // 3. สำคัญมาก: ต้องเด้งหน้ากลับไปที่เดิมพร้อมข้อความแจ้งเตือน
+            return redirect()->route('approvals.index')
+                            ->with('success', 'เปลี่ยนสถานะเป็น ' . $request->status . ' เรียบร้อยแล้ว');
         }
 
     // กรณีถูก Reject: Sale สร้างเวอร์ชันใหม่เพื่อแก้ไข
