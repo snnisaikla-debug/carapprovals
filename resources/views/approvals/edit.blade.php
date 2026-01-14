@@ -177,8 +177,8 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">หัก (บาท)</label>
-            <input type="number" class="form-control" name="installment_months"
-            value="{{ old('installment_months', $approval->installment_months) }}">
+            <input type="number" class="form-control" name="Flight"
+            value="{{ old('Flight', $approval->Flight) }}">
         </div>
     </div>
     <div class="row">
@@ -299,23 +299,6 @@
             {{ old('extra_purchase_items', $approval->extra_purchase_items) }}</textarea>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">รายการของแถม</label>
-        <textarea rows="2" class="form-control" name="free_items">
-            {{ old('fee_items', $approval->free_items) }}</textarea>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">รายการของแถมเกิน</label>
-        <textarea rows="2" class="form-control" name="free_items_over">
-            {{ old('free_items_over', $approval->free_items_over) }}</textarea>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">รายการซื้อเพิ่ม</label>
-        <textarea rows="2" class="form-control" name="extra_purchase_items">
-            {{ old('extra_purchase_items', $approval->extra_purchase_items) }}</textarea>
-    </div>
 
     {{-- 19–20 แคมเปญ --}}
     <div class="section-title">แคมเปญ</div><br>

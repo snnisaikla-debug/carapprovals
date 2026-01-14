@@ -5,10 +5,22 @@
 @section('content')
 
 @php
-    // แยก Draft ออกเป็นอีกตาราง
-    $draftApprovals = $approvals->where('status', 'Draft');
-    // ตารางหลักแสดงเฉพาะที่ไม่ใช่ Draft
-    $mainApprovals  = $approvals->where('status', '!=', 'Draft');
+    $user = Auth::user();
+    $isSale = $user->role === 'sale';
+
+    // 1. ตารางหลัก: Admin/Manager เห็นทุกสถานะยกเว้น Draft | Sale เห็นเฉพาะที่ส่งไปแล้ว (Pending/Approved)
+    if ($isSale) {
+        $mainApprovals = $approvals->whereIn('status', ['Pending_Admin', 'Pending_Manager', 'Approved']);
+    } else {
+        $mainApprovals = $approvals->where('status', '!=', 'Draft');
+    }
+
+    // 2. ตาราง Draft (สำหรับ Sale เท่านั้น): รวมงานที่เป็น Draft จริงๆ และงานที่ถูก Reject
+    if ($isSale) {
+        $draftApprovals = $approvals->whereIn('status', ['Draft', 'Reject']);
+    } else {
+        $draftApprovals = collect(); // Admin/Manager ไม่เห็นตารางนี้
+    }
 @endphp
 
 {{-- แถว 1: ปุ่มสร้าง --}}
@@ -51,45 +63,42 @@
     </div>
 </div>
 
-{{-- แถว 3: ตารางหลัก (ใช้ $mainApprovals) --}}
+{{-- แถว 3: ตารางหลัก --}}
 <div class="table-responsive">
     <table class="table table-bordered table-sm align-middle">
         <thead class="text-center bg-light">
             <tr>
-                <th style="width:40px">#</th>
-                <th style="width:90px">GroupID</th>
+                <th>#</th>
+                <th>GroupID</th>
                 <th>รุ่นรถ</th>
-                <th>ชื่อผู้ส่งคำขอ</th>
-                <th style="width:160px">สถานะ</th>
-                <th style="width:170px">อัปเดตล่าสุด</th>
-                <th style="width:260px">จัดการ</th>
+                <th>ผู้ส่งคำขอ</th>
+                <th>สถานะ</th>
+                <th>อัปเดตล่าสุด</th>
+                <th>จัดการ</th>
             </tr>
         </thead>
         <tbody>
-        @forelse($mainApprovals as $approval) {{-- แก้จาก $approvals เป็น $mainApprovals เพื่อไม่ให้โชว์ซ้ำกับตาราง Draft --}}
+        @forelse($mainApprovals as $approval)
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
-                <td class="text-center">{{ $approval->group_id }}</td> {{-- แก้จาก $row เป็น $approval --}}
+                <td class="text-center">{{ $approval->group_id }}</td>
                 <td>{{ $approval->car_model }}</td> 
                 <td>{{ $approval->sales_name }}</td>
                 <td class="text-center">
+                    {{-- แสดงสถานะตามจริง --}}
                     @if($approval->status == 'Pending_Admin')
-                        <span class="badge px-3 py-2" style="background-color: #fd178aff; color: white;">Pending Admin</span> {{-- สีชมพู --}}
+                        <span class="badge px-3 py-2" style="background-color: #fd178a; color: white;">Pending Admin</span>
                     @elseif($approval->status == 'Pending_Manager')
-                        <span class="badge px-3 py-2" style="background-color: #ff6716ff; color: white;">Pending Manager</span> {{-- สีส้ม--}}
+                        <span class="badge px-3 py-2" style="background-color: #ff6716; color: white;">Pending Manager</span>
                     @elseif($approval->status == 'Approved')
-                        <span class="badge px-3 py-2" style="background-color: #03b11aff; color: white;">Approved</span> {{-- สีเขียว --}}
-                    @elseif($approval->status == 'Draft')
-                        <span class="badge px-3 py-2" style="background-color: #f7ff07ff; color: black;">Draft</span> {{-- สีเหลือง --}}
+                        <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">Approved</span>
                     @elseif($approval->status == 'Reject')
-                        <span class="badge px-3 py-2" style="background-color: #fe1c1cff; color: white;">Rejected</span> {{-- สีแดง --}}
-                    @else
-                        <span class="badge bg-dark px-3 py-2">{{ $approval->status }}</span>
+                        <span class="badge px-3 py-2" style="background-color: #fe1c1c; color: white;">Rejected</span>
                     @endif
                 </td>
                 <td class="text-center text-muted small">{{ $approval->updated_at }}</td>
                 <td class="text-center">
-                    @php $role = strtolower(Auth::user()->role); @endphp
+                    @php $role = strtolower($user->role); @endphp
                     @if($role == 'admin')
                         @include('approvals.partials.actions_admin', ['approval' => $approval])
                     @elseif($role == 'manager')
@@ -106,46 +115,35 @@
     </table>
 </div>
 
-{{-- ตาราง Draft แยกด้านล่าง --}}
-@if($draftApprovals->count())
+{{-- ตาราง Draft (แสดงเฉพาะ Sale) --}}
+@if($isSale && $draftApprovals->count())
     <hr class="my-5">
-    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-file-earmark-text"></i> งานสถานะ Draft (ยังไม่ได้ส่งอนุมัติ)</h6>
+    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-file-earmark-text"></i> งานที่ต้องแก้ไข / Draft</h6>
     <div class="table-responsive">
         <table class="table table-sm table-hover align-middle border">
             <thead class="table-light text-center">
                 <tr>
-                    <th style="width:40px">#</th>
-                    <th style="width:90px">GroupID</th>
+                    <th>#</th>
+                    <th>GroupID</th>
                     <th>รุ่นรถ</th>
-                    <th>ชื่อผู้ส่งคำขอ</th>
-                    <th style="width:160px">สถานะ</th>
-                    <th style="width:170px">สร้างเมื่อ</th>
-                    <th style="width:200px">จัดการ</th>
+                    <th>สถานะเดิม</th>
+                    <th>จัดการ</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach($draftApprovals as $approval) {{-- ใช้ $approval เพื่อให้ตรงกับ partials --}}
+            @foreach($draftApprovals as $approval)
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td class="text-center">{{ $approval->group_id }}</td>
-                    <td class="text-center">{{ $approval->car_model }}</td>
-                    <td class="text-center">{{ $approval->sales_name }}</td>
+                    <td>{{ $approval->car_model }}</td>
                     <td class="text-center">
-                        @if($approval->status == 'Pending_Admin')
-                            <span class="badge px-3 py-2" style="background-color: #fd178aff; color: white;">Pending Admin</span> {{-- สีชมพู --}}
-                        @elseif($approval->status == 'Pending_Manager')
-                            <span class="badge px-3 py-2" style="background-color: #ff6716ff; color: white;">Pending Manager</span> {{-- สีส้ม--}}
-                        @elseif($approval->status == 'Approved')
-                            <span class="badge px-3 py-2" style="background-color: #03b11aff; color: white;">Approved</span> {{-- สีเขียว --}}
-                        @elseif($approval->status == 'Draft')
-                            <span class="badge px-3 py-2" style="background-color: #f7ff07ff; color: black;">Draft</span> {{-- สีเหลือง --}}
-                        @elseif($approval->status == 'Reject')
-                            <span class="badge px-3 py-2" style="background-color: #fe1c1cff; color: white;">Rejected</span> {{-- สีแดง --}}
+                        {{-- Sale จะเห็นงานที่ Reject เป็น Draft --}}
+                        @if($approval->status == 'Reject')
+                            <span class="badge bg-warning text-dark px-3 py-2">Draft</span>
                         @else
-                            <span class="badge bg-dark px-3 py-2">{{ $approval->status }}</span>
+                            <span class="badge bg-light text-dark border px-3 py-2">Draft</span>
                         @endif
                     </td>
-                    <td class="text-center text-muted small">{{ $approval->created_at }}</td>
                     <td class="text-center">
                         @include('approvals.partials.actions_sale', ['approval' => $approval])
                     </td>
@@ -155,4 +153,4 @@
         </table>
     </div>
 @endif
-@endsection 
+@endsection

@@ -239,14 +239,27 @@ class ApprovalController extends Controller
     // เพิ่มฟังก์ชันนี้เข้าไปใน Controller
     public function show($id)
         {
-            // ค้นหาข้อมูลจาก ID
+            // ดึงข้อมูลฉบับปัจจุบัน
             $current = Approval::findOrFail($id);
-            
-            // ดึงประวัติทั้งหมดในกลุ่มเดียวกัน (Group ID) เพื่อแสดงในตารางประวัติ
-            $approvals = Approval::where('group_id', $current->group_id)
+
+            // ดึงประวัติทั้งหมดในกลุ่มเดียวกัน เรียงตาม Version ล่าสุด
+            $history = Approval::where('group_id', $current->group_id)
                                 ->orderBy('version', 'desc')
                                 ->get();
 
-            return view('approvals.show', compact('current', 'approvals'));
+            // ส่งค่าไปยัง View (แก้ปัญหา Undefined variable $history)
+            return view('approvals.show', compact('current', 'history'));
+        }
+    public function getVersionDetail($id)
+        {
+            $approval = Approval::findOrFail($id);
+            
+            // คืนค่าเป็น View เล็กๆ (Partial) ที่มีเฉพาะตารางข้อมูล
+            return view('approvals.partials.version_detail', compact('approval'))->render();
+        }
+    public function fetchVersion($id) 
+        {
+            $approval = Approval::findOrFail($id);
+            return view('approvals.partials.detail_table', compact('approval'))->render();
         }
 }

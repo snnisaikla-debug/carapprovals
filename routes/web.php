@@ -51,7 +51,7 @@ use App\Http\Controllers\HomeController;
         Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
         Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
         Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
-
+        Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion']);
         // Change Password/Gmail
         Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
         Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
@@ -91,7 +91,8 @@ use App\Http\Controllers\HomeController;
             ->name('approvals.edit');
         Route::post('/approvals/{groupId}/update', [ApprovalController::class, 'update'])
             ->name('approvals.update');
-
+        Route::get('/approvals/version/{id}', [ApprovalController::class, 'getVersionDetail'])
+            ->name('approvals.version.detail');
         // ✅ ลบทั้ง group
         Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])
             ->name('approvals.destroy');
