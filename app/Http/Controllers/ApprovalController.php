@@ -193,17 +193,19 @@ class ApprovalController extends Controller
         {
             $oldVersion = Approval::findOrFail($id);
             
-            // ก๊อปปี้ข้อมูลเดิมมาสร้างแถวใหม่ (Versioning)
+            // สร้าง Version ใหม่จากของเดิม
             $newVersion = $oldVersion->replicate(); 
             
-            // นำข้อมูลใหม่จากฟอร์มมาใส่
+            // รับข้อมูลใหม่จากฟอร์ม
             $newVersion->fill($request->all());
             
-            $newVersion->version = $oldVersion->version + 1; // เพิ่มเลขเวอร์ชัน
-            $newVersion->status = 'Pending_Admin'; // แก้ไขแล้วส่งกลับไปเริ่ม Workflow ใหม่ (สีชมพู)
+            // รักษา group_id เดิม และเพิ่มเลขเวอร์ชัน
+            $newVersion->group_id = $oldVersion->group_id; 
+            $newVersion->version = $oldVersion->version + 1;
+            $newVersion->status = 'Pending_Admin'; 
             $newVersion->save();
 
-            return redirect()->route('approvals.index')->with('success', 'สร้างเวอร์ชันใหม่และส่งตรวจสอบแล้ว');
+            return redirect()->route('approvals.index')->with('success', 'ส่งเวอร์ชันใหม่เพื่อตรวจสอบแล้ว');
         }
 
     public function destroy($groupId)
@@ -257,9 +259,10 @@ class ApprovalController extends Controller
             // คืนค่าเป็น View เล็กๆ (Partial) ที่มีเฉพาะตารางข้อมูล
             return view('approvals.partials.version_detail', compact('approval'))->render();
         }
-    public function fetchVersion($id) 
+        
+   public function fetchVersion($id)
         {
-            $approval = Approval::findOrFail($id);
+            $approval = \App\Models\Approval::findOrFail($id);
             return view('approvals.partials.detail_table', compact('approval'))->render();
         }
 }

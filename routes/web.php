@@ -51,7 +51,7 @@ use App\Http\Controllers\HomeController;
         Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
         Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
         Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
-        Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion']);
+       
         // Change Password/Gmail
         Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
         Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
@@ -80,34 +80,26 @@ use App\Http\Controllers\HomeController;
         Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
         Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
 
-        // ✅ ดูเอกสาร (ใช้ groupId)
-        Route::get('/approvals/{groupId}', [ApprovalController::class, 'showGroup'])
-            ->name('approvals.show');
-        Route::get('/approvals/{groupId}', [ApprovalController::class, 'show'])
-            ->name('approvals.show');
+        // --- เพิ่มส่วน Ajax Fetch ไว้ข้างบนพวก ID ---
+        Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion'])->name('approvals.fetchVersion');
 
-        // ✅ แก้ไข
-        Route::get('/approvals/{groupId}/edit', [ApprovalController::class, 'edit'])
-            ->name('approvals.edit');
-        Route::post('/approvals/{groupId}/update', [ApprovalController::class, 'update'])
-            ->name('approvals.update');
-        Route::get('/approvals/version/{id}', [ApprovalController::class, 'getVersionDetail'])
-            ->name('approvals.version.detail');
-        // ✅ ลบทั้ง group
-        Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])
-            ->name('approvals.destroy');
+        // ✅ ดูเอกสาร (เลือกใช้อันเดียวพอ)
+        Route::get('/approvals/{id}', [ApprovalController::class, 'show'])->name('approvals.show');
 
-        // ✅ Export PDF (ใช้ approval id)
-        Route::get('/approvals/{id}/pdf', [App\Http\Controllers\ApprovalController::class, 'exportPdf'])
-            ->name('approvals.exportPdf');
+        // ✅ แก้ไขและอัปเดต
+        Route::get('/approvals/{id}/edit', [ApprovalController::class, 'edit'])->name('approvals.edit');
+        Route::post('/approvals/{id}/update', [ApprovalController::class, 'update'])->name('approvals.update');
+
+        // ✅ จัดการสถานะ (ใช้ groupId เพื่อให้อัปเดตยกแผง)
+        Route::post('/approvals/{groupId}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+
+        // ✅ ลบ และ PDF
+        Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');
+        Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
 
         // ✅ Submit
         Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
         ->name('approvals.submit');
-
-        // ✅ Route สำหรับเปลี่ยนสถานะ (Approve / Reject)
-        Route::post('/approvals/{groupId}/update-status', [ApprovalController::class, 'updateStatus'])
-        ->name('approvals.updateStatus');
 
         // ✅ Manager Approve” → Approved (จบ)
         Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])
@@ -116,7 +108,6 @@ use App\Http\Controllers\HomeController;
         // ✅ Reject (Admin หรือ Manager กด Reject)
         Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
         ->name('approvals.reject');
-        
 
     /*
     |--------------------------------------------------------------------------
