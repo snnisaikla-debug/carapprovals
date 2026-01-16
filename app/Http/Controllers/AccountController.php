@@ -20,6 +20,25 @@ class AccountController extends Controller
             return view('account.show', ['user' => Auth::user()]);
         }
 
+    public function edit()
+        {
+            return view('account.edit');
+        }
+
+    public function update(Request $request)
+        {
+            $request->validate([
+                'name' => 'required|string|max:255',
+            ]);
+
+            $user = auth()->user();
+            $user->name = $request->name;
+            $user->save();
+
+            return back()->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
+        }
+
+
     public function updateProfile(Request $request)
         {
             $user = Auth::user();
@@ -238,11 +257,10 @@ class AccountController extends Controller
         }
 
         
-        // ฟังก์ชัน 2: ขอเปลี่ยนอีเมล (ส่งลิงก์ยืนยันไปที่อีเมลใหม่)
+        // ฟังก์ชัน 2: ขอเปลี่ยนอีเมล 
     public function requestEmailChange(Request $request)
         {
             $request->validate([
-                'current_password_for_email' => 'required|current_password', // ยืนยันรหัสผ่านก่อนเปลี่ยนเมล
                 'new_email' => 'required|email|unique:users,email',
             ]);
 

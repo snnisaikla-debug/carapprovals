@@ -36,13 +36,13 @@
                         <div class="col-md-6">
                             <label class="form-label">อีเมล</label>
                             <input type="email" name="email" class="form-control"
-                                value="{{ old('email', auth()->user()->email) }}" required>
-                            <small class="text-muted">แนะนำใช้ @ypb.co.th</small>
+                                value="{{ auth()->user()->email) }}" disabled>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Role</label>
-                            <input type="text" class="form-control" value="{{ auth()->user()->role }}" disabled>
+                            <input type="text" class="form-control" 
+                                value="{{ auth()->user()->role }}" disabled>
                         </div>
 
                         <div class="col-md-6">
@@ -91,40 +91,6 @@
                 <small class="text-muted d-block mt-2">
                     * ถ้าจะทำ “crop” จริง เดี๋ยวเราค่อยเพิ่มด้วย Cropper.js ทีหลังได้ (ตอนนี้อัปโหลดก่อน)
                 </small>
-
-            </div>
-        </div>
-
-        {{-- ✅ การ์ด: เปลี่ยนรหัสผ่าน --}}
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <strong>Password</strong>
-            </div>
-            <div class="card-body">
-
-                <form method="POST" action="{{ route('account.updatePassword') }}">
-                    @csrf
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">รหัสผ่านเดิม</label>
-                            <input type="password" name="current_password" class="form-control" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">รหัสผ่านใหม่</label>
-                            <input type="password" name="password" class="form-control" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">ยืนยันรหัสผ่านใหม่</label>
-                            <input type="password" name="password_confirmation" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="mt-3">
-                        <button class="btn btn-danger px-4">เปลี่ยนรหัสผ่าน</button>
-                    </div>
-                </form>
-
             </div>
         </div>
 

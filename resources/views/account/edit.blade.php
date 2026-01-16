@@ -2,6 +2,14 @@
 @section('title','Edit Profile')
 
 @section('content')
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3" style="font-size:16px;">
+        {{-- ใช้คำสั่ง route('approvals.index') เพื่อระบุปลายทางให้แน่นอน --}}
+        <a href="{{ route('approvals.index') }}" class="btn btn-secondary">
+            ← ย้อนกลับ
+        </a>
+    </div>
+    
 <div class="container" style="max-width:520px;">
     <h4 class="mb-3">Edit Profile</h4>
 

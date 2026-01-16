@@ -57,12 +57,12 @@
                         <div class="mb-3 row">
                             <div class="col-md-6">
                                 <label>รหัสผ่านใหม่</label>
-                                <input type="password" name="new_password" class="form-control @error('new_password') is-invalid @enderror">
+                                <input type="password" name="password" class="form-control @error('new_password') is-invalid @enderror">
                                 @error('new_password') <div class="text-danger small">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label>ยืนยันรหัสผ่านใหม่</label>
-                                <input type="password" name="new_password_confirmation" class="form-control">
+                                <input type="password" name="password_confirmation" class="form-control">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">ยืนยันเปลี่ยนรหัสผ่านใหม่</button>
@@ -91,7 +91,7 @@
                             <input type="password" name="current_password_for_email" class="form-control @error('current_password_for_email') is-invalid @enderror">
                             @error('current_password_for_email') <div class="text-danger small">{{ $message }}</div> @enderror
                         </div>
-                        <button type="submit" class="btn btn-primary">ส่งลิงก์ยืนยันไปที่อีเมลใหม่</button>
+                        <button type="submit" class="btn btn-primary">ยืนยัน</button>
                     </form>
                 </div>
             </div>

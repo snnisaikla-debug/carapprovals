@@ -57,6 +57,7 @@ use App\Http\Controllers\HomeController;
             ->name('account.password');
         Route::post('/account/password', [AccountController::class, 'updatePassword'])
             ->name('account.password.update');
+
         Route::get('/account/security', [AccountController::class, 'showSecurityForm'])
             ->name('account.security');
         Route::post('/account/email', [AccountController::class, 'requestEmailChange'])
@@ -111,7 +112,9 @@ use App\Http\Controllers\HomeController;
     |--------------------------------------------------------------------------
     */
     // หน้าหลักของบัญชี 
-    // Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+        Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+        Route::get('/account', [AccountController::class, 'edit'])
+            ->name('account.index');
 
         Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
         Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
