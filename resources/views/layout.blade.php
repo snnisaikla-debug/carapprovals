@@ -78,7 +78,7 @@
                     รหัสผ่านและความปลอดภัย</a></li>
                     <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="#">
-                    ช่วยเหลือ</a></li>
+                    ช่วยเหลือ</a></li> 
                 <li><hr class="dropdown-divider"></li>
                
                     <form method="POST" action="{{ route('logout') }}">

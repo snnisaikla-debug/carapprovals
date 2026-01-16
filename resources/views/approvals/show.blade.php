@@ -68,12 +68,12 @@
 
     {{-- พื้นที่แสดงรายละเอียด (โหลด V. ล่าสุดรอไว้) --}}
     <div class="card mt-4">
-        <div class="card-header bg-dark text-white">
+        <div class="card-header bg-warning text-black">
             รายละเอียดข้อมูล <span id="ver-label">V.{{ $current->version }}</span>
         </div>
-        <div class="card-body" id="version-detail-display">
+       
             @include('approvals.partials.detail_table', ['approval' => $current])
-        </div>
+      
     </div>
 
     {{-- ปุ่ม Floating PDF --}}
@@ -82,27 +82,31 @@
     </a>
 
     {{-- Scripts --}}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-    $(document).ready(function() {
-        $('.clickable-row').click(function() {
-            let versionId = $(this).data('id');
-            let versionName = $(this).find('strong').text(); // ดึงคำว่า V.1, V.2 มาโชว์
-            
-            // 1. ไฮไลท์แถว
-            $('.clickable-row').removeClass('table-primary');
-            $(this).addClass('table-primary');
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.clickable-row').click(function() {
+        let versionId = $(this).data('id');
+        let versionName = $(this).find('strong').text(); // ดึงคำว่า V.1 มาโชว์
+        
+        // 1. ไฮไลท์แถว
+        $('.clickable-row').removeClass('table-primary');
+        $(this).addClass('table-primary');
 
-            // 2. อัปเดตหัวข้อรายละเอียด
-            $('#ver-label').text(versionName);
+        // 2. อัปเดตหัวข้อ
+        $('#ver-label').text(versionName);
 
-            // 3. ใช้ Ajax ดึงข้อมูล
-            $.get('/approvals/fetch-version/' + versionId, function(data) {
-                $('#version-detail-display').html(data);
-            }).fail(function() {
-                alert('ไม่พบข้อมูลเวอร์ชันนี้');
-            });
+        // 3. สร้าง URL ให้ถูกต้องแม่นยำด้วย Blade Template
+        let url = "{{ url('/approvals/fetch-version') }}/" + versionId;
+
+        // 4. ดึงข้อมูล
+        $.get(url, function(data) {
+            $('#version-detail-display').html(data);
+        }).fail(function(xhr) {
+            console.log("Error details:", xhr.responseText);
+            alert('ไม่พบข้อมูล (Error: ' + xhr.status + ') \nกรุณาเช็ค Console (F12) เพื่อดูรายละเอียด');
         });
     });
-    </script>
+});
+</script>
 @endsection

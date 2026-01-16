@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
-
  
    
     /*
@@ -39,7 +38,8 @@ use App\Http\Controllers\HomeController;
     | Protected Routes
     |--------------------------------------------------------------------------
     */
-    Route::middleware('auth')->group(function () {
+
+        Route::middleware('auth')->group(function () {
         Route::resource('approvals', ApprovalController::class);
     
         // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
@@ -53,11 +53,16 @@ use App\Http\Controllers\HomeController;
         Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
        
         // Change Password/Gmail
-        Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])->name('account.password');
-        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
-        Route::get('/account/security', [AccountController::class, 'showSecurityForm'])->name('account.security');
-        Route::post('/account/email', [AccountController::class, 'requestEmailChange'])->name('account.email.request');
-        Route::get('/account/email/verify', [AccountController::class, 'verifyEmailChange'])->name('account.email.verify');
+        Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])
+            ->name('account.password');
+        Route::post('/account/password', [AccountController::class, 'updatePassword'])
+            ->name('account.password.update');
+        Route::get('/account/security', [AccountController::class, 'showSecurityForm'])
+            ->name('account.security');
+        Route::post('/account/email', [AccountController::class, 'requestEmailChange'])
+            ->name('account.email.request');
+        Route::get('/account/email/verify', [AccountController::class, 'verifyEmailChange'])
+            ->name('account.email.verify');
         
     /*
     |--------------------------------------------------------------------------
@@ -73,56 +78,45 @@ use App\Http\Controllers\HomeController;
 
     /*
     |--------------------------------------------------------------------------
-    | Approvals
+    | Approvals (จัดระเบียบใหม่: ห้ามใช้ Route::resource ผสมกับ Route เขียนเอง)
     |--------------------------------------------------------------------------
     */
-        Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
-        Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
-        Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
 
-        // --- เพิ่มส่วน Ajax Fetch ไว้ข้างบนพวก ID ---
+        // 1. กลุ่ม Route ที่เป็น "ชื่อเฉพาะ" (Static) -> ต้องอยู่บนสุด!
         Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion'])->name('approvals.fetchVersion');
+        Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
+        Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
 
-        // ✅ ดูเอกสาร (เลือกใช้อันเดียวพอ)
+        // 2. กลุ่ม Route สำหรับการกระทำ (Actions / POST)
+        Route::post('/approvals', [ApprovalController::class, 'store'])->name('approvals.store');
+        Route::post('/approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus'); // อันนี้เหมือนจะซ้ำกับ update-status ข้างล่าง เลือกใช้สักอันครับ
+        Route::post('/approvals/{group_id}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+        Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
+        Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])->name('approvals.submit');
+        Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])->name('approvals.approveManager');
+        Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
+
+        // 3. กลุ่ม Route ที่รับค่าตัวแปร {id}, {groupId} (Dynamic) -> ต้องอยู่ล่างสุดเสมอ!
+        // เพราะถ้าเอาไว้บน มันจะเข้าใจว่าคำว่า "create" หรือ "fetch-version" เป็น id ของใบงาน
         Route::get('/approvals/{id}', [ApprovalController::class, 'show'])->name('approvals.show');
-
-        // ✅ แก้ไขและอัปเดต
+        Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
         Route::get('/approvals/{id}/edit', [ApprovalController::class, 'edit'])->name('approvals.edit');
         Route::post('/approvals/{id}/update', [ApprovalController::class, 'update'])->name('approvals.update');
-
-        // ✅ จัดการสถานะ (ใช้ groupId เพื่อให้อัปเดตยกแผง)
-        Route::post('/approvals/{groupId}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
-
-        // ✅ ลบ และ PDF
         Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');
         Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
-
-        // ✅ Submit
-        Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])
-        ->name('approvals.submit');
-
-        // ✅ Manager Approve” → Approved (จบ)
-        Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])
-        ->name('approvals.approveManager');
-
-        // ✅ Reject (Admin หรือ Manager กด Reject)
-        Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])
-        ->name('approvals.reject');
 
     /*
     |--------------------------------------------------------------------------
     | Account
     |--------------------------------------------------------------------------
     */
-    // หน้าหลักของบัญชี
+    // หน้าหลักของบัญชี 
     // Route::get('/account', [AccountController::class, 'show'])->name('account.show');
 
         Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
         Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
-        
+    
         Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
-        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.password.update');
-        Route::post('/account/password', [AccountController::class, 'updatePassword'])->name('account.updatePassword');
         
         // updateSphp artisan route:clearphp artisan route:clear
         Route::get('/account/avatar', [AccountController::class, 'editAvatar'])->name('account.avatar.edit');

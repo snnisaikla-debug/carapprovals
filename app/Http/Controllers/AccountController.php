@@ -218,20 +218,26 @@ class AccountController extends Controller
     // บันทึกรหัสผ่านใหม่
     public function updatePassword(Request $request)
         {
-            // Validate ข้อมูล
             $request->validate([
-                'current_password' => 'required|current_password',
-                'new_password' => 'required|string|min:8|confirmed',
+                'current_password' => ['required'],
+                'password' => ['required', 'confirmed', 'min:8'],
             ]);
 
-            // อัปเดตรหัสผ่าน
-            $user = Auth::user();
-            $user->forceFill([
-                'password' => Hash::make($request->new_password)
-                ])->save();
+            $user = auth()->user();
+
+            // ❌ รหัสเดิมไม่ถูก
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->with('error', 'รหัสผ่านปัจจุบันไม่ถูกต้อง');
+            }
+
+            // ✅ เปลี่ยนรหัส
+            $user->password = Hash::make($request->password);
+            $user->save();
 
             return back()->with('success', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว');
         }
+
+        
         // ฟังก์ชัน 2: ขอเปลี่ยนอีเมล (ส่งลิงก์ยืนยันไปที่อีเมลใหม่)
     public function requestEmailChange(Request $request)
         {
