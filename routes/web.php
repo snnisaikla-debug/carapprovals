@@ -13,6 +13,18 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
    
     /*
     |--------------------------------------------------------------------------
+    | เปลี่ยนภาษา
+    |--------------------------------------------------------------------------
+        */
+        Route::get('/lang/toggle', function () {
+            $current = session('lang', config('app.locale', 'th'));
+            $next = $current === 'th' ? 'en' : 'th';
+            session(['lang' => $next]);
+            return back();
+        })->name('lang.toggle');
+
+    /*
+    |--------------------------------------------------------------------------
     | Public Routes
     |--------------------------------------------------------------------------
     */
@@ -64,18 +76,6 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
             ->name('account.email.request');
         Route::get('/account/email/verify', [AccountController::class, 'verifyEmailChange'])
             ->name('account.email.verify');
-        
-    /*
-    |--------------------------------------------------------------------------
-    | จัดหน้า หน้าแรก sale/admin/manager
-    |--------------------------------------------------------------------------
-        */
-        Route::get('/lang/toggle', function () {
-            $current = session('lang', config('app.locale', 'th'));
-            $next = $current === 'th' ? 'en' : 'th';
-            session(['lang' => $next]);
-            return back();
-        })->name('lang.toggle');
 
     /*
     |--------------------------------------------------------------------------
@@ -105,6 +105,15 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
         Route::post('/approvals/{id}/update', [ApprovalController::class, 'update'])->name('approvals.update');
         Route::delete('/approvals/{groupId}', [ApprovalController::class, 'destroy'])->name('approvals.destroy');
         Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
+        
+        // แสดงพรีวิวเอกสาร (รายละเอียด)
+        Route::get('/approvals/{approval}/version/{version}', [ApprovalController::class, 'previewVersion'])
+            ->middleware('auth')
+            ->name('approvals.preview-version');
+        Route::get('/approvals/{approval}/version/{version}/pdf', [ApprovalController::class, 'exportVersionPdf'])
+            ->middleware('auth')
+            ->name('approvals.version.pdf');
+
 
     /*
     |--------------------------------------------------------------------------

@@ -126,6 +126,7 @@
                     <th>#</th>
                     <th>GroupID</th>
                     <th>รุ่นรถ</th>
+                    <th>ผู้ส่งคำขอ</th>
                     <th>สถานะเดิม</th>
                     <th>จัดการ</th>
                 </tr>
@@ -136,6 +137,7 @@
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td class="text-center">{{ $approval->group_id }}</td>
                     <td>{{ $approval->car_model }}</td>
+                    <td>{{ $approval->sales_name }}</td>
                     <td class="text-center">
                         {{-- Sale จะเห็นงานที่ Reject เป็น Draft --}}
                         @if($approval->status == 'Reject')

@@ -25,6 +25,7 @@
         }
     </style>
 
+{{-- -------------------------------------------------------- --}}
     {{-- ตารางประวัติ --}}
     <div class="card mb-4">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -43,7 +44,9 @@
                 </thead>
                 <tbody>
                     @foreach($history as $row)
-                    <tr class="clickable-row {{ $row->id == $current->id ? 'table-primary' : '' }}" data-id="{{ $row->id }}">
+                    <tr class="clickable-row {{ $row->id == $current->id ? 'table-primary' : '' }}" 
+                        data-id="{{ $row->id }}"
+                        data-version="{{ $row->version }}">
                         <td class="text-center"><strong>V.{{ $row->version }}</strong></td>
                         <td class="text-center">
                             @php
@@ -67,18 +70,15 @@
     </div>
 
     {{-- พื้นที่แสดงรายละเอียด (โหลด V. ล่าสุดรอไว้) --}}
-    <div class="card mt-4">
-        <div class="card-header bg-warning text-black">
-            รายละเอียดข้อมูล <span id="ver-label">V.{{ $current->version }}</span>
-        </div>
-       
-            @include('approvals.partials.detail_table', ['approval' => $current])
-      
+    <div id="version-detail-display">
+        @include('approvals.partials.preview', ['approval' => $current])
     </div>
-
+    
     {{-- ปุ่ม Floating PDF --}}
-    <a href="{{ route('approvals.exportPdf', $current->id) }}" class="fab-download text-decoration-none">
-        Export PDF
+    <a href="{{ route('approvals.exportPdf', $current->id) }}"
+        id="pdfBtn"
+        class="fab-download  text-decoration-none">
+            Export PDF
     </a>
 
     {{-- Scripts --}}
@@ -87,25 +87,21 @@
 $(document).ready(function() {
     $('.clickable-row').click(function() {
         let versionId = $(this).data('id');
-        let versionName = $(this).find('strong').text(); // ดึงคำว่า V.1 มาโชว์
-        
-        // 1. ไฮไลท์แถว
+        let versionNum = $(this).data('version');
+
+        // 1. Highlight แถวที่เลือก
         $('.clickable-row').removeClass('table-primary');
         $(this).addClass('table-primary');
 
-        // 2. อัปเดตหัวข้อ
-        $('#ver-label').text(versionName);
-
-        // 3. สร้าง URL ให้ถูกต้องแม่นยำด้วย Blade Template
+        // 2. โหลดเนื้อหาพรีวิว (Partial View)
         let url = "{{ url('/approvals/fetch-version') }}/" + versionId;
-
-        // 4. ดึงข้อมูล
         $.get(url, function(data) {
             $('#version-detail-display').html(data);
-        }).fail(function(xhr) {
-            console.log("Error details:", xhr.responseText);
-            alert('ไม่พบข้อมูล (Error: ' + xhr.status + ') \nกรุณาเช็ค Console (F12) เพื่อดูรายละเอียด');
         });
+
+        // 3. เปลี่ยนลิงก์ปุ่ม PDF ให้เป็น ID ของเวอร์ชันที่คลิก
+        let pdfUrl = "{{ url('/approvals') }}/" + versionId + "/pdf";
+        $('#pdfBtn').attr('href', pdfUrl);
     });
 });
 </script>

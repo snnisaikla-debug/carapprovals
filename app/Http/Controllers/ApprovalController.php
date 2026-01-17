@@ -165,14 +165,6 @@ class ApprovalController extends Controller
         
         }
 
-    // 4. การแสดงผลและจัดการข้อมูล
-    public function showGroup($groupId)
-        {
-            $approvals = Approval::where('group_id', $groupId)->orderBy('version', 'asc')->get();
-            $current = $approvals->last(); // แสดงข้อมูลเวอร์ชันล่าสุดเป็นหลัก
-            return view('approvals.show', compact('approvals', 'current'));
-        }
-
     // ส่วนของฟังก์ชัน edit
     public function edit($id)
         {
@@ -226,19 +218,15 @@ class ApprovalController extends Controller
 
     public function exportPdf($id)
         {
-            // 1. ดึงข้อมูลใบอนุมัติ
+            
             $approval = Approval::findOrFail($id);
 
-            // 2. สร้าง PDF จากไฟล์ View กำหนดขนาดกระดาษ A4 แนวตั้ง
             $pdf = Pdf::loadView('approvals.pdf', compact('approval'))
                     ->setPaper('A4', 'portrait');
 
-            // 3. กำหนด Font ภาษาไทย (เพื่อให้แสดงผลภาษาไทยได้)
-            // 4. ส่งไฟล์ PDF ให้ Browser (Stream = เปิดดู, Download = โหลดลงเครื่อง)
             return $pdf->stream('approval_' . $approval->id . '.pdf');
         }
 
-    // เพิ่มฟังก์ชันนี้เข้าไปใน Controller
     public function show($id)
         {
             // ดึงข้อมูลฉบับปัจจุบัน
@@ -246,12 +234,20 @@ class ApprovalController extends Controller
 
             // ดึงประวัติทั้งหมดในกลุ่มเดียวกัน เรียงตาม Version ล่าสุด
             $history = Approval::where('group_id', $current->group_id)
-                                ->orderBy('version', 'desc')
-                                ->get();
+                ->orderBy('version', 'desc')
+                ->get();
 
-            // ส่งค่าไปยัง View (แก้ปัญหา Undefined variable $history)
             return view('approvals.show', compact('current', 'history'));
         }
+
+        // 4. การแสดงผลและจัดการข้อมูล
+    // public function showGroup($groupId)
+    //    {
+    //        $approvals = Approval::where('group_id', $groupId)->orderBy('version', 'asc')->get();
+    //        $current = $approvals->last(); // แสดงข้อมูลเวอร์ชันล่าสุดเป็นหลัก
+    //        return view('approvals.show', compact('approvals', 'current'));
+    //    }
+    
     public function getVersionDetail($id)
         {
             $approval = Approval::findOrFail($id);
@@ -263,6 +259,15 @@ class ApprovalController extends Controller
    public function fetchVersion($id)
         {
             $approval = \App\Models\Approval::findOrFail($id);
-            return view('approvals.partials.detail_table', compact('approval'))->render();
+            return view('approvals.partials.preview', compact('approval'))->render();
         }
+
+    public function previewVersion($approvalId, $version)
+    {
+        $approval = Approval::where('id', $approvalId)
+            ->where('version', $version)
+            ->firstOrFail();
+
+        return view('approvals.partials.preview', compact('approval'));
+    }
 }

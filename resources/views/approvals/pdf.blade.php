@@ -42,7 +42,10 @@
 </head>
 <body>
 
+{{-- -------------------------------------------------------- --}}
+
     <h2>ใบขออนุมัติเงื่อนไขการขาย YPB</h2>
+    
     <div style="text-align: right; margin-bottom: 10px;">
         <strong>วันที่ขอแคมเปญ:</strong> {{ $approval->request_date ? $approval->request_date->format('d/m/Y') : '-' }} <br>
         <strong>วันที่จะส่งมอบรถ:</strong> {{ $approval->delivery_date ? \Carbon\Carbon::parse($approval->delivery_date)->format('d/m/Y H:i') : '-' }}

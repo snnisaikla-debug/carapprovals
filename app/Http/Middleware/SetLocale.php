@@ -7,34 +7,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 
-
 class SetLocale
 {
     public function handle(Request $request, Closure $next)
     {
+        // 1. ตรวจสอบว่ามีค่าภาษาใน Session หรือไม่ (ถ้าไม่มีให้เป็น 'th')
+        // ชื่อ Key ต้องตรงกับที่ใช้ใน Route (ในที่นี้ใช้ 'lang')
+        $lang = Session::get('lang', 'th');
 
-         $locale = Session::get('locale', 'th'); // default ภาษาไทย
-        App::setLocale($locale);
-
-        return $next($request);
-        // allow เฉพาะที่รองรับ
-        $allowed = ['th', 'en'];
-        if (!in_array($lang, $allowed)) {
+        // 2. ตรวจสอบว่าเป็นภาษาที่อนุญาตเท่านั้น
+        if (!in_array($lang, ['th', 'en'])) {
             $lang = 'th';
         }
 
-        app()->setLocale($lang);
-
-        // รองรับ 3 แหล่ง: URL (?lang=en) > session > cookie
-       $lang = $request->query('lang')
-            ?? ($request->hasSession() ? $request->session()->get('lang') : null)
-            ?? $request->cookie('lang')
-            ?? 'th';
-            
-        // ถ้ามีส่งมาจาก URL ให้ “บันทึกลง session” อัตโนมัติ
-        if ($request->has('lang')) {
-            $request->session()->put('lang', $lang);
-        }
+        // 3. ตั้งค่าภาษาให้ระบบ
+        App::setLocale($lang);
 
         return $next($request);
     }
