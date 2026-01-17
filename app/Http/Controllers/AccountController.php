@@ -199,35 +199,25 @@ class AccountController extends Controller
             return redirect()->route('account.show')->with('success', 'อัปเดตรูปโปรไฟล์เรียบร้อย');
         }
 
+        // ลบบัญชี
     public function destroy(Request $request)
         {
-            $user = Auth::user();
-                if ($user) 
-            {
-
-            // บันทึกวันที่ลบลง DB (ถ้า Model มี SoftDeletes จะขึ้นวันที่อัตโนมัติ)
-            $user->delete(); 
-
-            // เพื่อความปลอดภัย ให้ยืนยันรหัสผ่านก่อนลบ
             $request->validate([
-                'current_password' => ['required'],]);
+                'confirm_text' => ['required', 'in:DELETE'],
+            ]);
 
-            // สั่งออกจากระบบทันที
-            Auth::logout();
+            $user = Auth::user();
 
-            // ล้างข้อมูล Session เพื่อให้เด้งออกจากหน้าเว็บ
+            Auth::logout();          // ออกจากระบบก่อน
+            $user->delete();         // ลบ user
+
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect('/login')->with('success', 'ลบบัญชีเรียบร้อยแล้ว');
-            }
-        
-            return redirect('/');
-            }
-            public function showChangePasswordForm()
-        {
-            return view('account.password'); // ต้องไปสร้างไฟล์ View นี้ในข้อ 3
+            return redirect('/')
+                ->with('success', 'บัญชีถูกลบเรียบร้อยแล้ว');
         }
+
     // ฟอร์มรหัสผ่าน
     public function showSecurityForm()
         {

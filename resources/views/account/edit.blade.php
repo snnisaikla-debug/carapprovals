@@ -1,57 +1,90 @@
 @extends('layout')
-@section('title','Edit Profile')
 
 @section('content')
 <div class="container mt-4">
-    <div class="d-flex justify-content-between mb-3" style="font-size:16px;">
-        {{-- ใช้คำสั่ง route('approvals.index') เพื่อระบุปลายทางให้แน่นอน --}}
+
+    <div class="d-flex justify-content-between mb-3">
         <a href="{{ route('approvals.index') }}" class="btn btn-secondary">
             ← ย้อนกลับ
         </a>
     </div>
-    
-<div class="container" style="max-width:520px;">
-    <h4 class="mb-3">Edit Profile</h4>
 
-    {{-- 1. แสดง Error กรณีบันทึกไม่สำเร็จ --}}
-    @if($errors->any())
-        <div class="alert alert-danger py-2 small">
-            <ul class="mb-0">
-                @foreach($errors->all() as $e) <li>{{ $e }}</li> @endforeach
-            </ul>
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-user"></i> บัญชีของฉัน
         </div>
-    @endif
 
-    <form method="POST" action="{{ route('account.updateProfile') }}">
-        @csrf
-        {{-- ... ฟิลด์ข้อมูล Name, Email ... --}}
+        <div class="card-body">
 
-        <div class="d-flex gap-2">
-            <a href="{{ route('account.index') }}" class="btn btn-light w-50 border">Back</a>
-            
-            {{-- 2. ปุ่มบันทึกข้อมูลพร้อม id สำหรับเรียกใช้ใน JavaScript --}}
-            <button type="submit" id="saveBtn" class="btn btn-danger w-50 shadow-sm">บันทึกข้อมูล</button>
-        </div>
-    </form>
+            {{-- แจ้งเตือน --}}
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            {{-- ฟอร์มแก้ไขโปรไฟล์ --}}
+            <form method="POST" action="{{ route('account.update') }}">
+                @csrf
+
+                {{-- ชื่อ - สกุล --}}
+                <div class="mb-3">
+                    <label class="form-label">ชื่อ - สกุล</label>
+                    <input type="text"
+                           name="name"
+                           class="form-control @error('name') is-invalid @enderror"
+                           value="{{ old('name', Auth::user()->name) }}">
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- อีเมล (แก้ไม่ได้) --}}
+                <div class="mb-3">
+                    <label class="form-label">อีเมล</label>
+                    <input type="email"
+                           class="form-control"
+                           value="{{ Auth::user()->email }}"
+                           disabled>
+                </div>
+
+                {{-- Role (แก้ไม่ได้) --}}
+                <div class="mb-3">
+                    <label class="form-label">สิทธิ์ผู้ใช้งาน</label>
+                    <input type="text"
+                           class="form-control"
+                           value="{{ Auth::user()->role }}"
+                           disabled>
+                </div>
+
+                {{-- วันที่เข้าร่วม --}}
+                <div class="mb-3">
+                    <label class="form-label">วันที่เข้าร่วม</label>
+                    <input type="text"
+                           class="form-control"
+                           value="{{ Auth::user()->created_at->format('d/m/Y') }}"
+                           disabled>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        บันทึกข้อมูล
+                    </button>
+                </div>
+            </form>
+
+            <hr>
+
+            {{-- ลบบัญชี --}}
+            <a href="{{ route('account.confirm-delete') }}"
+                class="btn btn-danger">
+                ลบบัญชี
+            </a>
+    </div>
 </div>
-
-{{-- วางต่อจากจบฟอร์มบันทึกข้อมูล --}}
-@if(session('success'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btn = document.getElementById('saveBtn');
-        if (btn) {
-            // 1. เปลี่ยนข้อความและสีปุ่มทันทีเมื่อโหลดหน้า
-            btn.innerText = 'บันทึกสำเร็จ';
-            btn.classList.replace('btn-danger', 'btn-success');
-
-            // 2. ตั้งเวลาให้กลับเป็นสถานะปกติหลังจาก 3 วินาที
-            setTimeout(() => {
-                btn.innerText = 'บันทึกข้อมูล';
-                btn.classList.replace('btn-success', 'btn-danger');
-            }, 3000);
-        }
-    });
-</script>
-@endif
-@endsection
+        </div>
+    </div>
+</div>
+@endsection                     

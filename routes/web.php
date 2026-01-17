@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
- 
+use App\Http\Controllers\Auth\ConfirmPasswordController;
    
     /*
     |--------------------------------------------------------------------------
@@ -126,7 +126,16 @@ use App\Http\Controllers\HomeController;
         Route::post('/account/avatar', [AccountController::class, 'updateAvatar'])->name('account.avatar.update');
         Route::post('/account/update', [AccountController::class, 'updateProfile'])->name('account.updateProfile');
         Route::post('/account/photo', [AccountController::class, 'updatePhoto'])->name('account.photo');
-        Route::delete('/account/destroy', [AccountController::class, 'destroy'])->name('account.destroy');
+        
+        // ยืนยันการลบบัญชี
+        Route::delete('/account', [AccountController::class, 'destroy'])
+            ->middleware('auth')
+            ->name('account.destroy');
+
+        Route::get('/account/confirm-delete', function () {
+            return view('auth.confirm-delete');
+        })->middleware('auth')->name('account.confirm-delete');
+
     });
 
     /*

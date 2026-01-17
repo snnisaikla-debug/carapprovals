@@ -51,25 +51,42 @@
                         @csrf
                         <div class="mb-3">
                             <label>รหัสผ่านปัจจุบัน</label>
-                            <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror">
-                            @error('current_password') <div class="text-danger small">{{ $message }}</div> @enderror
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="current_password" id="current_password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('current_password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            @error('current_password') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
+
                         <div class="mb-3 row">
-                            <div class="col-md-6">
-                                <label>รหัสผ่านใหม่</label>
-                                <input type="password" name="password" class="form-control @error('new_password') is-invalid @enderror">
-                                @error('new_password') <div class="text-danger small">{{ $message }}</div> @enderror
+                            <label>รหัสผ่านใหม่</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="password" id="password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
-                            <div class="col-md-6">
-                                <label>ยืนยันรหัสผ่านใหม่</label>
-                                <input type="password" name="password_confirmation" class="form-control">
-                            </div>
+                            @error('password') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
+
+                            <div class="mb-3 row">
+                                <label>ยืนยันรหัสผ่านใหม่</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password_confirmation', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                         <button type="submit" class="btn btn-primary">ยืนยันเปลี่ยนรหัสผ่านใหม่</button>
                     </form>
                 </div>
             </div>
-
+            
+            {{-- การ์ดเปลี่ยนอีเมล --}}
             <div class="card border-danger">
                 <div class="card-header bg-danger text-white">
                     <i class="fas fa-envelope"></i> เปลี่ยนอีเมล
@@ -88,9 +105,15 @@
                         </div>
                         <div class="mb-3">
                             <label>ยืนยันด้วยรหัสผ่านปัจจุบัน</label>
-                            <input type="password" name="current_password_for_email" class="form-control @error('current_password_for_email') is-invalid @enderror">
-                            @error('current_password_for_email') <div class="text-danger small">{{ $message }}</div> @enderror
+                             <div class="input-group">
+                                <input type="password" class="form-control" name="current_password_for_email" id="current_password_for_email" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('current_password_for_email', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            @error('current_password_for_email') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
+
                         <button type="submit" class="btn btn-primary">ยืนยัน</button>
                     </form>
                 </div>
@@ -98,4 +121,21 @@
         </div>
     </div>
 </div>
+{{-- SCRIPT สำหรับกดสลับตา (Toggle Eye) --}}
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash'); // เปลี่ยนเป็นรูปตาขีดฆ่า
+    } else {
+        input.type = "password";
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye'); // เปลี่ยนกลับเป็นรูปตาปกติ
+    }
+}
+</script>
 @endsection
