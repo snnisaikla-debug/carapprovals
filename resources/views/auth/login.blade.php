@@ -13,14 +13,14 @@
         @csrf
 
         <div class="mb-3">
-            <label class="form-label">อีเมล</label>
+            <label class="form-label">{{ __('messages.email') }}</label>
             <input type="text" id="login_email" name="email" class="form-control"
                    required value="{{ old('email') }}">
-            <div class="form-text">ไม่ต้องเติม @ ก็ได้</div>
+            <div class="form-text">{{ __('messages.acho') }}</div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">รหัสผ่าน</label>
+            <label class="form-label">{{ __('messages.password') }}</label>
             <div class="position-relative"> <input type="password" 
                         id="login_password" 
                         name="password"
@@ -38,18 +38,18 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                <input class="form-check-input" type="checkbox" name="V" id="remember">
                 <label class="form-check-label" for="remember">
-                    จำรหัสผ่าน
+                    {{ __('messages.remember') }}
                 </label>
             </div>
-            <a href="{{ route('password.request') }}" class="small">รีเซ็ตรหัสผ่าน</a>
+            <a href="{{ route('password.request') }}" class="small">{{ __('messages.repass') }}</a>
         </div>
 
-        <button class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+        <button class="btn btn-primary w-100">{{ __('messages.login') }}</button>
 
         <div class="text-center mt-3">
-            <a href="{{ route('register') }}">ยังไม่มีบัญชี? สมัครสมาชิก</a>
+            <a href="{{ route('register') }}">{{ __('messages.achore') }}</a>
         </div>
 
         @if ($errors->any())

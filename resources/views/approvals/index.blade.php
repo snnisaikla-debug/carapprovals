@@ -27,7 +27,7 @@
     @if(Auth::user()->role == 'sale')
         <div class="d-flex justify-content-start mb-3">
             <a href="{{ route('approvals.create') }}" class="btn btn-success">
-                + สร้างใบอนุมัติใหม่
+                {{ __('messages.newpaper') }}
             </a>
         </div>
     @endif
@@ -36,14 +36,14 @@
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <form action="{{ route('approvals.index') }}" method="GET" class="d-flex align-items-center gap-2 flex-wrap">
         <select name="sales_user_id" class="form-select form-select-sm" style="width:160px" onchange="this.form.submit()">
-            <option value="">-- ทั้งหมด --</option>
+            <option value="">{{ __('messages.sales_user_id') }}</option>
             @foreach($salesList as $id => $name)
                 <option value="{{ $id }}" {{ request('sales_user_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
             @endforeach
         </select>
 
         <select name="status" class="form-select form-select-sm" style="width:180px" onchange="this.form.submit()">
-            <option value="">-- ทุกสถานะ --</option>
+            <option value="">{{ __('messages.sales_user_id') }}</option>
             @foreach ($statusList as $st)
                 <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
             @endforeach
@@ -55,7 +55,7 @@
         @php
             $currentSort = request('sort','newest');
             $toggleSort = $currentSort === 'newest' ? 'oldest' : 'newest';
-            $toggleText = $currentSort === 'newest' ? 'เรียงวันที่: ล่าสุด' : 'เรียงวันที่: เก่าสุด';
+            $toggleText = $currentSort === 'newest' ? __('messages.sortN') : __('messages.sortO');
         @endphp
         <a href="{{ route('approvals.index', ['sort' => $toggleSort, 'sales_user_id' => request('sales_user_id'), 'status' => request('status')]) }}" class="btn btn-sm btn-outline-primary">
             {{ $toggleText }}
@@ -70,11 +70,11 @@
             <tr>
                 <th>#</th>
                 <th>GroupID</th>
-                <th>รุ่นรถ</th>
-                <th>ผู้ส่งคำขอ</th>
-                <th>สถานะ</th>
-                <th>อัปเดตล่าสุด</th>
-                <th>จัดการ</th>
+                <th>{{ __('messages.car_model') }}</th>
+                <th>{{ __('messages.sales_name') }}</th>
+                <th>{{ __('messages.status') }}</th>
+                <th>{{ __('messages.updated_at') }}</th>
+                <th>{{ __('messages.action') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -87,13 +87,13 @@
                 <td class="text-center">
                     {{-- แสดงสถานะตามจริง --}}
                     @if($approval->status == 'Pending_Admin')
-                        <span class="badge px-3 py-2" style="background-color: #fd178a; color: white;">Pending Admin</span>
+                        <span class="badge px-3 py-2" style="background-color: #fd178a; color: white;">{{ __('messages.statusPA') }}</span>
                     @elseif($approval->status == 'Pending_Manager')
-                        <span class="badge px-3 py-2" style="background-color: #ff6716; color: white;">Pending Manager</span>
+                        <span class="badge px-3 py-2" style="background-color: #ff6716; color: white;">{{ __('messages.statusPM') }}</span>
                     @elseif($approval->status == 'Approved')
-                        <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">Approved</span>
+                        <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">{{ __('messages.statusA') }}</span>
                     @elseif($approval->status == 'Reject')
-                        <span class="badge px-3 py-2" style="background-color: #fe1c1c; color: white;">Rejected</span>
+                        <span class="badge px-3 py-2" style="background-color: #fe1c1c; color: white;">{{ __('messages.statusR') }}</span>
                     @endif
                 </td>
                 <td class="text-center text-muted small">{{ $approval->updated_at }}</td>
@@ -109,7 +109,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="7" class="text-center text-muted p-4">ไม่มีรายการที่รอดำเนินการ</td></tr>
+            <tr><td colspan="7" class="text-center text-muted p-4">{{ __('messages.notitext') }}</td></tr>
         @endforelse
         </tbody>
     </table>
@@ -118,17 +118,17 @@
 {{-- ตาราง Draft (แสดงเฉพาะ Sale) --}}
 @if($isSale && $draftApprovals->count())
     <hr class="my-5">
-    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-file-earmark-text"></i> งานที่ต้องแก้ไข / Draft</h6>
+    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-file-earmark-text"></i> {{ __('messages.draftW') }}</h6>
     <div class="table-responsive">
         <table class="table table-sm table-hover align-middle border">
             <thead class="table-light text-center">
                 <tr>
                     <th>#</th>
                     <th>GroupID</th>
-                    <th>รุ่นรถ</th>
-                    <th>ผู้ส่งคำขอ</th>
-                    <th>สถานะเดิม</th>
-                    <th>จัดการ</th>
+                    <th>{{ __('messages.car_model') }}</th>
+                    <th>{{ __('messages.sales_name') }}</th>
+                    <th>{{ __('messages.status') }}</th>
+                    <th>{{ __('messages.action') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -141,9 +141,9 @@
                     <td class="text-center">
                         {{-- Sale จะเห็นงานที่ Reject เป็น Draft --}}
                         @if($approval->status == 'Reject')
-                            <span class="badge bg-warning text-dark px-3 py-2">Draft</span>
+                            <span class="badge bg-warning text-dark px-3 py-2">{{ __('messages.statusd') }}</span>
                         @else
-                            <span class="badge bg-light text-dark border px-3 py-2">Draft</span>
+                            <span class="badge bg-light text-dark border px-3 py-2">{{ __('messages.statusd') }}</span>
                         @endif
                     </td>
                     <td class="text-center">

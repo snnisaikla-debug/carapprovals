@@ -5,13 +5,13 @@
 
     <div class="d-flex justify-content-between mb-3">
         <a href="{{ route('approvals.index') }}" class="btn btn-secondary">
-            ← ย้อนกลับ
+            {{ __('messages.back') }}
         </a>
     </div>
 
     <div class="card">
         <div class="card-header bg-danger text-white">
-            <i class="fas fa-user"></i> บัญชีของฉัน
+            <i class="fas fa-user"></i> {{ __('messages.myaccount') }}
         </div>
 
         <div class="card-body">
@@ -31,7 +31,7 @@
 
             {{-- ชื่อ - สกุล --}}
                 <div class="mb-3">
-                    <label class="form-label">ชื่อ - สกุล</label>
+                    <label class="form-label">{{ __('messages.name') }}</label>
                     <input type="text"
                            name="name"
                            class="form-control @error('name') is-invalid @enderror"
@@ -43,7 +43,7 @@
 
                 {{-- อีเมล (แก้ไม่ได้) --}}
                 <div class="mb-3">
-                    <label class="form-label">อีเมล</label>
+                    <label class="form-label">{{ __('messages.email') }}</label>
                     <input type="email"
                            class="form-control"
                            value="{{ Auth::user()->email }}"
@@ -52,7 +52,7 @@
 
                 {{-- Role (แก้ไม่ได้) --}}
                 <div class="mb-3">
-                    <label class="form-label">สิทธิ์ผู้ใช้งาน</label>
+                    <label class="form-label">{{ __('messages.role') }}</label>
                     <input type="text"
                            class="form-control"
                            value="{{ Auth::user()->role }}"
@@ -61,7 +61,7 @@
 
                 {{-- วันที่เข้าร่วม --}}
                 <div class="mb-3">
-                    <label class="form-label">วันที่เข้าร่วม</label>
+                    <label class="form-label">{{ __('messages.email') }}</label>
                     <input type="text"
                            class="form-control"
                            value="{{ Auth::user()->created_at->format('d/m/Y') }}"
@@ -70,7 +70,7 @@
 
                 <div class="d-flex justify-content-between mt-4">
                     <button type="submit" class="btn btn-primary">
-                        บันทึกข้อมูล
+                        {{ __('messages.save') }}
                     </button>
                 </div>
             </form>
@@ -80,7 +80,7 @@
             {{-- ลบบัญชี --}}
             <a href="{{ route('account.confirm-delete') }}"
                 class="btn btn-danger">
-                ลบบัญชี
+                {{ __('messages.deleteacc') }}
             </a>
     </div>
 </div>

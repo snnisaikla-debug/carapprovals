@@ -40,7 +40,7 @@
         <div class="d-flex justify-content-between align-items-center px-3">
             <div class="d-flex align-items-center">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo me-2">
-                <span class="fw-bold">ฟอร์มอนุมัติการขายรถ</span>
+                <span class="fw-bold">{{ __('messages.app_name') }}</span>
             </div>
         </div>
 
@@ -72,18 +72,18 @@
 
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="{{ route('account.edit') }}">
-                    บัญชีของฉัน</a></li>
+                    {{ __('messages.myaccount') }}</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{ route('account.security') }}">
-                    รหัสผ่านและความปลอดภัย</a></li>
+                    {{ __('messages.security') }}</a></li>
                     <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="#">
-                    ช่วยเหลือ</a></li> 
+                    {{ __('messages.help') }}</a></li> 
                 <li><hr class="dropdown-divider"></li>
                
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="dropdown-item text-danger">ออกจากระบบ</button>
+                        <button class="dropdown-item text-danger">{{ __('messages.logout') }}</button>
                     </form>
                 </li>
             </ul>

@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between mb-3" style="font-size:16px;">
         {{-- ใช้คำสั่ง route('approvals.index') เพื่อระบุปลายทางให้แน่นอน --}}
         <a href="{{ route('approvals.index') }}" class="btn btn-secondary">
-            ← ย้อนกลับ
+            {{ __('messages.back') }}
         </a>
     </div>
 
@@ -44,13 +44,13 @@
 
             <div class="card border-danger mb-4">
                 <div class="card-header bg-danger text-white">
-                    <i class="fas fa-key"></i> เปลี่ยนรหัสผ่าน
+                    <i class="fas fa-key"></i> {{ __('messages.changepw') }}
                 </div>
                 <div class="card-body">
                     <form action="{{ route('account.password.update') }}" method="POST">
                         @csrf
                         <div class="mb-3">
-                            <label>รหัสผ่านปัจจุบัน</label>
+                            <label>{{ __('messages.oldpass') }}</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" name="current_password" id="current_password" required>
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('current_password', this)">
@@ -61,7 +61,7 @@
                         </div>
 
                         <div class="mb-3 row">
-                            <label>รหัสผ่านใหม่</label>
+                            <label>{{ __('messages.newpass') }}</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" name="password" id="password" required>
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
@@ -72,7 +72,7 @@
                         </div>
 
                             <div class="mb-3 row">
-                                <label>ยืนยันรหัสผ่านใหม่</label>
+                                <label>{{ __('messages.confirmnewpass') }}</label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" required>
                                     <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password_confirmation', this)">
@@ -81,7 +81,7 @@
                                 </div>
                             </div>
 
-                        <button type="submit" class="btn btn-primary">ยืนยันเปลี่ยนรหัสผ่านใหม่</button>
+                        <button type="submit" class="btn btn-primary">{{ __('messages.confirm') }}</button>
                     </form>
                 </div>
             </div>
@@ -89,22 +89,22 @@
             {{-- การ์ดเปลี่ยนอีเมล --}}
             <div class="card border-danger">
                 <div class="card-header bg-danger text-white">
-                    <i class="fas fa-envelope"></i> เปลี่ยนอีเมล
+                    <i class="fas fa-envelope"></i> {{ __('messages.chemail') }}
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info py-2">
-                        <small>อีเมลปัจจุบัน: <strong>{{ Auth::user()->email }}</strong></small>
+                        <small>{{ __('messages.emailn') }} <strong>{{ Auth::user()->email }}</strong></small>
                     </div>
 
                     <form action="{{ route('account.email.request') }}" method="POST">
                         @csrf
                         <div class="mb-3">
-                            <label>อีเมลใหม่</label>
+                            <label>{{ __('messages.Nemail') }}</label>
                             <input type="email" name="new_email" class="form-control @error('new_email') is-invalid @enderror" placeholder="example@ypb.co.th">
                             @error('new_email') <div class="text-danger small">{{ $message }}</div> @enderror
                         </div>
                         <div class="mb-3">
-                            <label>ยืนยันด้วยรหัสผ่านปัจจุบัน</label>
+                            <label>{{ __('messages.confirmWpw') }}</label>
                              <div class="input-group">
                                 <input type="password" class="form-control" name="current_password_for_email" id="current_password_for_email" required>
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('current_password_for_email', this)">
@@ -114,7 +114,7 @@
                             @error('current_password_for_email') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-primary">ยืนยัน</button>
+                        <button type="submit" class="btn btn-primary">{{ __('messages.save') }}</button>
                     </form>
                 </div>
             </div>
