@@ -71,7 +71,7 @@
             @endauth
 
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ route('account.index') }}">
+                <li><a class="dropdown-item" href="{{ route('account.edit') }}">
                     บัญชีของฉัน</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="{{ route('account.security') }}">

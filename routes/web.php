@@ -121,12 +121,15 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
     |--------------------------------------------------------------------------
     */
     // หน้าหลักของบัญชี 
-        Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-        Route::get('/account', [AccountController::class, 'edit'])
+        Route::get('/account', [AccountController::class, 'show'])
+            ->name('account.show');
+         Route::get('/account', [AccountController::class, 'edit'])
             ->name('account.index');
 
-        Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
-        Route::post('/account/edit', [AccountController::class, 'update'])->name('account.update');
+        Route::get('/account/edit', [AccountController::class, 'edit'])
+            ->name('account.edit');
+        Route::post('/account/edit', [AccountController::class, 'update'])
+            ->name('account.update');
     
         Route::get('/account/password', [AccountController::class, 'editPassword'])->name('account.password.edit');
         

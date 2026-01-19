@@ -29,7 +29,7 @@
             <form method="POST" action="{{ route('account.update') }}">
                 @csrf
 
-                {{-- ชื่อ - สกุล --}}
+            {{-- ชื่อ - สกุล --}}
                 <div class="mb-3">
                     <label class="form-label">ชื่อ - สกุล</label>
                     <input type="text"
@@ -87,4 +87,44 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script>
+  let cropper = null;
+
+  const fileInput = document.getElementById('avatarFile');
+  const img = document.getElementById('preview');
+  const saveBtn = document.getElementById('saveBtn');
+  const avatarData = document.getElementById('avatar_data');
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    img.src = url;
+    img.style.display = 'block';
+
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(img, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+    });
+
+    saveBtn.disabled = false;
+  });
+
+  saveBtn.addEventListener('click', () => {
+    if (!cropper) return;
+
+    const canvas = cropper.getCroppedCanvas({
+      width: 512,
+      height: 512,
+      imageSmoothingQuality: 'high'
+    });
+
+    avatarData.value = canvas.toDataURL('image/png');
+    saveBtn.closest('form').submit();
+  });
+</script>
 @endsection                     
