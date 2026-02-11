@@ -10,6 +10,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Approval;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ApprovalExport;
 
 class ApprovalController extends Controller
 {
@@ -67,6 +69,7 @@ class ApprovalController extends Controller
             'customer_district'     => 'nullable|string|max:255',
             'customer_province'     => 'nullable|string|max:255',
             'customer_phone'        => 'nullable|string|max:50',
+            'customer_email'        => 'required|string|max:255',
 
             // 2. ข้อมูลรถ (Car Info)
             'car_model'             => 'required|string|max:255',
@@ -104,9 +107,6 @@ class ApprovalController extends Controller
             'over_reason'           => 'nullable|string',
             'remark'                => 'nullable|string',
 
-            // 7. ลายเซ็น (Signature Data - รับค่าเป็น Base64)
-            'sc_signature_data'     => 'nullable|string',
-            'sale_com_signature_data' => 'nullable|string',
         ]);
 
             // 2. จัดการลายเซ็นและข้อมูลเพิ่มเติม (ถ้ามี)
@@ -215,16 +215,28 @@ class ApprovalController extends Controller
             Approval::where('group_id', $groupId)->delete();
             return redirect()->route('approvals.index')->with('success', 'ลบเอกสารเรียบร้อย');
         }
-
+        // ฟังก์ชันสำหรับ Export Pdf
     public function exportPdf($id)
-        {
-            
+        { 
             $approval = Approval::findOrFail($id);
 
             $pdf = Pdf::loadView('approvals.pdf', compact('approval'))
                     ->setPaper('A4', 'portrait');
 
             return $pdf->stream('approval_' . $approval->id . '.pdf');
+        }
+
+        // ฟังก์ชันสำหรับ Export Excel
+    public function exportExcel() 
+        {
+            // ตั้งชื่อไฟล์เป็น All_Approvals.xlsx
+            return Excel::download(new ApprovalExport, 'All_Approvals.xlsx');
+        }
+
+        // ฟังก์ชันสำหรับ Export CSV
+    public function exportCsv()
+        {
+            return Excel::download(new ApprovalExport, 'GoogleSheets_Approvals.csv', \Maatwebsite\Excel\Excel::CSV);
         }
 
     public function show($id)

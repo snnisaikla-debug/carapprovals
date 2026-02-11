@@ -68,6 +68,10 @@
         <input type="text" class="form-control" name="customer_phone">
     </div>
 
+    <div class="mb-3">
+        <label class="form-label">อีเมล</label>
+        <input type="text" class="form-control" name="customer_email">
+    </div>
 
     {{-- 2. ข้อมูลรถ --}}
     <div class="section-title">ข้อมูลรถ</div>
@@ -380,29 +384,6 @@
         <input type="text" class="form-control" name="sale_com_signature">
     </div>
 
-<form>
-    <div class="section-title">ลายเซ็น</div>
-
-    {{-- Signature SC --}}
-    <div class="mb-3">
-        <label class="form-label">SC เซ็นที่นี่</label>
-        <div class="border" style="width:100%; height:200px;">
-            <canvas id="sc-pad" style="width:100%; height:100%;"></canvas>
-        </div>
-        <button type="button" id="sc-clear" class="btn btn-sm btn-outline-danger mt-2">ล้างลายเซ็น SC</button>
-        <input type="hidden" name="sc_signature_data" id="sc_signature_data">
-    </div>
-
-    {{-- Signature Com การขาย --}}
-    <div class="mb-3">
-        <label class="form-label">Com การขาย เซ็นที่นี่</label>
-        <div class="border" style="width:100%; height:200px;">
-            <canvas id="salecom-pad" style="width:100%; height:100%;"></canvas>
-        </div>
-        <button type="button" id="salecom-clear" class="btn btn-sm btn-outline-danger mt-2">ล้างลายเซ็น Com</button>
-        <input type="hidden" name="sale_com_signature_data" id="sale_com_signature_data">
-    </div>
-
     <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
     
 {{-- ================== SCRIPT เครื่องคิดเลข ================== --}}
@@ -435,53 +416,6 @@ function applyResult() {
 }
 </script>
 
-{{-- ================== SCRIPT คำนวณ ================== --}}
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
-<script>
-    function setupSignaturePad(canvasId, clearBtnId, outputId) {
-        const canvas = document.getElementById(canvasId);
-        const clearBtn = document.getElementById(clearBtnId);
-        const output   = document.getElementById(outputId);
-
-        // ปรับขนาด canvas ให้พอดีกับมือถือ
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * ratio;
-            canvas.height = rect.height * ratio;
-            const ctx = canvas.getContext("2d");
-            ctx.scale(ratio, ratio);
-        }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
-
-        const sigPad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(255, 255, 255, 0)',
-            penColor: 'black',
-        });
-
-        clearBtn.addEventListener('click', function () {
-            sigPad.clear();
-            output.value = '';
-        });
-
-        return { sigPad, output };
-    }
-
-    const scPad = setupSignaturePad('sc-pad', 'sc-clear', 'sc_signature_data');
-    const saleComPad = setupSignaturePad('salecom-pad', 'salecom-clear', 'sale_com_signature_data');
-
-    // ก่อน submit ฟอร์ม ให้แปลงลายเซ็นเป็น base64
-    document.querySelector('form').addEventListener('submit', function (e) {
-        if (!scPad.sigPad.isEmpty()) {
-            scPad.output.value = scPad.sigPad.toDataURL('image/png');
-        }
-        if (!saleComPad.sigPad.isEmpty()) {
-            saleComPad.output.value = saleComPad.sigPad.toDataURL('image/png');
-        }
-    });
-</script>
-</form>
 {{-- ================== SCRIPT คำนวณ ================== --}}
 <script>
 function calculateFinance() {

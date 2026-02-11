@@ -51,8 +51,13 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
     |--------------------------------------------------------------------------
     */
 
-        Route::middleware('auth')->group(function () {
-        Route::resource('approvals', ApprovalController::class);
+    Route::middleware('auth')->group(function () {
+        Route::get('/approvals/export-excel', [ApprovalController::class, 'exportExcel'])->name('approvals.exportExcel');
+        Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
+        Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion'])->name('approvals.fetchVersion');
+        Route::get('/approvals/export-csv', [ApprovalController::class, 'exportCsv'])->name('approvals.exportCsv');
+    
+    Route::resource('approvals', ApprovalController::class);
     
         // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
         Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
@@ -63,7 +68,7 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
         Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
         Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
         Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
-       
+
         // Change Password/Gmail
         Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])
             ->name('account.password');
