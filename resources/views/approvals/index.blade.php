@@ -7,16 +7,17 @@
 @php
     $user = Auth::user();
     $isSale = $user->role === 'sale';
+    $isAdmin = $user->role === 'admin';
 
     // 1. ตารางหลัก: Admin/Manager เห็นทุกสถานะยกเว้น Draft | Sale เห็นเฉพาะที่ส่งไปแล้ว (Pending/Approved)
-    if ($isSale) {
+    if ($isSale ) {
         $mainApprovals = $approvals->whereIn('status', ['Pending_Admin', 'Pending_Manager', 'Approved']);
     } else {
         $mainApprovals = $approvals->where('status', '!=', 'Draft');
     }
 
     // 2. ตาราง Draft (สำหรับ Sale เท่านั้น): รวมงานที่เป็น Draft จริงๆ และงานที่ถูก Reject
-    if ($isSale) {
+    if ($isSale || $isAdmin) {
         $draftApprovals = $approvals->whereIn('status', ['Draft', 'Reject']);
     } else {
         $draftApprovals = collect(); // Admin/Manager ไม่เห็นตารางนี้
@@ -115,8 +116,8 @@
     </table>
 </div>
 
-{{-- ตาราง Draft (แสดงเฉพาะ Sale) --}}
-@if($isSale && $draftApprovals->count())
+{{-- ตาราง Draft  --}}
+@if(($isSale || $isAdmin) && $draftApprovals->count())
     <hr class="my-5">
     <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-file-earmark-text"></i> {{ __('messages.draftW') }}</h6>
     <div class="table-responsive">
@@ -139,11 +140,12 @@
                     <td>{{ $approval->car_model }}</td>
                     <td>{{ $approval->sales_name }}</td>
                     <td class="text-center">
-                        {{-- Sale จะเห็นงานที่ Reject เป็น Draft --}}
-                        @if($approval->status == 'Reject')
-                            <span class="badge bg-warning text-dark px-3 py-2">{{ __('messages.statusd') }}</span>
+                        @if($isAdmin)
+                             {{-- ถ้าเป็น Admin ให้ใช้ปุ่ม Admin --}}
+                            @include('approvals.partials.actions_admin', ['approval' => $approval])
                         @else
-                            <span class="badge bg-light text-dark border px-3 py-2">{{ __('messages.statusd') }}</span>
+                             {{-- ถ้าเป็น Sale ให้ใช้ปุ่ม Sale --}}
+                            @include('approvals.partials.actions_sale', ['approval' => $approval])
                         @endif
                     </td>
                     <td class="text-center">

@@ -104,7 +104,7 @@ class ApprovalController extends Controller
             $approval = Approval::create(array_merge($data, [
                 'group_id'      => 0, 
                 'version'       => 1,
-                'status'        => 'Pending_Admin',
+                'status'        => 'Waiting',
                 'created_by'    => strtoupper($user->role),
                 'sales_name'    => $user->name,
                 'sales_user_id' => $user->id,
@@ -124,12 +124,12 @@ class ApprovalController extends Controller
             return redirect()->route('approvals.index')->with('success', 'บันทึกสำเร็จ');
         }
     
-    // Admin/Manager Action (ฟังก์ชันรวมเพื่อลดความซ้ำซ้อน)
+    // Admin Action (ฟังก์ชันรวมเพื่อลดความซ้ำซ้อน)
     public function updateStatus(Request $request, $group_id)
         {
             // 1. ตรวจสอบว่ามีสถานะส่งมาไหม
             $request->validate([
-                'status' => 'required|in:Approved,Reject,Pending_Manager'
+                'status' => 'required|in:Approved,Reject'
             ]);
 
             // 2. อัปเดตทุกใบใน Group เดียวกันให้เป็นสถานะใหม่
@@ -168,7 +168,7 @@ class ApprovalController extends Controller
             $user = auth()->user();
 
             // แก้ไขเงื่อนไข 403: 
-            // อนุญาตถ้า: เป็นเจ้าของงาน (Sale) หรือ เป็น Admin หรือ เป็น Manager
+            // อนุญาตถ้า: เป็นเจ้าของงาน (Sale) หรือ เป็น Admin
             if ($user->role === 'sale' && $approval->sales_user_id !== $user->id) {
                 abort(403, 'คุณไม่มีสิทธิ์แก้ไขเอกสารนี้');
             }
@@ -214,7 +214,7 @@ class ApprovalController extends Controller
             
             $newVersion->group_id = $oldVersion->group_id; 
             $newVersion->version = $oldVersion->version + 1;
-            $newVersion->status = 'Pending_Admin'; 
+            $newVersion->status = 'Waiting'; 
             $newVersion->save();
 
             // --- ส่ง Email แจ้งเตือน (Update) ---
@@ -222,7 +222,7 @@ class ApprovalController extends Controller
             if (count($changes) > 0) {
         
                 // ลบ try...catch ออกเช่นกัน:
-                $emails = ['manager@example.com'];
+                $emails = ['Admin@example.com'];
                 Mail::to($emails)->send(new ApprovalMail($newVersion, 'update', $changes));
                 
             }

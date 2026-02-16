@@ -4,7 +4,7 @@
         {{ __('messages.details') }}
     </a>
 
-    @if(in_array($approval->status, ['Draft', 'Pending_Admin', 'Reject']))
+    @if(in_array($approval->status, ['Draft', 'Waiting', 'Reject']))
         <a href="{{ route('approvals.edit', $approval->id) }}" class="btn btn-warning btn-sm" title="แก้ไข">
             <i class="bi bi-pencil"></i> {{ __('messages.edit') }}
         </a>

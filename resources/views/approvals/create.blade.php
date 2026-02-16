@@ -374,15 +374,16 @@
 
     {{-- 25–27 --}}
     <div class="section-title"></div><br>
-    <div class="mb-3">
-        <label class="form-label">SC (ชื่อ)</label>
-        <input type="text" class="form-control" name="sc_signature">
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Com การขาย (ชื่อ)</label>
-        <input type="text" class="form-control" name="sale_com_signature">
-    </div>
+    <div class="row">    
+        <div class="col-6 mb-3">
+            <label class="form-label">SC (ชื่อ)</label>
+            <input type="text" step="0.01" class="form-control" name="sc_signature">
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">Com การขาย (ชื่อ)</label>
+            <input type="text" step="0.01" class="form-control" name="sale_com_signature">
+        </div>
+    </div>   
 
     <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
     

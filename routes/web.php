@@ -99,7 +99,6 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
         Route::post('/approvals/{group_id}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
         Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
         Route::post('/approvals/{groupId}/submit', [ApprovalController::class, 'submit'])->name('approvals.submit');
-        Route::post('/approvals/{groupId}/approve-manager', [ApprovalController::class, 'approveManager'])->name('approvals.approveManager');
         Route::post('/approvals/{groupId}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
 
         // 3. กลุ่ม Route ที่รับค่าตัวแปร {id}, {groupId} (Dynamic) -> ต้องอยู่ล่างสุดเสมอ!
@@ -168,15 +167,6 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
         Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
 
-    /*
-    |--------------------------------------------------------------------------
-    | MANAGER
-    |--------------------------------------------------------------------------
-    */
-    Route::middleware('manager')->group(function () {
-        Route::post('/manager/approvals/{groupId}', [ApprovalController::class, 'managerAction'])
-            ->name('approvals.managerAction');
-});
 
     /*
     |--------------------------------------------------------------------------
