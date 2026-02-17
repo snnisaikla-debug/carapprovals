@@ -6,11 +6,7 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AccountController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Auth\ConfirmPasswordController;
-   
+
     /*
     |--------------------------------------------------------------------------
     | เปลี่ยนภาษา
@@ -52,22 +48,25 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
     */
 
     Route::middleware('auth')->group(function () {
+        // 1. Exort ต่างๆ
         Route::get('/approvals/export-excel', [ApprovalController::class, 'exportExcel'])->name('approvals.exportExcel');
         Route::get('/approvals/create', [ApprovalController::class, 'create'])->name('approvals.create');
-        Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion'])->name('approvals.fetchVersion');
         Route::get('/approvals/export-csv', [ApprovalController::class, 'exportCsv'])->name('approvals.exportCsv');
+        Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
+
+        // 2. Ver. Preview
+        Route::get('/approvals/fetch-version/{id}', [ApprovalController::class, 'fetchVersion'])->name('approvals.fetchVersion');
+        Route::get('/approvals/{approval}/version/{version}', [ApprovalController::class, 'previewVersion'])->name('approvals.preview-version');
+
+        Route::resource('approvals', ApprovalController::class);
     
-    Route::resource('approvals', ApprovalController::class);
-    
-        // เพิ่มบรรทัดนี้เพื่อรองรับการกด อนุมัติ/ตีกลับ
-        Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
+        // 3. อนุมัติ/ตีกลับ
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         // Custom Routes ของ Approval
         Route::post('/approvals/{group_id}/update-status', [ApprovalController::class, 'updateStatus'])->name('approvals.updateStatus');
         Route::post('/approvals/{group_id}/new-version', [ApprovalController::class, 'createNewVersion'])->name('approvals.newVersion');
         Route::get('/approvals/group/{group_id}', [ApprovalController::class, 'showGroup'])->name('approvals.showGroup');
-        Route::get('/approvals/{id}/pdf', [ApprovalController::class, 'exportPdf'])->name('approvals.exportPdf');
 
         // Change Password/Gmail
         Route::get('/account/password', [AccountController::class, 'showChangePasswordForm'])
@@ -159,9 +158,9 @@ use App\Http\Controllers\Auth\ConfirmPasswordController;
     | ADMIN
     |--------------------------------------------------------------------------
     */
-    Route::middleware('admin')->group(function () {
-        Route::post('/admin/approvals/{groupId}', [ApprovalController::class, 'adminAction'])
-            ->name('approvals.adminAction');
+    Route::middleware(['auth','admin'])->group(function () {
+        Route::post('approvals/{groupId}/status', [ApprovalController::class, 'updateStatus'])
+            ->name('approvals.updateStatus'); 
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.updateRole');

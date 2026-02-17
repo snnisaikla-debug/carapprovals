@@ -20,7 +20,7 @@
     }
 </style>
 
-<form method="POST" action="{{ route('approvals.store') }}">
+<form method="POST" action="{{ route('approvals.store') }}" enctype="multipart/form-data">
     @csrf
     <div class="d-flex justify-content-between mb-3">
         <button type="button" onclick="history.back()" class="btn btn-secondary">
@@ -179,28 +179,28 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label><br>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount">
+            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
         </div>
         <div class="col-6 mb-3">
             <input type="checkbox" name="options[]" value="RETENEION"> RETENTION
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount">
+            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
         </div>
         <div class="col-6 mb-3">
             <input type="checkbox" name="options[]" value="เกตรกร"> เกตรกร
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount">
+            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
         </div>
         <div class="col-6 mb-3">
             <input type="checkbox" name="options[]" value="Welcome"> Welcome
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount">
+            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
         </div>
     </div>
 
@@ -277,20 +277,20 @@
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">ส่วนลด (เงินสดดาวน์) (บาท)</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_amount">
+        <input type="number" step="0.01" class="form-control" name="decoration_discount">
     </div>
     <div class="col-6 mb-3">
         <label class="form-label">รับรถจ่ายดาวน์/สด (บาท)</label>
-        <input type="text" step="0.01" class="form-control" name="decoration_amount">
+        <input type="text" step="0.01" class="form-control" name="decoration_cash">
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">จ่ายของแต่ง</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_amount">
+        <input type="number" step="0.01" class="form-control" name="decoration_total">
     </div>
     <div class="col-6 mb-3">
         <label class="form-label">รวมทั้งหมด</label>
         <div class="input-group">
-            <input type="number" step="0.01" class="form-control" name="decoration_amount" id="calc_input">
+            <input type="number" step="0.01" class="form-control" name="decoration_value" id="calc_input">
             <button class="btn btn-outline-secondary" type="button" onclick="openCalculator()">
                 <i class="bi bi-calculator"></i> 🖩
             </button>
@@ -326,11 +326,11 @@
 
     <div class="mb-3">
         <label class="form-label">รายการแต่ง</label>
-        <textarea rows="2" class="form-control" name="decoration_amount"></textarea>
+        <textarea rows="2" class="form-control" name="decoration_detail"></textarea>
     </div>
     <div class="mb-3">
         <label class="form-label">มูลค่า (บาท)</label>
-        <textarea rows="2" class="form-control" name="decoration_amount"></textarea>
+        <textarea rows="2" class="form-control" name="decoration_payment"></textarea>
     </div>
 
 
@@ -372,7 +372,18 @@
             <textarea rows="2" class="form-control" name="over_reason"></textarea>
         </div>
 
-    {{-- 25–27 --}}
+    {{-- แนบไฟล์ --}}
+    <div class="mb-3">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10GB ต่อไฟล์</label>
+        <input type="file" 
+            name="documents[]" 
+            class="form-control" 
+            accept=".pdf,.jpg,.jpeg"
+            multiple>
+    </div>
+
+
+    {{-- ท้ายเอกสาร --}}
     <div class="section-title"></div><br>
     <div class="row">    
         <div class="col-6 mb-3">
@@ -385,7 +396,15 @@
         </div>
     </div>   
 
-    <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="submit" name="status" value="Draft" class="btn btn-secondary">
+            <i class="fas fa-save"></i> บันทึกร่าง
+        </button>
+
+        <button type="submit" name="status" value="Waiting" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> ส่งขออนุมัติ
+        </button>
+    </div>
     
 {{-- ================== SCRIPT เครื่องคิดเลข ================== --}}
 <script>

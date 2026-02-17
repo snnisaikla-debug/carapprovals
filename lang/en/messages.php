@@ -19,7 +19,7 @@ return [
     'action' => 'Management',
     'notitext' => 'There are no pending orders.',
     'draftW' => 'Need to edit',
-    'statusd' => 'Draft',
+    'statusD' => 'Draft',
     'statusA' => 'Approved',
     'statusPA' => 'Waiting',
     'statusR' => 'Rejected',

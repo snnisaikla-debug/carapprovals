@@ -26,4 +26,10 @@ class Approval extends Model
     protected $casts = [
         'options' => 'array', // บังคับให้ Laravel แปลงข้อมูล JSON เป็น Array อัตโนมัติ
     ];
+
+    public function documents()
+        {
+            return $this->hasMany(ApprovalDocument::class);
+        }
+
 }

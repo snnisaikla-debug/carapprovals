@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Approval;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ApprovalExport;
 use Illuminate\Support\Facades\Mail; 
@@ -22,35 +20,57 @@ class ApprovalController extends Controller
      */
     public function index(Request $request)
         {
+            $user = auth()->user();
+            $isSale = $user->role === 'sale';
+            $isAdmin = $user->role === 'admin';
+
             $sort = $request->input('sort', 'newest');
-            $salesFilter = $request->input('sales_user_id');
-            $statusFilter = $request->input('status');
-
+            
+            // 1. ดึงข้อมูลทั้งหมดมาก่อน
             $query = Approval::select('approvals.*', 'users.name as sales_name')
-            ->join(
-                DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
-                function ($join) {
-                    $join->on('approvals.group_id', '=', 'latest.group_id')
-                        ->on('approvals.version', '=', 'latest.max_version');
-                }
-            )
-            ->leftJoin('users', 'users.id', '=', 'approvals.sales_user_id');
+                ->join(
+                    DB::raw('(SELECT group_id, MAX(version) as max_version FROM approvals GROUP BY group_id) latest'),
+                    function ($join) {
+                        $join->on('approvals.group_id', '=', 'latest.group_id')
+                            ->on('approvals.version', '=', 'latest.max_version');
+                    }
+                )
+                ->leftJoin('users', 'users.id', '=', 'approvals.sales_user_id');
 
-        // 1) ฟิลเตอร์ชื่อ Sale และสถานะ
-        if (!empty($salesFilter)) {
-            $query->where('approvals.sales_user_id', $salesFilter);
-        }
-        if (!empty($statusFilter)) {
-            $query->where('approvals.status', $statusFilter);
-        }
+            if ($request->filled('sales_user_id')) {
+                $query->where('approvals.sales_user_id', $request->input('sales_user_id'));
+            }
 
-            $approvals = $query->orderBy('approvals.updated_at', ($sort === 'oldest' ? 'ASC' : 'DESC'))->get();
+            $allApprovals = $query->orderBy('approvals.updated_at', ($sort === 'oldest' ? 'ASC' : 'DESC'))->get();
+
+            // 2. แยกตารางที่ Controller เลย (ตัดปัญหา Logic ใน View ตีกัน)
+            
+            // ตารางบน: Admin/Sale เห็นเหมือนกันคือ Pending_Admin และ Approved
+            $mainApprovals = $allApprovals->filter(function ($val) {
+                return in_array($val->status, ['Pending_Admin', 'Approved']);
+            });
+
+            // ตารางล่าง:
+            if ($isSale) {
+                // Sale เห็นทั้ง Draft และ Reject
+                $draftApprovals = $allApprovals->filter(function ($val) {
+                    return in_array($val->status, ['Draft', 'Reject']);
+                });
+            } elseif ($isAdmin) {
+                // Admin เห็นแค่ Reject (เพื่อดูว่าตีกลับอะไรไป)
+                $draftApprovals = $allApprovals->filter(function ($val) {
+                    return $val->status == 'Reject';
+                });
+            } else {
+                $draftApprovals = collect();
+            }
 
             $salesList = User::where('role', 'sale')->orderBy('name')->pluck('name', 'id');
-            $statusList = Approval::select('status')->distinct()->pluck('status');
+            $statusList = ['Pending_Admin', 'Approved', 'Reject', 'Draft'];
 
-        return view('approvals.index', compact('approvals', 'salesList', 'statusList'));
-    }
+            // ส่งตัวแปรไปที่ View
+            return view('approvals.index', compact('mainApprovals', 'draftApprovals', 'salesList', 'statusList'));
+        }
 
     /**
      * 2. กระบวนการสร้าง (SALE)
@@ -63,9 +83,9 @@ class ApprovalController extends Controller
     public function store(Request $request)
         {
             $user = auth()->user();
-
+        
             $data = $request->validate([
-                // ... Validation rules เดิมของคุณ ...
+
                 'customer_name'         => 'required|string|max:255',
                 'customer_district'     => 'nullable|string|max:255',
                 'customer_province'     => 'nullable|string|max:255',
@@ -97,6 +117,7 @@ class ApprovalController extends Controller
                 'over_decoration_amount' => 'nullable|numeric',
                 'over_reason'           => 'nullable|string',
                 'remark'                => 'nullable|string',
+                'documents.*'           => 'nullable|mimes:pdf,jpg,jpeg|max:10240000',
             ]);
 
             $data['is_commercial_30000'] = $request->has('is_commercial_30000');
@@ -110,18 +131,35 @@ class ApprovalController extends Controller
                 'sales_user_id' => $user->id,
             ]));
 
+            $inputStatus = $request->input('status', 'Waiting');
+
             // อัปเดต group_id
             $approval->update(['group_id' => $approval->id]);
 
-                // ใส่รายชื่ออีเมลที่ต้องการส่งให้ครบที่นี่ (คั่นด้วยลูกน้ำ)
-                $emails = [
-                    'snryu.work@gmail.com', 
-                    'pandc1234@gmail.com'    
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $file) {
+                    $path = $file->store('documents', 'public');
+
+                    $approval->documents()->create([
+                        'file_path' => $path
+                    ]);
+                    // บันทึก $path ลง database ถ้าต้องการ
+                }
+            }
+
+            // ใส่รายชื่ออีเมลที่ต้องการส่งให้ครบที่นี่ (คั่นด้วยลูกน้ำ)
+            if ($inputStatus === 'Waiting') {
+                try {
+                    $emails = [
+                'snryu.work@gmail.com', 
+                'pandc1234@gmail.com'    
                 ];
-
                 Mail::to($emails)->send(new ApprovalMail($approval, 'new'));
-
-            return redirect()->route('approvals.index')->with('success', 'บันทึกสำเร็จ');
+                } catch (\Exception $e) {}
+            }
+                return redirect()->route('approvals.index')->with('success', 
+                        ($inputStatus === 'Draft' ? 'บันทึกร่างเรียบร้อย' : 'ส่งใบขออนุมัติเรียบร้อย')
+                );
         }
     
     // Admin Action (ฟังก์ชันรวมเพื่อลดความซ้ำซ้อน)
@@ -167,9 +205,11 @@ class ApprovalController extends Controller
             $approval = Approval::findOrFail($id);
             $user = auth()->user();
 
-            // แก้ไขเงื่อนไข 403: 
-            // อนุญาตถ้า: เป็นเจ้าของงาน (Sale) หรือ เป็น Admin
-            if ($user->role === 'sale' && $approval->sales_user_id !== $user->id) {
+            // แก้เงื่อนไข: ยอมให้ Sale เจ้าของงาน OR Admin เข้ามาแก้ได้
+            $isOwner = ($user->role === 'sale' && $approval->sales_user_id === $user->id);
+            $isAdmin = ($user->role === 'admin');
+
+            if (!$isOwner && !$isAdmin) {
                 abort(403, 'คุณไม่มีสิทธิ์แก้ไขเอกสารนี้');
             }
 

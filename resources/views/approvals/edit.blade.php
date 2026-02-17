@@ -54,20 +54,25 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">อำเภอ</label>
-            <input type="text" class="form-control" name="customer_district"
+            <input type="text" class="form-control" name="customer_district" required
                 value="{{ old('customer_district', $approval->customer_district) }}">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จังหวัด</label>
-            <input type="text" class="form-control" name="customer_province"
+            <input type="text" class="form-control" name="customer_province" required
                 value="{{ old('customer_province', $approval->customer_province) }}">
         </div>
     </div>
 
     <div class="mb-3">
         <label class="form-label">เบอร์โทร</label>
-        <input type="text" class="form-control" name="customer_phone"
+        <input type="text" class="form-control" name="customer_phone" required
             value="{{ old('customer_phone', $approval->customer_phone) }}">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">อีเมล</label>
+        <input type="text" class="form-control" name="customer_email">
     </div>
 
     {{-- 2. ข้อมูลรถ --}}
@@ -81,7 +86,7 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">สี</label>
-            <input type="text" class="form-control" name="car_color"
+            <input type="text" class="form-control" name="car_color" required
                 value="{{ old('car_color', $approval->car_color) }}">
         </div>
         <div class="col-6 mb-3">
@@ -404,17 +409,16 @@
 
     {{-- 25–27 --}}
     <div class="section-title"></div><br>
-    <div class="mb-3">
-        <label class="form-label">SC (ชื่อ)</label>
-        <input type="text" class="form-control" name="sc_signature"
-            value="{{ old('sc_signature', $approval->sc_signature) }}">
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Com การขาย (ชื่อ)</label>
-        <input type="text" class="form-control" name="sale_com_signature"
-            value="{{ old('sale_com_signature', $approval->sale_com_signature) }}">
-    </div>
+    <div class="row">    
+        <div class="col-6 mb-3">
+            <label class="form-label">SC (ชื่อ)</label>
+            <input type="text" step="0.01" class="form-control" name="sc_signature">
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">Com การขาย (ชื่อ)</label>
+            <input type="text" step="0.01" class="form-control" name="sale_com_signature">
+        </div>
+    </div> 
 
     <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
 

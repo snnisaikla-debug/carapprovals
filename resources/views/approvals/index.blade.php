@@ -5,27 +5,13 @@
 @section('content')
 
 @php
-    $user = Auth::user();
+    $user = auth::user();
     $isSale = $user->role === 'sale';
     $isAdmin = $user->role === 'admin';
-
-    // 1. ตารางหลัก: Admin/Manager เห็นทุกสถานะยกเว้น Draft | Sale เห็นเฉพาะที่ส่งไปแล้ว (Pending/Approved)
-    if ($isSale ) {
-        $mainApprovals = $approvals->whereIn('status', ['Pending_Admin', 'Pending_Manager', 'Approved']);
-    } else {
-        $mainApprovals = $approvals->where('status', '!=', 'Draft');
-    }
-
-    // 2. ตาราง Draft (สำหรับ Sale เท่านั้น): รวมงานที่เป็น Draft จริงๆ และงานที่ถูก Reject
-    if ($isSale || $isAdmin) {
-        $draftApprovals = $approvals->whereIn('status', ['Draft', 'Reject']);
-    } else {
-        $draftApprovals = collect(); // Admin/Manager ไม่เห็นตารางนี้
-    }
 @endphp
 
 {{-- แถว 1: ปุ่มสร้าง --}}
-    @if(Auth::user()->role == 'sale')
+    @if(auth::user()->role == 'sale')
         <div class="d-flex justify-content-start mb-3">
             <a href="{{ route('approvals.create') }}" class="btn btn-success">
                 {{ __('messages.newpaper') }}
@@ -87,10 +73,8 @@
                 <td>{{ $approval->sales_name }}</td>
                 <td class="text-center">
                     {{-- แสดงสถานะตามจริง --}}
-                    @if($approval->status == 'Pending_Admin')
+                    @if($approval->status == 'Waiting')
                         <span class="badge px-3 py-2" style="background-color: #fd178a; color: white;">{{ __('messages.statusPA') }}</span>
-                    @elseif($approval->status == 'Pending_Manager')
-                        <span class="badge px-3 py-2" style="background-color: #ff6716; color: white;">{{ __('messages.statusPM') }}</span>
                     @elseif($approval->status == 'Approved')
                         <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">{{ __('messages.statusA') }}</span>
                     @elseif($approval->status == 'Reject')
@@ -102,8 +86,6 @@
                     @php $role = strtolower($user->role); @endphp
                     @if($role == 'admin')
                         @include('approvals.partials.actions_admin', ['approval' => $approval])
-                    @elseif($role == 'manager')
-                        @include('approvals.partials.actions_manager', ['approval' => $approval])
                     @elseif($role == 'sale')
                         @include('approvals.partials.actions_sale', ['approval' => $approval])
                     @endif
@@ -117,11 +99,17 @@
 </div>
 
 {{-- ตาราง Draft  --}}
-@if(($isSale || $isAdmin) && $draftApprovals->count())
+@if(($isSale || $isAdmin) && $draftApprovals->count() > 0)
     <hr class="my-5">
-    <h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-file-earmark-text"></i> {{ __('messages.draftW') }}</h6>
-    <div class="table-responsive">
-        <table class="table table-sm table-hover align-middle border">
+    <h6 class="fw-bold mb-3 text-secondary">
+        <i class="fas fa-exclamation-circle"></i> 
+        {{ $isAdmin ? 'งานที่ถูกตีกลับ (Reject)' : 'งานร่างและงานที่ถูกตีกลับ' }}
+    </h6>   
+        
+    
+        <thead class="text-center bg-light">
+        <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle">            
             <thead class="table-light text-center">
                 <tr>
                     <th>#</th>
@@ -140,16 +128,31 @@
                     <td>{{ $approval->car_model }}</td>
                     <td>{{ $approval->sales_name }}</td>
                     <td class="text-center">
-                        @if($isAdmin)
-                             {{-- ถ้าเป็น Admin ให้ใช้ปุ่ม Admin --}}
-                            @include('approvals.partials.actions_admin', ['approval' => $approval])
+                        @if($approval->status == 'Reject')
+                            <span class="badge px-3 py-2" style="background-color: #fe1c1c; color: white;">{{ __('messages.statusR') }}</span>
                         @else
-                             {{-- ถ้าเป็น Sale ให้ใช้ปุ่ม Sale --}}
-                            @include('approvals.partials.actions_sale', ['approval' => $approval])
+                            <span class="badge px-3 py-2" style="background-color: #fcef01; color: white;">{{ __('messages.statusD') }}</span>
                         @endif
                     </td>
                     <td class="text-center">
-                        @include('approvals.partials.actions_sale', ['approval' => $approval])
+                        <div class="d-flex justify-content-center gap-2">
+                            {{-- 1. ปุ่มแก้ไข (มีทั้ง Admin และ Sale) --}}
+                            <a href="{{ route('approvals.edit', $approval->id) }}" class="btn btn-warning btn-sm" title="แก้ไข">
+                                <i class="bi bi-pencil"></i> {{ __('messages.edit') }}
+                            </a>
+
+                            {{-- 2. ปุ่มลบ (เฉพาะ Sale เท่านั้น!!) --}}
+                            @if($isSale)
+                                <form action="{{ route('approvals.destroy', $approval->group_id) }}" 
+                                    method="POST" onsubmit="return confirm('ยืนยันที่จะลบข้อมูลนี้?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" title="ลบ">
+                                            <i class="bi bi-trash"></i> 
+                                        </button>
+                                </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @endforeach
