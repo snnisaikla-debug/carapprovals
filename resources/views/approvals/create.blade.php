@@ -35,11 +35,11 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">วันที่ขอแคมเปญ</label>
-            <input type="date" class="form-control" name="request_date">
+            <input type="date" class="form-control" name="request_date" required>
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">วันที่จะส่งมอบรถ</label>
-            <input type="date" class="form-control" name="delivery_date">
+            <input type="date" class="form-control" name="delivery_date" required>
         </div>
     </div>
 
@@ -54,23 +54,34 @@
 
     <div class="row">
         <div class="col-6 mb-3">
+            <label class="form-label">ที่อยู่</label>
+            <input type="text" class="form-control" name="customer_address" required>
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">ตำบล</label>
+            <input type="text" class="form-control" name="customer_district" required>
+        </div>
+     </div>
+
+    <div class="row">
+        <div class="col-6 mb-3">
             <label class="form-label">อำเภอ</label>
-            <input type="text" class="form-control" name="customer_district">
+            <input type="text" class="form-control" name="customer_district" required>
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จังหวัด</label>
-            <input type="text" class="form-control" name="customer_province">
+            <input type="text" class="form-control" name="customer_province" required>
         </div>
     </div>
 
     <div class="mb-3">
         <label class="form-label">เบอร์โทร</label>
-        <input type="text" class="form-control" name="customer_phone">
+        <input type="text" class="form-control" name="customer_phone" required>
     </div>
 
     <div class="mb-3">
         <label class="form-label">อีเมล</label>
-        <input type="text" class="form-control" name="customer_email">
+        <input type="text" class="form-control" name="customer_email" required>
     </div>
 
     {{-- 2. ข้อมูลรถ --}}
@@ -84,7 +95,7 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">สี</label>
-            <input type="text" class="form-control" name="car_color">
+            <input type="text" class="form-control" name="car_color" required>
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">ออฟชั่น</label>
@@ -372,7 +383,7 @@
             <textarea rows="2" class="form-control" name="over_reason"></textarea>
         </div>
 
-    {{-- แนบไฟล์ --}}
+         {{-- แนบไฟล์ --}}
     <div class="mb-3">
         <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10GB ต่อไฟล์</label>
         <input type="file" 
@@ -382,8 +393,7 @@
             multiple>
     </div>
 
-
-    {{-- ท้ายเอกสาร --}}
+    {{-- ลงชื่อ --}}
     <div class="section-title"></div><br>
     <div class="row">    
         <div class="col-6 mb-3">
@@ -394,7 +404,12 @@
             <label class="form-label">Com การขาย (ชื่อ)</label>
             <input type="text" step="0.01" class="form-control" name="sale_com_signature">
         </div>
-    </div>   
+    </div>  
+
+    <div class="mb-3">
+        <label for="remark" class="form-label fw-bold">หมายเหตุ (ถ้ามี):</label>
+        <textarea name="remark" class="form-control" rows="2" placeholder="ระบุข้อความเพิ่มเติม...">{{ old('remark', $approval->remark ?? '') }}</textarea>
+    </div>
 
     <div class="d-flex justify-content-end gap-2 mt-4">
         <button type="submit" name="status" value="Draft" class="btn btn-secondary">

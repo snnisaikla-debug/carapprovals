@@ -5,13 +5,13 @@
 @section('content')
 
 @php
-    $user = auth::user();
-    $isSale = $user->role === 'sale';
-    $isAdmin = $user->role === 'admin';
+    $user = auth()->user();
+    $isSale = $user && $user->role === 'sale';
+    $isAdmin = $user && $user->role === 'admin';
 @endphp
 
 {{-- แถว 1: ปุ่มสร้าง --}}
-    @if(auth::user()->role == 'sale')
+    @if(auth()->user()->role == 'sale')
         <div class="d-flex justify-content-start mb-3">
             <a href="{{ route('approvals.create') }}" class="btn btn-success">
                 {{ __('messages.newpaper') }}
@@ -29,12 +29,14 @@
             @endforeach
         </select>
 
-        <select name="status" class="form-select form-select-sm" style="width:180px" onchange="this.form.submit()">
-            <option value="">{{ __('messages.sales_user_id') }}</option>
-            @foreach ($statusList as $st)
-                <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+        <select name="status"
+                class="form-select form-select-sm" style="width:180px" onchange="this.form.submit()">
+            <option value="">{{ __('messages.statusSort') }}</option>    
+            @foreach ($statusList as $st)    
+            <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
             @endforeach
         </select>
+
         <input type="hidden" name="sort" value="{{ request('sort','newest') }}">
     </form>
 
@@ -69,12 +71,12 @@
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td class="text-center">{{ $approval->group_id }}</td>
-                <td>{{ $approval->car_model }}</td> 
-                <td>{{ $approval->sales_name }}</td>
+                <td class="text-center">{{ $approval->car_model }}</td> 
+                <td class="text-center">{{ $approval->sales_name }}</td>
                 <td class="text-center">
                     {{-- แสดงสถานะตามจริง --}}
                     @if($approval->status == 'Waiting')
-                        <span class="badge px-3 py-2" style="background-color: #fd178a; color: white;">{{ __('messages.statusPA') }}</span>
+                        <span class="badge px-3 py-2" style="background-color: #00b6e8; color: white;">{{ __('messages.statusPA') }}</span>
                     @elseif($approval->status == 'Approved')
                         <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">{{ __('messages.statusA') }}</span>
                     @elseif($approval->status == 'Reject')
@@ -103,7 +105,7 @@
     <hr class="my-5">
     <h6 class="fw-bold mb-3 text-secondary">
         <i class="fas fa-exclamation-circle"></i> 
-        {{ $isAdmin ? 'งานที่ถูกตีกลับ (Reject)' : 'งานร่างและงานที่ถูกตีกลับ' }}
+        {{ $isAdmin ? 'งานที่ต้องแก้ไข (Reject)' : 'งานร่างและงานที่ถูกตีกลับ' }}
     </h6>   
         
     
@@ -125,8 +127,8 @@
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td class="text-center">{{ $approval->group_id }}</td>
-                    <td>{{ $approval->car_model }}</td>
-                    <td>{{ $approval->sales_name }}</td>
+                    <td class="text-center">{{ $approval->car_model }}</td>
+                    <td class="text-center">{{ $approval->sales_name }}</td>
                     <td class="text-center">
                         @if($approval->status == 'Reject')
                             <span class="badge px-3 py-2" style="background-color: #fe1c1c; color: white;">{{ __('messages.statusR') }}</span>
@@ -136,6 +138,10 @@
                     </td>
                     <td class="text-center">
                         <div class="d-flex justify-content-center gap-2">
+                            <a href="{{ route('approvals.show', $approval->group_id) }}" 
+                                class="btn btn-sm btn-secondary" style="opacity: 0.6;">
+                                {{ __('messages.details') }}
+                            </a>
                             {{-- 1. ปุ่มแก้ไข (มีทั้ง Admin และ Sale) --}}
                             <a href="{{ route('approvals.edit', $approval->id) }}" class="btn btn-warning btn-sm" title="แก้ไข">
                                 <i class="bi bi-pencil"></i> {{ __('messages.edit') }}

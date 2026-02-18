@@ -150,9 +150,10 @@
                 <thead class="table-light text-center">
                     <tr>
                         <th>Version</th>
-                        <th>สถานะ</th>
-                        <th>ผู้สร้าง</th>
-                        <th>วันที่สร้าง</th>
+                        <th>{{ __('messages.status') }}</th>
+                        <th>{{ __('messages.sales_name') }}</th>
+                        <th>{{ __('messages.remark') }}</th>
+                        <th>{{ __('messages.updated_at') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -166,14 +167,14 @@
                                 $badgeColor = '#6c757d';
                                 if ($row->status == 'Approved') $badgeColor = '#03b11a';
                                 elseif ($row->status == 'Reject') $badgeColor = '#fe1c1c';
-                                elseif ($row->status == 'Pending_Admin') $badgeColor = '#fd178a';
-                                elseif ($row->status == 'Pending_Manager') $badgeColor = '#ff6716';
+                                elseif ($row->status == 'Waiting') $badgeColor = '#00b6e8';
                             @endphp
                             <span class="badge" style="background-color: {{ $badgeColor }}; color: white; padding: 8px 12px;">
                                 {{ $row->status }}
                             </span>
                         </td>
-                        <td>{{ $row->sales_name }}</td>
+                        <td class="text-center">{{ $row->sales_name }}</td>
+                        <td class="text-center danger small">{{ $row->remark ?? '-' }}</td>
                         <td class="text-center">{{ $row->created_at->format('d/m/Y H:i') }}</td>
                     </tr>
                     @endforeach
@@ -213,25 +214,35 @@
 </div>
 
     {{-- Scripts Export file --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
 $(document).ready(function() {
+    
     $('.clickable-row').click(function() {
-        let versionId = $(this).data('id');
-        let versionNum = $(this).data('version');
+        
+        // เช็คว่ากดติดไหม (ดูใน Console F12)
+        console.log("Clicked row:", $(this).data('id'));
 
-        // 1. Highlight แถวที่เลือก
+        let versionId = $(this).data('id');
+
+        // 1. เปลี่ยนสีแถวเพื่อบอกว่าเลือกอันนี้อยู่
         $('.clickable-row').removeClass('table-primary');
         $(this).addClass('table-primary');
 
-        // 2. โหลดเนื้อหาพรีวิว (Partial View)
+        // 2. โหลดเนื้อหาพรีวิวผ่าน AJAX
+        // ตรวจสอบ URL ให้แน่ใจว่าไม่มี / ซ้อนกัน
         let url = "{{ url('/approvals/fetch-version') }}/" + versionId;
+        
+        $('#version-detail-display').html('<div class="text-center p-4"><div class="spinner-border text-primary"></div><p>กำลังโหลดข้อมูล...</p></div>');
+
         $.get(url, function(data) {
             $('#version-detail-display').html(data);
+        }).fail(function() {
+            $('#version-detail-display').html('<div class="alert alert-danger">โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่</div>');
         });
 
-        // 3. เปลี่ยนลิงก์ปุ่ม PDF ให้เป็น ID ของเวอร์ชันที่คลิก
+        // 3. เปลี่ยนปุ่ม PDF ให้เป็นของเวอร์ชันนั้น
         let pdfUrl = "{{ url('/approvals') }}/" + versionId + "/pdf";
         $('#pdfBtn').attr('href', pdfUrl);
     });

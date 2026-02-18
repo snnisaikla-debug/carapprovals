@@ -45,9 +45,9 @@ class ApprovalController extends Controller
 
             // 2. แยกตารางที่ Controller เลย (ตัดปัญหา Logic ใน View ตีกัน)
             
-            // ตารางบน: Admin/Sale เห็นเหมือนกันคือ Pending_Admin และ Approved
+            // ตารางบน: Admin/Sale เห็นเหมือนกันคือ Waiting และ Approved
             $mainApprovals = $allApprovals->filter(function ($val) {
-                return in_array($val->status, ['Pending_Admin', 'Approved']);
+                return in_array($val->status, ['Waiting', 'Approved']);
             });
 
             // ตารางล่าง:
@@ -66,7 +66,7 @@ class ApprovalController extends Controller
             }
 
             $salesList = User::where('role', 'sale')->orderBy('name')->pluck('name', 'id');
-            $statusList = ['Pending_Admin', 'Approved', 'Reject', 'Draft'];
+            $statusList = ['Draft','Waiting', 'Reject', 'Approved', 'Cancel'];
 
             // ส่งตัวแปรไปที่ View
             return view('approvals.index', compact('mainApprovals', 'draftApprovals', 'salesList', 'statusList'));
@@ -129,6 +129,7 @@ class ApprovalController extends Controller
                 'created_by'    => strtoupper($user->role),
                 'sales_name'    => $user->name,
                 'sales_user_id' => $user->id,
+                'remark' => $request->input('remark'),
             ]));
 
             $inputStatus = $request->input('status', 'Waiting');
@@ -143,7 +144,6 @@ class ApprovalController extends Controller
                     $approval->documents()->create([
                         'file_path' => $path
                     ]);
-                    // บันทึก $path ลง database ถ้าต้องการ
                 }
             }
 
@@ -157,6 +157,7 @@ class ApprovalController extends Controller
                 Mail::to($emails)->send(new ApprovalMail($approval, 'new'));
                 } catch (\Exception $e) {}
             }
+
                 return redirect()->route('approvals.index')->with('success', 
                         ($inputStatus === 'Draft' ? 'บันทึกร่างเรียบร้อย' : 'ส่งใบขออนุมัติเรียบร้อย')
                 );
@@ -167,12 +168,14 @@ class ApprovalController extends Controller
         {
             // 1. ตรวจสอบว่ามีสถานะส่งมาไหม
             $request->validate([
-                'status' => 'required|in:Approved,Reject'
+                'status' => 'required|in:Approved,Reject',
+                'remark' => 'nullable|string'
             ]);
 
             // 2. อัปเดตทุกใบใน Group เดียวกันให้เป็นสถานะใหม่
             $affected = \App\Models\Approval::where('group_id', $group_id)->update([
                 'status' => $request->status,
+                'remark' => $request->input('remark'),
                 'updated_at' => now()
             ]);
 
@@ -275,7 +278,7 @@ class ApprovalController extends Controller
             $latest = Approval::where('group_id', $groupId)->orderByDesc('version')->firstOrFail();
 
             if (Auth::user()->role === 'sale' && $latest->sales_user_id !== Auth::id()) {
-                abort(403);
+                abort(403, 'คุณไม่มีสิทธิ์ลบเอกสารนี้ เนื่องจากไม่ใช่เจ้าของ หรือ แอดมิน');
             }
 
             if ($latest->status === 'Approved') {

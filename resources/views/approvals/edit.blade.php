@@ -53,6 +53,19 @@
 
     <div class="row">
         <div class="col-6 mb-3">
+            <label class="form-label">ที่อยู่</label>
+            <input type="text" class="form-control" name="customer_address" required
+            value="{{ old('customer_address', $approval->customer_address) }}">
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">ตำบล</label>
+            <input type="text" class="form-control" name="customer_district" required
+            value="{{ old('customer_district', $approval->customer_districts) }}">
+        </div>
+     </div>
+
+    <div class="row">
+        <div class="col-6 mb-3">
             <label class="form-label">อำเภอ</label>
             <input type="text" class="form-control" name="customer_district" required
                 value="{{ old('customer_district', $approval->customer_district) }}">
@@ -72,7 +85,8 @@
 
     <div class="mb-3">
         <label class="form-label">อีเมล</label>
-        <input type="text" class="form-control" name="customer_email">
+        <input type="text" class="form-control" name="customer_email" required
+         value="{{ old('customer_email', $approval->customer_email) }}">
     </div>
 
     {{-- 2. ข้อมูลรถ --}}
@@ -356,7 +370,7 @@
     </div>
     <div class="mb-3">
         <label class="form-label">มูลค่า (บาท)</label>
-        <textarea rows="2" class="form-control" name="decoration_amount">
+        <textarea rows="2" class="form-control" name="decoration_amount"> 
             {{ old('decoration_amount', $approval->decoration_amount) }}</textarea>
     </div>
 
@@ -407,18 +421,36 @@
                 {{ old('over_reason', $approval->over_reason) }}</textarea>
     </div>
 
+     {{-- แนบไฟล์ --}}
+    <div class="mb-3">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10GB ต่อไฟล์</label>
+        <input type="file" 
+            name="documents[]" 
+            class="form-control" 
+            accept=".pdf,.jpg,.jpeg"
+            multiple
+            value="{{ old('documents', $approval->documents) }}">
+    </div>
+
     {{-- 25–27 --}}
     <div class="section-title"></div><br>
     <div class="row">    
         <div class="col-6 mb-3">
             <label class="form-label">SC (ชื่อ)</label>
-            <input type="text" step="0.01" class="form-control" name="sc_signature">
+            <input type="text" step="0.01" class="form-control" name="sc_signature"
+            value="{{ old('sc_signature', $approval->sc_signature) }}">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">Com การขาย (ชื่อ)</label>
-            <input type="text" step="0.01" class="form-control" name="sale_com_signature">
+            <input type="text" step="0.01" class="form-control" name="sale_com_signature"
+            value="{{ old('sale_com_signature', $approval->sale_com_signature) }}">
         </div>
     </div> 
+
+    <div class="mb-3">
+        <label for="remark" class="form-label fw-bold">หมายเหตุ (ถ้ามี):</label>
+        <textarea name="remark" class="form-control" rows="2" placeholder="ระบุข้อความเพิ่มเติม...">{{ old('remark', $approval->remark ?? '') }}</textarea>
+    </div>
 
     <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>
 

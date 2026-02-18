@@ -1,9 +1,10 @@
 <div class="card mt-4">
     <div class="card-header bg-warning text-black">
-        <strong>ตัวอย่างเอกสาร V {{ $approval->version }}</strong>
+        <strong>ตัวอย่างเอกสาร V.{{ $approval->version }}</strong>
     </div>
    
         <table class="table table-bordered">
+            <tr><th class="ps-3">หมายเหตุ:</th><td>{{ $approval->remark ?: '-' }}</td></tr>
             <tr class="table-dark"><th colspan="2" class="ps-3">ข้อมูลพื้นฐาน</th></tr>
             <tr><th class="ps-3" style="width: 250px;">วันที่ขอแคมเปญ:</th><td>{{ $approval->created_at->format('d/m/Y') }}</td></tr>
             <tr><th class="ps-3">วันที่ส่งมอบรถ (โดยประมาณ):</th><td>{{ $approval->delivery_date ?: '-' }}</td></tr>
@@ -35,6 +36,5 @@
             <tr><th class="ps-3">แคมเปญที่มี:</th><td>{!! nl2br(e($approval->campaigns_available)) !!}</td></tr>
             <tr><th class="ps-3">แคมเปญที่ใช้:</th><td>{!! nl2br(e($approval->campaigns_used)) !!}</td></tr>
             <tr><th class="ps-3">รวมทั้งหมด:</th><td>{{ number_format($approval->decoration_amount, 2) }} บาท</td></tr>
-            <tr><th class="ps-3">หมายเหตุ:</th><td>{{ $approval->remark ?: '-' }}</td></tr>
         </table>
     </div>
