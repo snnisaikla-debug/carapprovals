@@ -59,8 +59,8 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">ตำบล</label>
-            <input type="text" class="form-control" name="customer_district" required
-            value="{{ old('customer_district', $approval->customer_districts) }}">
+            <input type="text" class="form-control" name="customer_subdistrict" required
+            value="{{ old('customer_subdistrict', $approval->customer_subdistrict) }}">
         </div>
      </div>
 
@@ -86,7 +86,7 @@
     <div class="mb-3">
         <label class="form-label">อีเมล</label>
         <input type="text" class="form-control" name="customer_email" required
-         value="{{ old('customer_email', $approval->customer_email) }}">
+        value="{{ old('customer_email', $approval->customer_email) }}">
     </div>
 
     {{-- 2. ข้อมูลรถ --}}
@@ -94,7 +94,7 @@
         <div class="mb-3">
             <label class="form-label">รุ่นรถ</label>
             <input type="text" class="form-control" name="car_model" required
-                value="{{ old('car_model', $approval->car_model) }}">
+            value="{{ old('car_model', $approval->car_model) }}">
         </div>
 
     <div class="row">
@@ -172,26 +172,14 @@
     <div class="row">
         <div class="col-6 mb-3">
                 <label class="form-label">รหัสแคมเปญ</label>
-                <select class="form-select" name="com_fn_option">
+                <select class="form-select" name="com_option">
                     <option value="">-- เลือก --</option>
-                    <option value="์N" {{ old('com_fn_option', $approval->com_fn_option) == 'N' ? 'selected' : '' }}>
-                        N
-                    </option>
-                    <option value="L" {{ old('com_fn_option', $approval->com_fn_option) == 'L' ? 'selected' : '' }}>
-                        L
-                    </option>
-                    <option value="LDP" {{ old('com_fn_option', $approval->com_fn_option) == 'LDP' ? 'selected' : '' }}>
-                        LDP
-                    </option>
-                    <option value="90D" {{ old('com_fn_option', $approval->com_fn_option) == '90D' ? 'selected' : '' }}>
-                        90D
-                    </option>
-                    <option value="SCP" {{ old('com_fn_option', $approval->com_fn_option) == 'SCP' ? 'selected' : '' }}>
-                        SCP
-                    </option>
-                    <option value="FCP" {{ old('com_fn_option', $approval->com_fn_option) == 'FCP' ? 'selected' : '' }}>
-                        FCP
-                    </option>
+                    <option value="N" {{ old('com_option', $approval->com_option) == 'N' ? 'selected' : '' }}>N</option>
+                    <option value="L" {{ old('com_option', $approval->com_option) == 'L' ? 'selected' : '' }}>L</option>
+                    <option value="LDP" {{ old('com_option', $approval->com_option) == 'LDP' ? 'selected' : '' }}>LDP</option>
+                    <option value="90D" {{ old('com_option', $approval->com_option) == '90D' ? 'selected' : '' }}>90D</option>
+                    <option value="SCP" {{ old('com_option', $approval->com_option) == 'SCP' ? 'selected' : '' }}>SCP</option>
+                    <option value="FCP" {{ old('com_option', $approval->com_option) == 'FCP' ? 'selected' : '' }}>FCP</option>
                 </select>
         </div>
         <div class="col-6 mb-3">
@@ -200,52 +188,56 @@
             value="{{ old('Flight', $approval->Flight) }}">
         </div>
     </div>
+    
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">ประเภทการขาย</label><br>
-            <input type="checkbox" name="sale_type_options[]" 
-                value="GE"{{ (is_array(old('sale_type_options', $approval->sale_type_options)) 
+            <input type="checkbox" name="options1[]" 
+                value="GE"{{ (is_array(old('options1', $approval->sale_type_options)) 
                 && in_array('GE', old('sale_type_options', $approval->sale_type_options))) ? 'checked' : '' }}> GE<br>       
-    </div>
-    <div class="col-6 mb-3">
-            <label class="form-label">จำนวน (บาท)</label><br>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount"
-                value="{{ old('sale_type_amount', $approval->sale_type_amount) }}">
         </div>
         <div class="col-6 mb-3">
-            <input type="checkbox" name="options[]" 
+            <label class="form-label">จำนวน (บาท)</label><br>
+            <input type="number" step="0.01" class="form-control" name="amount_ge" 
+                value="{{ old('amount_ge', $approval->amount_ge ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
+        </div>
+
+        <div class="col-6 mb-3">
+            <input type="checkbox" name="options2[]" 
                 value="RETENEION"{{ (is_array(old('options', $approval->options)) 
                 && in_array('RETENTION', old('options', $approval->options))) ? 'checked' : '' }}> RETENTION 
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount"
-            value="{{ old('sale_type_amount', $approval->sale_type_amount) }}">
+            <input type="number" step="0.01" class="form-control" name="amount_retention"
+            value="{{ old('amount_retention', $approval->amount_retention ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
         </div>
+
         <div class="col-6 mb-3">
-            <input type="checkbox" name="options[]" 
-                value="เกตรกร"{{ (is_array(old('options', $approval->options)) 
+            <input type="checkbox" name="options3[]" 
+                value="เกตรกร"{{ (is_array(old('options3', $approval->options)) 
                 && in_array('เกตรกร', old('options', $approval->options))) ? 'checked' : '' }}"> เกตรกร
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount"
-            value="{{ old('sale_type_amount', $approval->sale_type_amount) }}">
+            <input type="number" step="0.01" class="form-control" name="amount_farmer"
+            value="{{ old('amount_farmer', $approval->amount_farmer ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
         </div>
+
         <div class="col-6 mb-3">
-            <input type="checkbox" name="options[]" 
-                value="Welcome"{{ (is_array(old('options', $approval->options)) 
+            <input type="checkbox" name="options4[]" 
+                value="Welcome"{{ (is_array(old('options4', $approval->options)) 
                 && in_array('Welcome', old('options', $approval->options))) ? 'checked' : '' }}> Welcome
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount"
-            value="{{ old('sale_type_amount', $approval->sale_type_amount) }}">
+            <input type="number" step="0.01" class="form-control" name="amount_welcome"
+            value="{{ old('amount_welcome', $approval->amount_welcome ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
         </div>
     </div>
 
     <div class="mb-3">
-            <input type="checkbox" name="options[]">
+            <input type="checkbox" name="options5[]" value="Fleet">
             <label class="form-label">Fleet (บาท)</label>
             <input type="number" step="0.01" class="form-control" name="fleet_amount"
                 value="{{ old('fleet_amount', $approval->fleet_amount) }}">
@@ -274,24 +266,12 @@
         <label class="form-label">Com F/N</label>
         <select class="form-select" name="com_fn_option">
             <option value="">-- เลือก --</option>
-            <option value="4" {{ old('com_fn_option', $approval->com_fn_option) == '4' ? 'selected' : '' }}>
-                4
-            </option>
-            <option value="8" {{ old('com_fn_option', $approval->com_fn_option) == '8' ? 'selected' : '' }}>
-                8
-            </option>
-            <option value="10" {{ old('com_fn_option', $approval->com_fn_option) == '10' ? 'selected' : '' }}>
-                10
-            </option>
-            <option value="12" {{ old('com_fn_option', $approval->com_fn_option) == '12' ? 'selected' : '' }}>
-                12
-            </option>
-            <option value="14" {{ old('com_fn_option', $approval->com_fn_option) == '14' ? 'selected' : '' }}>
-                14
-            </option>
-            <option value="16" {{ old('com_fn_option', $approval->com_fn_option) == '16' ? 'selected' : '' }}>
-                16
-            </option>
+            <option value="4" {{ old('com_fn_option', $approval->com_fn_option) == '4' ? 'selected' : '' }}>4</option>
+            <option value="8" {{ old('com_fn_option', $approval->com_fn_option) == '8' ? 'selected' : '' }}>8</option>
+            <option value="10" {{ old('com_fn_option', $approval->com_fn_option) == '10' ? 'selected' : '' }}>10</option>
+            <option value="12" {{ old('com_fn_option', $approval->com_fn_option) == '12' ? 'selected' : '' }}>12</option>
+            <option value="14" {{ old('com_fn_option', $approval->com_fn_option) == '14' ? 'selected' : '' }}>14</option>
+            <option value="16" {{ old('com_fn_option', $approval->com_fn_option) == '16' ? 'selected' : '' }}>16</option>
         </select>
     </div>
     <div class="col-6 mb-3">
@@ -302,20 +282,17 @@
    
     <div class="mb-3">
         <label class="form-label">รายการของแถม</label>
-        <textarea rows="2" class="form-control" name="free_items">
-            {{ old('free_items', $approval->free_items) }}</textarea>
+        <textarea rows="2" class="form-control" name="free_items">{{ old('free_items', $approval->free_items) }}</textarea>
     </div>
 
     <div class="mb-3">
         <label class="form-label">รายการของแถมเกิน</label>
-        <textarea rows="2" class="form-control" name="free_items_over">
-            {{ old('free_items_over', $approval->free_items_over) }}</textarea>
+        <textarea rows="2" class="form-control" name="free_items_over">{{ old('free_items_over', $approval->free_items_over) }}</textarea>
     </div>
 
     <div class="mb-3">
         <label class="form-label">รายการซื้อเพิ่ม</label>
-        <textarea rows="2" class="form-control" name="extra_purchase_items">
-            {{ old('extra_purchase_items', $approval->extra_purchase_items) }}</textarea>
+        <textarea rows="2" class="form-control" name="extra_purchase_items">{{ old('extra_purchase_items', $approval->extra_purchase_items) }}</textarea>
     </div>
 
 
@@ -324,29 +301,29 @@
 
     <div class="mb-3">
         <label class="form-label">แคมเปญที่มี</label>
-        <textarea rows="2" class="form-control" name="campaigns_available">
-            {{ old('campaigns_available', $approval->campaigns_available) }}</textarea>
+        <textarea rows="2" class="form-control" name="campaigns_available">{{ old('campaigns_available', $approval->campaigns_available) }}</textarea>
     </div>
 
     <div class="mb-3">
         <label class="form-label">แคมเปญที่ใช้</label>
-        <textarea rows="2" class="form-control" name="campaigns_used">
-            {{ old('campaigns_used', $approval->campaigns_used) }}</textarea>
+        <textarea rows="2" class="form-control" name="campaigns_used">{{ old('campaigns_used', $approval->campaigns_used) }}</textarea>
     </div>
+
+    {{-- 4. แก้ไข: decoration_amount ซ้ำกัน 5 จุด!!! ต้องเปลี่ยนชื่อให้ตรง DB --}}
     <div class="col-6 mb-3">
         <label class="form-label">ส่วนลด (เงินสดดาวน์)</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_amount"
-        value="{{ old('decoration_amount', $approval->decoration_amount) }}">
+        <input type="number" step="0.01" class="form-control" name="discount_cash" 
+        value="{{ old('discount_cash', $approval->discount_cash ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
     </div>
     <div class="col-6 mb-3">
         <label class="form-label">รับรถจ่ายดาวน์/สด</label>
-        <input type="text" step="0.01" class="form-control" name="decoration_amount"
-        value="{{ old('decoration_amount', $approval->decoration_amount) }}">
+        <input type="text" step="0.01" class="form-control" name="pickup_payment" 
+        value="{{ old('pickup_payment', $approval->pickup_payment ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">จ่ายของแต่ง</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_amount"
-        value="{{ old('decoration_amount', $approval->decoration_amount) }}">
+        <input type="number" step="0.01" class="form-control" name="decoration_cost" 
+        value="{{ old('decoration_cost', $approval->decoration_cost ?? '') }}"> {{-- ต้องแก้ name ให้ตรง DB --}}
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">รวมทั้งหมด</label>
@@ -365,13 +342,13 @@
 
     <div class="mb-3">
         <label class="form-label">รายการแต่ง</label>
-        <textarea rows="2" class="form-control" name="decoration_amount">
-            {{ old('decoration_amount', $approval->decoration_amount) }}</textarea>
+        {{-- 5. แก้ไข: เปลี่ยน name ไม่ให้ซ้ำ --}}
+        <textarea rows="2" class="form-control" name="decoration_list">{{ old('decoration_list', $approval->decoration_list ?? '') }}</textarea>
     </div>
     <div class="mb-3">
         <label class="form-label">มูลค่า (บาท)</label>
-        <textarea rows="2" class="form-control" name="decoration_amount"> 
-            {{ old('decoration_amount', $approval->decoration_amount) }}</textarea>
+        {{-- 6. แก้ไข: เปลี่ยน name ไม่ให้ซ้ำ --}}
+        <textarea rows="2" class="form-control" name="decoration_value">{{ old('decoration_value', $approval->decoration_value ?? '') }}</textarea>
     </div>
 
 
@@ -386,11 +363,10 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">สถานะ</label>
-            <select class="form-select" name="over_campaign_status"
-                value="{{ old('over_campaign_status', $approval->over_campaign_status) }}">
+            <select class="form-select" name="over_campaign_status">
                 <option value="">-- เลือก --</option>
-                <option value="ไม่เกิน">ไม่เกิน</option>
-                <option value="เกิน">เกิน</option>
+                <option value="ไม่เกิน" {{ old('over_campaign_status', $approval->over_campaign_status) == 'ไม่เกิน' ? 'selected' : '' }}>ไม่เกิน</option>
+                <option value="เกิน" {{ old('over_campaign_status', $approval->over_campaign_status) == 'เกิน' ? 'selected' : '' }}>เกิน</option>
             </select>
         </div>
     </div>
@@ -405,31 +381,69 @@
             <label class="form-label">สถานะ</label>
             <select class="form-select" name="over_decoration_status">
                 <option value="">-- เลือก --</option>
-                <option value="ไม่เกิน" {{ old('over_decoration_status', $approval->over_decoration_status) == 'ไม่เกิน' ? 'selected' : '' }}>
-                    ไม่เกิน
-                </option>
-                <option value="เกิน" {{ old('over_decoration_status', $approval->over_decoration_status) == 'เกิน' ? 'selected' : '' }}>
-                    เกิน
-                </option>
+                <option value="ไม่เกิน" {{ old('over_decoration_status', $approval->over_decoration_status) == 'ไม่เกิน' ? 'selected' : '' }}>ไม่เกิน</option>
+                <option value="เกิน" {{ old('over_decoration_status', $approval->over_decoration_status) == 'เกิน' ? 'selected' : '' }}>เกิน</option>
             </select>
         </div>
     </div>
 
         <div class="mb-3">
             <label class="form-label">สาเหตุขอเกิน</label>
-            <textarea rows="2" class="form-control" name="over_reason">
-                {{ old('over_reason', $approval->over_reason) }}</textarea>
+            <textarea rows="2" class="form-control" name="over_reason">{{ old('over_reason', $approval->over_reason) }}</textarea>
     </div>
 
-     {{-- แนบไฟล์ --}}
+    {{-- แนบไฟล์ 1 --}}
     <div class="mb-3">
-        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10GB ต่อไฟล์</label>
-        <input type="file" 
-            name="documents[]" 
-            class="form-control" 
-            accept=".pdf,.jpg,.jpeg"
-            multiple
-            value="{{ old('documents', $approval->documents) }}">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10MB ต่อไฟล์</label>
+        @if(!empty($approval->documents1))
+            <div class="mb-2 p-2 bg-light border rounded">
+                <span class="text-success"><i class="fas fa-check-circle"></i> มีไฟล์แนบเดิมแล้ว:</span>
+                {{-- สมมติว่าเก็บชื่อไฟล์เป็น JSON หรือ Text ธรรมดา --}}
+                <a href="{{ asset('storage/' . $approval->documents1) }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                    ดูไฟล์ปัจจุบัน
+                </a>
+            </div>
+        @endif
+
+        {{-- ช่องสำหรับอัปโหลดใหม่ (ไม่ต้องใส่ value) --}}
+        <input type="file" name="documents1[]" class="form-control" accept=".pdf,.jpg,.jpeg" multiple>
+        <small class="text-muted">หากไม่อัปโหลดใหม่ ระบบจะใช้ไฟล์เดิม</small>
+    </div>
+
+    {{-- แนบไฟล์ 2 --}}
+    <div class="mb-3">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10MB ต่อไฟล์</label>
+        @if(!empty($approval->documents2))
+            <div class="mb-2 p-2 bg-light border rounded">
+                <span class="text-success"><i class="fas fa-check-circle"></i> มีไฟล์แนบเดิมแล้ว:</span>
+                {{-- สมมติว่าเก็บชื่อไฟล์เป็น JSON หรือ Text ธรรมดา --}}
+                <a href="{{ asset('storage/' . $approval->documents2) }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                    ดูไฟล์ปัจจุบัน
+                </a>
+            </div>
+        @endif
+
+        {{-- ช่องสำหรับอัปโหลดใหม่ (ไม่ต้องใส่ value) --}}
+        <input type="file" name="documents2[]" class="form-control" accept=".pdf,.jpg,.jpeg" multiple>
+        <small class="text-muted">หากไม่อัปโหลดใหม่ ระบบจะใช้ไฟล์เดิม</small>
+    </div>
+
+    {{-- แนบไฟล์ 3 --}}
+    <div class="mb-3">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10MB ต่อไฟล์</label>
+        @if(!empty($approval->documents3))
+            <div class="mb-2 p-2 bg-light border rounded">
+                <span class="text-success"><i class="fas fa-check-circle"></i> มีไฟล์แนบเดิมแล้ว:</span>
+                {{-- สมมติว่าเก็บชื่อไฟล์เป็น JSON หรือ Text ธรรมดา --}}
+                <a href="{{ asset('storage/' . $approval->documents3) }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                    ดูไฟล์ปัจจุบัน
+                </a>
+            </div>
+        @endif
+
+        {{-- ช่องสำหรับอัปโหลดใหม่ (ไม่ต้องใส่ value) --}}
+        <input type="file" name="documents3[]" class="form-control" accept=".pdf,.jpg,.jpeg" multiple>
+        <small class="text-muted">หากไม่อัปโหลดใหม่ ระบบจะใช้ไฟล์เดิม</small>
     </div>
 
     {{-- 25–27 --}}
@@ -437,19 +451,20 @@
     <div class="row">    
         <div class="col-6 mb-3">
             <label class="form-label">SC (ชื่อ)</label>
-            <input type="text" step="0.01" class="form-control" name="sc_signature"
+            <input type="text" class="form-control" name="sc_signature"
             value="{{ old('sc_signature', $approval->sc_signature) }}">
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">Com การขาย (ชื่อ)</label>
-            <input type="text" step="0.01" class="form-control" name="sale_com_signature"
+            <input type="text" class="form-control" name="sale_com_signature"
             value="{{ old('sale_com_signature', $approval->sale_com_signature) }}">
         </div>
     </div> 
 
     <div class="mb-3">
         <label for="remark" class="form-label fw-bold">หมายเหตุ (ถ้ามี):</label>
-        <textarea name="remark" class="form-control" rows="2" placeholder="ระบุข้อความเพิ่มเติม...">{{ old('remark', $approval->remark ?? '') }}</textarea>
+        <textarea name="remark" class="form-control" rows="2" 
+        placeholder="ระบุข้อความเพิ่มเติม...">{{ old('remark', $approval->remark ?? '') }}</textarea>
     </div>
 
     <button class="btn btn-primary w-100 mt-3">บันทึกและส่ง</button>

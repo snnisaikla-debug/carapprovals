@@ -25,7 +25,8 @@
         <select name="sales_user_id" class="form-select form-select-sm" style="width:160px" onchange="this.form.submit()">
             <option value="">{{ __('messages.sales_user_id') }}</option>
             @foreach($salesList as $id => $name)
-                <option value="{{ $id }}" {{ request('sales_user_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
+                <option value="{{ $id }}" {{ request('sales_user_id') == $id ? 'selected' : '' }}>
+                    {{ $name }}</option>
             @endforeach
         </select>
 
@@ -33,7 +34,8 @@
                 class="form-select form-select-sm" style="width:180px" onchange="this.form.submit()">
             <option value="">{{ __('messages.statusSort') }}</option>    
             @foreach ($statusList as $st)    
-            <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+            <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>
+                {{ $st }}</option>
             @endforeach
         </select>
 
@@ -76,7 +78,7 @@
                 <td class="text-center">
                     {{-- แสดงสถานะตามจริง --}}
                     @if($approval->status == 'Waiting')
-                        <span class="badge px-3 py-2" style="background-color: #00b6e8; color: white;">{{ __('messages.statusPA') }}</span>
+                        <span class="badge px-3 py-2" style="background-color: #0580a2; color: white;">{{ __('messages.statusW') }}</span>
                     @elseif($approval->status == 'Approved')
                         <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">{{ __('messages.statusA') }}</span>
                     @elseif($approval->status == 'Reject')

@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'status' => [
+        'Draft' => 'Draft',
+        'Waiting' => 'Waiting',
+        'Reject' => 'Reject',
+        'Approved' => 'Approved',
+        'Cancel' => 'Cancel',
+    ],
+
     'app_name' => 'Car Approval',
     'myaccount' => 'My Account',
     'security' => 'Password & Security',
@@ -22,7 +30,7 @@ return [
     'draftW' => 'Need to edit',
     'statusD' => 'Draft',
     'statusA' => 'Approved',
-    'statusPA' => 'Waiting',
+    'statusW' => 'Waiting',
     'statusR' => 'Reject',
     'statusC' => 'Cancel',
     'details' => 'Details',

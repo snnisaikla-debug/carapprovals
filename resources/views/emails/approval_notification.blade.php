@@ -24,12 +24,12 @@
         </div>
 
         <div class="content">
-            <p><strong>เรียน ผู้จัดการ,</strong></p>
+            <p><strong>เรียน ผู้จัดการ</strong></p>
 
             @if($type === 'new')
                 <p>มีการสร้างใบขออนุมัติใหม่ โดยเซลล์: <strong>{{ $approval->sales_name }}</strong></p>
                 <ul>
-                    <li><strong>ลูกค้า:</strong> {{ $approval->customer_name }}</li>
+                    <li><strong>ชื่อลูกค้า:</strong> {{ $approval->customer_name }}</li>
                     <li><strong>รุ่นรถ:</strong> {{ $approval->car_model }}</li>
                     <li><strong>ราคารถ:</strong> {{ number_format($approval->car_price, 2) }} บาท</li>
                 </ul>

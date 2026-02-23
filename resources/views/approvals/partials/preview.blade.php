@@ -9,8 +9,9 @@
             <tr><th class="ps-3" style="width: 250px;">วันที่ขอแคมเปญ:</th><td>{{ $approval->created_at->format('d/m/Y') }}</td></tr>
             <tr><th class="ps-3">วันที่ส่งมอบรถ (โดยประมาณ):</th><td>{{ $approval->delivery_date ?: '-' }}</td></tr>
             <tr><th class="ps-3">ชื่อลูกค้า:</th><td>{{ $approval->customer_name }}</td></tr>
-            <tr><th class="ps-3">ที่อยู่:</th><td>{{ $approval->customer_district }} {{ $approval->customer_province }}</td></tr>
+            <tr><th class="ps-3">ที่อยู่:</th><td>{{ $approval->customer_address }} {{ $approval->customer_subdistrict }} {{ $approval->customer_district }} {{ $approval->customer_province }}</td></tr>
             <tr><th class="ps-3">เบอร์โทร:</th><td>{{ $approval->customer_phone }}</td></tr>
+            <tr><th class="ps-3">อีเมล:</th><td>{{ $approval->customer_email }}</td></tr>
 
             <tr class="table-dark"><th colspan="2" class="ps-3">ข้อมูลผู้รับผิดชอบ</th></tr>
             <tr><th class="ps-3">ที่ปรึกษาการขาย (SC):</th><td>{{ $approval->sales_name }}</td></tr>

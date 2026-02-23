@@ -22,6 +22,17 @@
 
 <form method="POST" action="{{ route('approvals.store') }}" enctype="multipart/form-data">
     @csrf
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>พบข้อผิดพลาด:</strong>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="d-flex justify-content-between mb-3">
         <button type="button" onclick="history.back()" class="btn btn-secondary">
             ← ย้อนกลับ
@@ -39,7 +50,7 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">วันที่จะส่งมอบรถ</label>
-            <input type="date" class="form-control" name="delivery_date" required>
+            <input type="date" class="form-control" name="delivery_date">
         </div>
     </div>
 
@@ -59,7 +70,7 @@
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">ตำบล</label>
-            <input type="text" class="form-control" name="customer_district" required>
+            <input type="text" class="form-control" name="customer_subdistrict" required>
         </div>
      </div>
 
@@ -186,37 +197,37 @@
     <div class="row">
         <div class="col-6 mb-3">
             <label class="form-label">ประเภทการขาย</label><br>
-            <input type="checkbox" name="sale_type_options[]" value="GE"> GE<br>
+            <input type="checkbox" name="options1[]" value="GE"> GE<br>
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label><br>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
+            <input type="number" step="0.01" class="form-control" name="amount_ge">
         </div>
         <div class="col-6 mb-3">
-            <input type="checkbox" name="options[]" value="RETENEION"> RETENTION
-        </div>
-        <div class="col-6 mb-3">
-            <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
-        </div>
-        <div class="col-6 mb-3">
-            <input type="checkbox" name="options[]" value="เกตรกร"> เกตรกร
+            <input type="checkbox" name="options2[]" value="RETENEION"> RETENTION
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
+            <input type="number" step="0.01" class="form-control" name="amount_reteneion]">
         </div>
         <div class="col-6 mb-3">
-            <input type="checkbox" name="options[]" value="Welcome"> Welcome
+            <input type="checkbox" name="options3[]" value="เกตรกร"> เกตรกร
         </div>
         <div class="col-6 mb-3">
             <label class="form-label">จำนวน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" name="sale_type_amount[]">
+            <input type="number" step="0.01" class="form-control" name="amount_farmer">
+        </div>
+        <div class="col-6 mb-3">
+            <input type="checkbox" name="options4[]" value="Welcome"> Welcome
+        </div>
+        <div class="col-6 mb-3">
+            <label class="form-label">จำนวน (บาท)</label>
+            <input type="number" step="0.01" class="form-control" name="amount_welcome">
         </div>
     </div>
 
         <div class="mb-3">
-            <input type="checkbox" name="options[]">
+            <input type="checkbox" name="options5[]">
             <label class="form-label">Fleet (บาท)</label>
             <input type="number" step="0.01" class="form-control" name="fleet_amount">
         </div>
@@ -239,7 +250,7 @@
     
         <div class="mb-3">
             <label class="form-label">Com F/N</label>
-            <select class="form-select" name="com_fn_option">
+            <select class="form-select" name="com_option">
                 <option value="">-- เลือก --</option>
                 <option value="4">4</option>
                 <option value="8">8</option>
@@ -288,20 +299,20 @@
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">ส่วนลด (เงินสดดาวน์) (บาท)</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_discount">
+        <input type="number" step="0.01" class="form-control" name="discount_cash">
     </div>
     <div class="col-6 mb-3">
         <label class="form-label">รับรถจ่ายดาวน์/สด (บาท)</label>
-        <input type="text" step="0.01" class="form-control" name="decoration_cash">
+        <input type="text" step="0.01" class="form-control" name="pickup_payment">
     </div>
      <div class="col-6 mb-3">
         <label class="form-label">จ่ายของแต่ง</label>
-        <input type="number" step="0.01" class="form-control" name="decoration_total">
+        <input type="number" step="0.01" class="form-control" name="decoration_cost">
     </div>
     <div class="col-6 mb-3">
         <label class="form-label">รวมทั้งหมด</label>
         <div class="input-group">
-            <input type="number" step="0.01" class="form-control" name="decoration_value" id="calc_input">
+            <input type="number" step="0.01" class="form-control" name="decoration_amount" id="calc_input">
             <button class="btn btn-outline-secondary" type="button" onclick="openCalculator()">
                 <i class="bi bi-calculator"></i> 🖩
             </button>
@@ -337,11 +348,11 @@
 
     <div class="mb-3">
         <label class="form-label">รายการแต่ง</label>
-        <textarea rows="2" class="form-control" name="decoration_detail"></textarea>
+        <textarea rows="2" class="form-control" name="decoration_list"></textarea>
     </div>
     <div class="mb-3">
         <label class="form-label">มูลค่า (บาท)</label>
-        <textarea rows="2" class="form-control" name="decoration_payment"></textarea>
+        <textarea rows="2" class="form-control" name="decoration_value"></textarea>
     </div>
 
 
@@ -383,11 +394,29 @@
             <textarea rows="2" class="form-control" name="over_reason"></textarea>
         </div>
 
-         {{-- แนบไฟล์ --}}
+         {{-- แนบไฟล์ 1 --}}
     <div class="mb-3">
-        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10GB ต่อไฟล์</label>
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10MB ต่อไฟล์</label>
         <input type="file" 
-            name="documents[]" 
+            name="documents1[]" 
+            class="form-control" 
+            accept=".pdf,.jpg,.jpeg"
+            multiple>
+    </div>
+    {{-- แนบไฟล์ 2 --}}
+    <div class="mb-3">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10MB ต่อไฟล์</label>
+        <input type="file" 
+            name="documents2[]" 
+            class="form-control" 
+            accept=".pdf,.jpg,.jpeg"
+            multiple>
+    </div>
+    {{-- แนบไฟล์ 3 --}}
+    <div class="mb-3">
+        <label class="form-label">แนบเอกสาร (PDF / JPG) ไม่เกิน 10MB ต่อไฟล์</label>
+        <input type="file" 
+            name="documents3[]" 
             class="form-control" 
             accept=".pdf,.jpg,.jpeg"
             multiple>

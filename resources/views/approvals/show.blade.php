@@ -167,7 +167,7 @@
                                 $badgeColor = '#6c757d';
                                 if ($row->status == 'Approved') $badgeColor = '#03b11a';
                                 elseif ($row->status == 'Reject') $badgeColor = '#fe1c1c';
-                                elseif ($row->status == 'Waiting') $badgeColor = '#00b6e8';
+                                elseif ($row->status == 'Waiting') $badgeColor = '#0580a2';
                             @endphp
                             <span class="badge" style="background-color: {{ $badgeColor }}; color: white; padding: 8px 12px;">
                                 {{ $row->status }}

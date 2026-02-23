@@ -10,8 +10,9 @@ class Approval extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_name', 'customer_district', 'customer_province', 'customer_phone',
-        'car_model', 'car_color', 'car_options', 'car_price',
+        'customer_name', 'customer_address','customer_subdistrict', 
+        'customer_district', 'customer_province', 'customer_phone',
+        'customer_email', 'car_model', 'car_color', 'car_options', 'car_price',
         'plus_head', 'fn', 'down_percent', 'down_amount', 'finance_amount',
         'installment_per_month', 'installment_months', 'interest_rate',
         'sale_type_amount', 'fleet_amount', 'kickback_amount',

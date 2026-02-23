@@ -40,6 +40,10 @@ class ApprovalController extends Controller
             if ($request->filled('sales_user_id')) {
                 $query->where('approvals.sales_user_id', $request->input('sales_user_id'));
             }
+            if ($request->filled('status')) {
+                $query->where('approvals.status', $request->input('status'));
+            }
+
 
             $allApprovals = $query->orderBy('approvals.updated_at', ($sort === 'oldest' ? 'ASC' : 'DESC'))->get();
 
@@ -87,9 +91,11 @@ class ApprovalController extends Controller
             $data = $request->validate([
 
                 'customer_name'         => 'required|string|max:255',
-                'customer_district'     => 'nullable|string|max:255',
-                'customer_province'     => 'nullable|string|max:255',
-                'customer_phone'        => 'nullable|string|max:50',
+                'customer_address'      => 'required|string|max:255',
+                'customer_subdistrict'  => 'required|string|max:255',
+                'customer_district'     => 'required|string|max:255',
+                'customer_province'     => 'required|string|max:255',
+                'customer_phone'        => 'required|string|max:50',
                 'customer_email'        => 'required|string|max:255',
                 'car_model'             => 'required|string|max:255',
                 'car_color'             => 'nullable|string|max:255',
@@ -103,7 +109,10 @@ class ApprovalController extends Controller
                 'installment_per_month' => 'nullable|numeric',
                 'installment_months'    => 'nullable|integer',
                 'interest_rate'         => 'nullable|numeric',
-                'sale_type_amount'      => 'nullable|numeric',
+                'amount_ge'             => 'nullable|numeric',
+                'amount_reteneion'      => 'nullable|numeric',
+                'amount_farmer'             => 'nullable|numeric',
+                'amount_welcome'        => 'nullable|numeric',
                 'fleet_amount'          => 'nullable|numeric',
                 'kickback_amount'       => 'nullable|numeric',
                 'campaigns_available'   => 'nullable|string',
@@ -117,7 +126,10 @@ class ApprovalController extends Controller
                 'over_decoration_amount' => 'nullable|numeric',
                 'over_reason'           => 'nullable|string',
                 'remark'                => 'nullable|string',
-                'documents.*'           => 'nullable|mimes:pdf,jpg,jpeg|max:10240000',
+                'documents1.*'           => 'nullable|mimes:pdf,jpg,jpeg|max:10240',
+                'documents2.*'           => 'nullable|mimes:pdf,jpg,jpeg|max:10240',
+                'documents3.*'           => 'nullable|mimes:pdf,jpg,jpeg|max:10240',
+                
             ]);
 
             $data['is_commercial_30000'] = $request->has('is_commercial_30000');
@@ -227,15 +239,66 @@ class ApprovalController extends Controller
             // 1. ตรวจสอบสิ่งที่เปลี่ยนแปลง (Compare Data)
             $changes = [];
             $fieldsToCheck = [
-                'customer_name' => 'ชื่อลูกค้า',
-                'car_model' => 'รุ่นรถ',
-                'car_price' => 'ราคารถ',
-                'down_amount' => 'เงินดาวน์',
-                'finance_amount' => 'ยอดจัด',
-                'installment_per_month' => 'ค่างวด',
+                'customer_name'         => 'ชื่อลูกค้า',
+                'customer_address'      => 'ที่อยู่',
+                'customer_subdistrict'  => 'ตำบล',
+                'customer_district'     => 'อำเภอ',
+                'customer_province'     => 'จังหวัด',
+                'customer_phone'        => 'เบอร์โทร',
+                'customer_email'        => 'อีเมล',
+                'car_model'             => 'รุ่นรถ',
+                'car_color'             => 'สี',
+                'car_options'           => 'ออฟชั่น',
+                'car_price'             => 'ราคารถ',
+                'plus_head'             => 'บวกหัว (บาท)',
+                'fn'                    => 'F/N',
+                'down_percent'          => 'เงินดาวน์ (%)',
+                'down_amount'           => 'เงินดาวน์ (บาท)',
+                'installment_months'    => 'จำนวนงวด',
+                'installment_per_month' => 'งวดละ (บาท)',
+                'interest_rate'         => 'ดอกเบี้ย (%)',
+                'finance_amount'        => 'ยอดจัด (บาท)',
+                'Chassis'               => 'คัชซี',
+                'stock_number'          => 'เลขสต๊อก',
+                'com_fn_option'         => 'รหัสแคมเปญ',
+                'Flight'                => 'หัก (บาท)',
+                'insurance_used'        => 'ใช้จริง (บาท)',
+                'kickback_amount'       => 'Kickback (บาท)', 
+                'com_option'            => 'Com F/N',
+                'com_fn_amount'         => 'จำนวน (บาท)',
+                'free_items'            => 'รายการของแถม',
+                'free_items_over'       => 'รายการของแถมเกิน',
+                'extra_purchase_items'  => 'รายการซื้อเพิ่ม',
+                'campaigns_available'   => 'แคมเปญที่มี',
+                'campaigns_used'        => 'แคมเปญที่ใช้',
+                'discount_cash'         => 'ส่วนลด (เงินสดดาวน์) (บาท)',
+                'pickup_payment'        => 'รับรถจ่ายดาวน์/สด (บาท)',
+                'decoration_cost'       => 'จ่ายของแต่ง',
+                'decoration_amount'     => 'รวมทั้งหมด',
+                'is_commercial_30000'   => 'Commercial / การแต่ง',
+                'decoration_list'       => 'รายการแต่ง',
+                'decoration_value'      => 'มูลค่า (บาท)',
+                'over_campaign_amount'  => 'เกินแคมเปญ (บาท)',
+                'over_campaign_status'  => 'สถานะ',
+                'over_decoration_amount'=>'เกินของตกแต่ง (บาท)',
+                'over_reason'           =>'สาเหตุขอเกิน',
+                'amount_ge'             => 'จำนวนGE (บาท)',
+                'amount_reteneion'      => 'จำนวนreteneion (บาท)',
+                'amount_farmer'         => 'จำนวนเกษตร (บาท)',
+                'amount_welcome'        => 'จำนวนwelcome (บาท)',
+                'fleet_amount'          => 'Fleet (บาท)',
+                'documents1.*'          => 'ไฟล์1',
+                'documents2.*'          => 'ไฟล์2',
+                'documents3.*'          => 'ไฟล์2',
+                'sc_signature'          => 'SC',
+                'sale_com_signature'    => 'Com การขาย (ชื่อ)',
+                'remark'                => 'หมายเหตุ',
                 // เพิ่มฟิลด์อื่นๆ ที่อยากให้เช็คได้ที่นี่
             ];
 
+                $changes = [];
+                $fillableFields = $oldVersion->getFillable();
+                
             // วนลูปเช็คค่าเก่า vs ค่าใหม่
             foreach ($fieldsToCheck as $field => $label) {
                 $newValue = $request->input($field);
