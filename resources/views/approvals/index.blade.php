@@ -60,7 +60,7 @@
         <thead class="text-center bg-light">
             <tr>
                 <th>#</th>
-                <th>GroupID</th>
+                <th>{{ __('messages.GroupID') }}</th>
                 <th>{{ __('messages.car_model') }}</th>
                 <th>{{ __('messages.sales_name') }}</th>
                 <th>{{ __('messages.status') }}</th>
@@ -78,7 +78,7 @@
                 <td class="text-center">
                     {{-- แสดงสถานะตามจริง --}}
                     @if($approval->status == 'Waiting')
-                        <span class="badge px-3 py-2" style="background-color: #0580a2; color: white;">{{ __('messages.statusW') }}</span>
+                        <span class="badge px-3 py-2" style="background-color: #ff833b; color: black;">{{ __('messages.statusW') }}</span>
                     @elseif($approval->status == 'Approved')
                         <span class="badge px-3 py-2" style="background-color: #03b11a; color: white;">{{ __('messages.statusA') }}</span>
                     @elseif($approval->status == 'Reject')
@@ -135,7 +135,7 @@
                         @if($approval->status == 'Reject')
                             <span class="badge px-3 py-2" style="background-color: #fe1c1c; color: white;">{{ __('messages.statusR') }}</span>
                         @else
-                            <span class="badge px-3 py-2" style="background-color: #fcef01; color: white;">{{ __('messages.statusD') }}</span>
+                            <span class="badge px-3 py-2" style="background-color: #f3d30a; color: black;">{{ __('messages.statusD') }}</span>
                         @endif
                     </td>
                     <td class="text-center">

@@ -3,16 +3,16 @@
 @section('title', 'รายชื่อ Sales')
 
 @section('content')
-    <h4 class="mb-3">รายชื่อ Sales ทั้งหมด</h4>
+    <h4 class="mb-3">All Sales Name</h4>
 
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>#</th>
-                <th>ชื่อ - นามสกุล</th>
+                <th>Name - Surname</th>
                 <th>Email</th>
-                <th>วันที่สร้าง</th>
-                <th>จัดการ</th>
+                <th>Update Date</th>
+                <th>Management</th>
             </tr>
         </thead>
         <tbody>
@@ -24,7 +24,7 @@
                     <td>{{ $s->created_at }}</td>
                     <td>
                         <a href="{{ route('users.edit', $s->id) }}" class="btn btn-warning btn-sm">
-                            แก้ไข
+                            Edit
                         </a>
 
                         <form action="{{ route('users.destroy', $s->id) }}"
@@ -34,7 +34,7 @@
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-danger btn-sm">
-                                ลบ
+                                Delete
                             </button>
                         </form>
                     </td>

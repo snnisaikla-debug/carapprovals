@@ -45,7 +45,7 @@
     {{-- DATE --}}
     <div class="row">
         <div class="col-6 mb-3">
-            <label class="form-label">วันที่ขอแคมเปญ</label>
+            <label class="form-label">วันที่ขอแคมเปญ <span class="text-danger">*</span></label>
             <input type="date" class="form-control" name="request_date" required>
         </div>
         <div class="col-6 mb-3">
@@ -59,39 +59,39 @@
     <div class="section-title">ข้อมูลลูกค้า</div>
 
     <div class="mb-3">
-        <label class="form-label">ชื่อลูกค้า</label>
+        <label class="form-label">ชื่อลูกค้า <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="customer_name" required>
     </div>
 
     <div class="row">
         <div class="col-6 mb-3">
-            <label class="form-label">ที่อยู่</label>
+            <label class="form-label">ที่อยู่ <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="customer_address" required>
         </div>
         <div class="col-6 mb-3">
-            <label class="form-label">ตำบล</label>
+            <label class="form-label">ตำบล <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="customer_subdistrict" required>
         </div>
      </div>
 
     <div class="row">
         <div class="col-6 mb-3">
-            <label class="form-label">อำเภอ</label>
+            <label class="form-label">อำเภอ <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="customer_district" required>
         </div>
         <div class="col-6 mb-3">
-            <label class="form-label">จังหวัด</label>
+            <label class="form-label">จังหวัด <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="customer_province" required>
         </div>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">เบอร์โทร</label>
+        <label class="form-label">เบอร์โทร <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="customer_phone" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">อีเมล</label>
+        <label class="form-label">อีเมล <span class="text-danger">*</span></label>
         <input type="text" class="form-control" name="customer_email" required>
     </div>
 
@@ -99,13 +99,13 @@
     <div class="section-title">ข้อมูลรถ</div>
 
         <div class="mb-3">
-            <label class="form-label">รุ่นรถ</label>
+            <label class="form-label">รุ่นรถ <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="car_model" required>
         </div>
 
     <div class="row">
         <div class="col-6 mb-3">
-            <label class="form-label">สี</label>
+            <label class="form-label">สี <span class="text-danger">*</span></label>
             <input type="text" class="form-control" name="car_color" required>
         </div>
         <div class="col-6 mb-3">

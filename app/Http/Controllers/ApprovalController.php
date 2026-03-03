@@ -134,17 +134,17 @@ class ApprovalController extends Controller
 
             $data['is_commercial_30000'] = $request->has('is_commercial_30000');
 
+            $inputStatus = $request->input('status', 'Waiting');
+
             $approval = Approval::create(array_merge($data, [
                 'group_id'      => 0, 
                 'version'       => 1,
-                'status'        => 'Waiting',
+                'status'        => $inputStatus,
                 'created_by'    => strtoupper($user->role),
                 'sales_name'    => $user->name,
                 'sales_user_id' => $user->id,
                 'remark' => $request->input('remark'),
             ]));
-
-            $inputStatus = $request->input('status', 'Waiting');
 
             // อัปเดต group_id
             $approval->update(['group_id' => $approval->id]);
@@ -163,8 +163,7 @@ class ApprovalController extends Controller
             if ($inputStatus === 'Waiting') {
                 try {
                     $emails = [
-                'snryu.work@gmail.com', 
-                'pandc1234@gmail.com'    
+                'snryu.work@gmail.com'    
                 ];
                 Mail::to($emails)->send(new ApprovalMail($approval, 'new'));
                 } catch (\Exception $e) {}
@@ -289,7 +288,7 @@ class ApprovalController extends Controller
                 'fleet_amount'          => 'Fleet (บาท)',
                 'documents1.*'          => 'ไฟล์1',
                 'documents2.*'          => 'ไฟล์2',
-                'documents3.*'          => 'ไฟล์2',
+                'documents3.*'          => 'ไฟล์3',
                 'sc_signature'          => 'SC',
                 'sale_com_signature'    => 'Com การขาย (ชื่อ)',
                 'remark'                => 'หมายเหตุ',
