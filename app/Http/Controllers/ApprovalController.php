@@ -369,8 +369,17 @@ class ApprovalController extends Controller
         { 
             $approval = Approval::findOrFail($id);
 
-            $pdf = Pdf::loadView('approvals.pdf', compact('approval'))
-                    ->setPaper('A4', 'portrait');
+            $items = array_filter(explode("\n", $approval->free_items));
+
+            $campaignsAvailable = array_filter(explode("\n", $approval->campaigns_available));
+            $campaignsUsed = array_filter(explode("\n", $approval->campaigns_used));
+
+            $pdf = Pdf::loadView('approvals.pdf', compact(
+                'approval', 
+                'items', 
+                'campaignsAvailable', 
+                'campaignsUsed'
+            ))->setPaper('A4', 'portrait');
 
             return $pdf->stream('approval_' . $approval->id . '.pdf');
         }
